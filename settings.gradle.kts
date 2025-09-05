@@ -30,5 +30,3 @@ dependencyResolutionManagement {
     }
 }
 include(":shared")
-include(":sample:composeApp")
-
