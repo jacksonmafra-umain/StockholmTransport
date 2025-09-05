@@ -1,6 +1,7 @@
 rootProject.name = "StockholmTransport"
 
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content { 
