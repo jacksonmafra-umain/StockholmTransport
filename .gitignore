@@ -13,7 +13,7 @@
 *.iml
 *.ipr
 *.iws
-
+.kotlin
 # Arquivos do Gradle
 .gradle/
 gradle-app.setting
