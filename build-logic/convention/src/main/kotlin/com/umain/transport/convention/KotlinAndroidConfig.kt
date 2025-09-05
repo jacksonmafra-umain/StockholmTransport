@@ -1,9 +1,9 @@
 package com.umain.transport.convention
 
 import com.android.build.api.dsl.LibraryExtension
-import libs
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+
 internal fun Project.configureKotlinAndroid(
     extension: LibraryExtension
 ) = extension.apply {
@@ -11,22 +11,20 @@ internal fun Project.configureKotlinAndroid(
         .split(":")
         .drop(2)
         .joinToString(".")
-    namespace = if(moduleName.isNotEmpty()) {
+    namespace = if (moduleName.isNotEmpty()) {
         "com.umain.transport.$moduleName"
     } else {
         "com.umain.transport"
     }
+
     compileSdk = libs
-        .findVersion("android.compileSdk")
+        .findVersion("android-compileSdk")
         .get()
         .requiredVersion
         .toInt()
+
     defaultConfig {
-        minSdk = libs
-            .findVersion("android.minSdk")
-            .get()
-            .requiredVersion
-            .toInt()
+        minSdk = 24
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

@@ -1,13 +1,6 @@
 dependencyResolutionManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-                includeGroupByRegex("android.*")
-            }
-        }
+        google()
         gradlePluginPortal()
         mavenCentral()
     }
@@ -18,5 +11,5 @@ dependencyResolutionManagement {
     }
 }
 
-include(":convention")
 rootProject.name = "build-logic"
+include(":convention")

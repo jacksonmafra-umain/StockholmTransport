@@ -1,17 +1,23 @@
-
-*.iml
-.gradle
-.idea
-.kotlin
+# Arquivos de Sistema
 .DS_Store
-build
-*/build
-captures
-.externalNativeBuild
-.cxx
+*.swp
+*~
+
+# Arquivos gerados pelo Build
+/build
+/out
+/target
+
+# Arquivos do IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Arquivos do Gradle
+.gradle/
+gradle-app.setting
+gradle/wrapper/gradle-wrapper.properties
+
+# Arquivos locais
 local.properties
-xcuserdata/
-Pods/
-*.jks
-*.gpg
-*yarn.lock

@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.project
+
 rootProject.name = "StockholmTransport"
 
 pluginManagement {
@@ -30,3 +32,8 @@ dependencyResolutionManagement {
     }
 }
 include(":shared")
+include(":shared:lines")
+include(":shared:sites")
+include(":shared:departures")
+include(":shared:stoppoints")
+include(":shared:authorities")
