@@ -48,6 +48,7 @@ class LinesViewModel(
             NetworkError.NoInternet -> "No internet connection. Please check your network."
             NetworkError.ServerError -> "A server error occurred. Please try again later."
             NetworkError.Timeout -> "The request timed out. Please try again."
+            NetworkError.NotFound -> "The requested information could not be found."
             is NetworkError.Unknown -> "An unexpected error occurred: $message"
         }
 }
