@@ -22,6 +22,7 @@ androidx-uiTest = "1.6.7"
 # Build Logic Plugins
 buildconfig = "5.6.7"
 maven-publish = "0.34.0"
+npm-publish = "4.1.1"
 
 [libraries]
 # Coroutines
@@ -73,3 +74,4 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 # Build Tools
 buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
+npm-publish = { id = "org.danilopianini.npm.publish", version.ref = "npm-publish" }

@@ -19,7 +19,11 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
     repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        google()
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -41,3 +45,4 @@ include(
     ":shared:stoppoints",
     ":shared:authorities"
 )
+include(":composeApp")
