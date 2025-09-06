@@ -5,12 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SiteDto(
-    @SerialName("SiteId")
-    val siteId: Int,
-    @SerialName("SiteName")
-    val siteName: String,
-    @SerialName("X")
-    val x: String,
-    @SerialName("Y")
-    val y: String,
+    val id: Int,
+    val gid: Long,
+    val name: String,
+    val lat: Double,
+    val lon: Double,
+    @SerialName("stop_areas")
+    val stopAreas: List<Int> = emptyList()
 )

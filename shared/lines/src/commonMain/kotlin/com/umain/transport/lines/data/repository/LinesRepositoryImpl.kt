@@ -13,15 +13,19 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
+import kotlinx.io.IOException
 
 class LinesRepositoryImpl(
     private val httpClient: HttpClient,
 ) : LinesRepository {
     private val tag = "LinesRepository"
 
-    override suspend fun getAllLines(): DataResult<Map<TransportMode, List<Line>>> =
-        try {
-            val response = httpClient.get("$API_BASE_URL/lines").body<List<LinesResponse>>().firstOrNull()
+    override suspend fun getAllLines(): DataResult<Map<TransportMode, List<Line>>> {
+        return try {
+            val response = httpClient.get("lines") {
+                parameter("transport_authority_id", 1)
+            }.body<List<LinesResponse>>().firstOrNull()
+
             if (response == null) {
                 DataResult.Success(emptyMap())
             } else {
@@ -29,15 +33,19 @@ class LinesRepositoryImpl(
             }
         } catch (e: Exception) {
             AppLogger.e(tag, "Failed to fetch all lines", e)
-            val networkError =
-                when (e) {
-                    is HttpRequestTimeoutException -> NetworkError.Timeout
-                    is kotlinx.io.IOException -> NetworkError.NoInternet
-                    else -> NetworkError.Unknown(e.message ?: "An unknown error occurred")
+            val networkError = when (e) {
+                is HttpRequestTimeoutException -> NetworkError.Timeout
+                is IOException -> NetworkError.NoInternet
+                is ResponseException -> when (e.response.status.value) {
+                    404 -> NetworkError.NotFound
+                    in 500..599 -> NetworkError.ServerError
+                    else -> NetworkError.Unknown("HTTP Error: ${e.response.status.value}")
                 }
+                else -> NetworkError.Unknown(e.message ?: "An unknown error occurred")
+            }
             DataResult.Error(networkError)
         }
-
+    }
     private fun mapResponseToDomain(response: LinesResponse): Map<TransportMode, List<Line>> =
         mapOf(
             TransportMode.METRO to response.metro.map { it.toDomain() },
