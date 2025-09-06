@@ -79,14 +79,14 @@ kotlin {
 }
 
 android {
-    namespace = "com.jacksonfdam.transportdisplaykmp"
+    namespace = "com.umain.transport"
     compileSdk = 35
 
     defaultConfig {
         minSdk = 21
         targetSdk = 35
 
-        applicationId = "com.jacksonfdam.transportdisplaykmp.androidApp"
+        applicationId = "com.umain.transport.androidApp"
         versionCode = 1
         versionName = "1.0.0"
 

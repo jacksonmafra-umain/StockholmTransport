@@ -1,4 +1,4 @@
-package com.jacksonfdam.transportdisplaykmp.theme
+package com.umain.transport.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

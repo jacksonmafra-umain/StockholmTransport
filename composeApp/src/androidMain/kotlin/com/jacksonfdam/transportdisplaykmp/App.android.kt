@@ -1,4 +1,4 @@
-package com.jacksonfdam.transportdisplaykmp
+package com.umain.transport
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

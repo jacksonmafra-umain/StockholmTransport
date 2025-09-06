@@ -1,7 +1,7 @@
-package com.jacksonfdam.transportdisplaykmp
+package com.umain.transport
 
 import android.app.Application
-import com.jacksonfdam.transportdisplaykmp.di.initKoin
+import com.umain.transport.di.initKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 
