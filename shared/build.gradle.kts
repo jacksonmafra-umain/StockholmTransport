@@ -8,7 +8,6 @@ plugins {
 kotlin {
     androidTarget {
         compilations.all {
-
         }
     }
     jvm()

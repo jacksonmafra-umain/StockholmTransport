@@ -22,7 +22,7 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
             sitesModule,
             departuresModule,
             stopPointsModule,
-            authoritiesModule
+            authoritiesModule,
         )
     }
 }

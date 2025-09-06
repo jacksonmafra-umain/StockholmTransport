@@ -14,12 +14,12 @@ import kotlinx.coroutines.launch
 data class DeparturesUiState(
     val isLoading: Boolean = false,
     val departures: List<Departure> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
 )
 
 class DeparturesViewModel(
     private val departuresRepository: DeparturesRepository,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) {
     private val _uiState = MutableStateFlow(DeparturesUiState())
     val uiState = _uiState.asStateFlow()
@@ -42,12 +42,11 @@ class DeparturesViewModel(
         }
     }
 
-    private fun NetworkError.toUserFriendlyMessage(): String {
-        return when (this) {
+    private fun NetworkError.toUserFriendlyMessage(): String =
+        when (this) {
             NetworkError.NoInternet -> "No internet connection. Please check your network."
             NetworkError.ServerError -> "A server error occurred. Please try again later."
             NetworkError.Timeout -> "The request timed out. Please try again."
             is NetworkError.Unknown -> "An unexpected error occurred: $message"
         }
-    }
 }

@@ -4,5 +4,5 @@ data class Departure(
     val lineDesignation: String,
     val destination: String,
     val displayTime: String,
-    val transportMode: String
+    val transportMode: String,
 )

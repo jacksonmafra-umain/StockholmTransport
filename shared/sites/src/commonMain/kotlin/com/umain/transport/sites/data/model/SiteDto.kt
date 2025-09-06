@@ -12,5 +12,5 @@ data class SiteDto(
     @SerialName("X")
     val x: String,
     @SerialName("Y")
-    val y: String
+    val y: String,
 )

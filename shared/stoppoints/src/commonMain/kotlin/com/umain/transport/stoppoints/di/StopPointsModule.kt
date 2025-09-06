@@ -6,7 +6,8 @@ import com.umain.transport.stoppoints.presentation.StopPointsViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
-val stopPointsModule = module {
-    single<StopPointsRepository> { StopPointsRepositoryImpl(get()) }
-    factoryOf(::StopPointsViewModel)
-}
+val stopPointsModule =
+    module {
+        single<StopPointsRepository> { StopPointsRepositoryImpl(get()) }
+        factoryOf(::StopPointsViewModel)
+    }

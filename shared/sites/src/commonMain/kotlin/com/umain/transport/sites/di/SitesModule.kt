@@ -6,7 +6,8 @@ import com.umain.transport.sites.presentation.SitesViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
-val sitesModule = module {
-    single<SitesRepository> { SitesRepositoryImpl(get()) }
-    factoryOf(::SitesViewModel)
-}
+val sitesModule =
+    module {
+        single<SitesRepository> { SitesRepositoryImpl(get()) }
+        factoryOf(::SitesViewModel)
+    }

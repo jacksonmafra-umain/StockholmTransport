@@ -16,5 +16,5 @@ data class StopPointDto(
     @SerialName("LocationEasting")
     val locationEasting: Double,
     @SerialName("ZoneShortName")
-    val zoneShortName: String
+    val zoneShortName: String,
 )

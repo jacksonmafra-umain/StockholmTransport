@@ -5,9 +5,16 @@ data class Line(
     val name: String,
     val designation: String,
     val transportMode: TransportMode,
-    val authority: String
+    val authority: String,
 )
 
 enum class TransportMode {
-    METRO, TRAM, TRAIN, BUS, SHIP, FERRY, TAXI, UNKNOWN
+    METRO,
+    TRAM,
+    TRAIN,
+    BUS,
+    SHIP,
+    FERRY,
+    TAXI,
+    UNKNOWN,
 }

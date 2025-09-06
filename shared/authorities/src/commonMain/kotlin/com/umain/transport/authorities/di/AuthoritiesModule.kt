@@ -6,7 +6,8 @@ import com.umain.transport.authorities.presentation.AuthoritiesViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
-val authoritiesModule = module {
-    single<AuthoritiesRepository> { AuthoritiesRepositoryImpl(get()) }
-    factoryOf(::AuthoritiesViewModel)
-}
+val authoritiesModule =
+    module {
+        single<AuthoritiesRepository> { AuthoritiesRepositoryImpl(get()) }
+        factoryOf(::AuthoritiesViewModel)
+    }

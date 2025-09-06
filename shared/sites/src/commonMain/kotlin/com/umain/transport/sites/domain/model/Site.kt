@@ -2,5 +2,5 @@ package com.umain.transport.sites.domain.model
 
 data class Site(
     val id: Int,
-    val name: String
+    val name: String,
 )

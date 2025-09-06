@@ -31,5 +31,5 @@ data class LineDto(
 @Serializable
 data class TransportAuthorityDto(
     val id: Int,
-    val name: String
+    val name: String,
 )

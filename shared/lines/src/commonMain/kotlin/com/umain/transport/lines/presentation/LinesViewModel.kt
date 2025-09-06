@@ -15,12 +15,12 @@ import kotlinx.coroutines.launch
 data class LinesUiState(
     val isLoading: Boolean = false,
     val linesByMode: Map<TransportMode, List<Line>> = emptyMap(),
-    val error: String? = null
+    val error: String? = null,
 )
 
 class LinesViewModel(
     private val linesRepository: LinesRepository,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) {
     private val _uiState = MutableStateFlow(LinesUiState())
     val uiState = _uiState.asStateFlow()
@@ -43,12 +43,11 @@ class LinesViewModel(
         }
     }
 
-    private fun NetworkError.toUserFriendlyMessage(): String {
-        return when (this) {
+    private fun NetworkError.toUserFriendlyMessage(): String =
+        when (this) {
             NetworkError.NoInternet -> "No internet connection. Please check your network."
             NetworkError.ServerError -> "A server error occurred. Please try again later."
             NetworkError.Timeout -> "The request timed out. Please try again."
             is NetworkError.Unknown -> "An unexpected error occurred: $message"
         }
-    }
 }

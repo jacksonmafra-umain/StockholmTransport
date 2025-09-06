@@ -14,12 +14,12 @@ import kotlinx.coroutines.launch
 data class AuthoritiesUiState(
     val isLoading: Boolean = false,
     val authorities: List<Authority> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
 )
 
 class AuthoritiesViewModel(
     private val authoritiesRepository: AuthoritiesRepository,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) {
     private val _uiState = MutableStateFlow(AuthoritiesUiState())
     val uiState = _uiState.asStateFlow()
@@ -42,12 +42,11 @@ class AuthoritiesViewModel(
         }
     }
 
-    private fun NetworkError.toUserFriendlyMessage(): String {
-        return when (this) {
+    private fun NetworkError.toUserFriendlyMessage(): String =
+        when (this) {
             NetworkError.NoInternet -> "No internet connection. Please check your network."
             NetworkError.ServerError -> "A server error occurred. Please try again later."
             NetworkError.Timeout -> "The request timed out. Please try again."
             is NetworkError.Unknown -> "An unexpected error occurred: $message"
         }
-    }
 }

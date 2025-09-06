@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DeparturesResponseDto(
-    val departures: List<DepartureDto> = emptyList()
+    val departures: List<DepartureDto> = emptyList(),
 )
 
 @Serializable
@@ -23,5 +23,5 @@ data class LineInfoDto(
     val id: Int,
     val designation: String,
     @SerialName("transport_mode")
-    val transportMode: String
+    val transportMode: String,
 )
