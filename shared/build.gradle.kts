@@ -1,20 +1,17 @@
-import org.jetbrains.kotlin.gradle.targets.js.npm.PackageJson
-
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
     id("com.vanniktech.maven.publish")
     id("org.jetbrains.kotlin.plugin.serialization")
-    alias(libs.plugins.npm.publish)
 }
 
 kotlin {
     jvmToolchain(21)
 
     androidTarget {
-        compilations.all {
-        }
+        publishLibraryVariants("release")
     }
+
     jvm {
         compilerOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")
@@ -22,6 +19,7 @@ kotlin {
     }
     js(IR) {
         useEsModules()
+        nodejs()
         browser {
             commonWebpackConfig {
                 cssSupport {
@@ -29,11 +27,6 @@ kotlin {
                 }
                 outputFileName = "main.bundle.js"
                 sourceMaps = false
-            }
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                }
             }
         }
         binaries.executable()
@@ -62,5 +55,34 @@ android {
     compileSdk = 36
     defaultConfig {
         minSdk = 24
+    }
+}
+
+mavenPublishing {
+    coordinates("com.umain.transport", "stockholm-transport", "1.0.0")
+
+    pom {
+        name.set("Stockholm Transport KMP Library")
+        description.set("A KMP library for the Stockholm public transport API.")
+        url.set("https://github.com/eidra-umain/stockholm-transport")
+
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("jacksonmafra-umain")
+                name.set("Jackson Mafra")
+                email.set("jackson.mafra@umain.com")
+            }
+        }
+        scm {
+            url.set("https://github.com/eidra-umain/stockholm-transport")
+            connection.set("scm:git:git://github.com/eidra-umain/stockholm-transport.git")
+            developerConnection.set("scm:git:ssh://git@github.com:eidra-umain/stockholm-transport.git")
+        }
     }
 }
