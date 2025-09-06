@@ -1,5 +1,7 @@
 package com.umain.transport.departures.presentation
 
+import com.umain.transport.core.data.DataResult
+import com.umain.transport.core.data.NetworkError
 import com.umain.transport.departures.domain.model.Departure
 import com.umain.transport.departures.domain.repository.DeparturesRepository
 import kotlinx.coroutines.CoroutineScope
@@ -25,17 +27,27 @@ class DeparturesViewModel(
     fun loadDepartures(siteId: Int) {
         _uiState.update { it.copy(isLoading = true, error = null, departures = emptyList()) }
         coroutineScope.launch {
-            departuresRepository.getDeparturesForSite(siteId)
-                .onSuccess { departuresList ->
+            when (val result = departuresRepository.getDeparturesForSite(siteId)) {
+                is DataResult.Success -> {
                     _uiState.update {
-                        it.copy(isLoading = false, departures = departuresList)
+                        it.copy(isLoading = false, departures = result.data)
                     }
                 }
-                .onFailure { error ->
+                is DataResult.Error -> {
                     _uiState.update {
-                        it.copy(isLoading = false, error = error.message ?: "An unknown error occurred")
+                        it.copy(isLoading = false, error = result.error.toUserFriendlyMessage())
                     }
                 }
+            }
+        }
+    }
+
+    private fun NetworkError.toUserFriendlyMessage(): String {
+        return when (this) {
+            NetworkError.NoInternet -> "No internet connection. Please check your network."
+            NetworkError.ServerError -> "A server error occurred. Please try again later."
+            NetworkError.Timeout -> "The request timed out. Please try again."
+            is NetworkError.Unknown -> "An unexpected error occurred: $message"
         }
     }
 }

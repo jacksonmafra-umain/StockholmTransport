@@ -1,5 +1,8 @@
 package com.umain.transport.lines.data.repository
 
+import com.umain.transport.core.data.DataResult
+import com.umain.transport.core.data.NetworkError
+import com.umain.transport.core.logging.AppLogger
 import com.umain.transport.core.network.API_BASE_URL
 import com.umain.transport.lines.data.model.LineDto
 import com.umain.transport.lines.data.model.LinesResponse
@@ -8,19 +11,29 @@ import com.umain.transport.lines.domain.model.TransportMode
 import com.umain.transport.lines.domain.repository.LinesRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.request.get
+import kotlinx.io.IOException
 
 class LinesRepositoryImpl(private val httpClient: HttpClient) : LinesRepository {
-    override suspend fun getAllLines(): Result<Map<TransportMode, List<Line>>> {
+    private val tag = "LinesRepository"
+
+    override suspend fun getAllLines(): DataResult<Map<TransportMode, List<Line>>> {
         return try {
             val response = httpClient.get("$API_BASE_URL/lines").body<List<LinesResponse>>().firstOrNull()
             if (response == null) {
-                Result.success(emptyMap())
+                DataResult.Success(emptyMap())
             } else {
-                Result.success(mapResponseToDomain(response))
+                DataResult.Success(mapResponseToDomain(response))
             }
         } catch (e: Exception) {
-            Result.failure(e)
+            AppLogger.e(tag, "Failed to fetch all lines", e)
+            val networkError = when (e) {
+                is HttpRequestTimeoutException -> NetworkError.Timeout
+                is IOException -> NetworkError.NoInternet
+                else -> NetworkError.Unknown(e.message ?: "An unknown error occurred")
+            }
+            DataResult.Error(networkError)
         }
     }
 

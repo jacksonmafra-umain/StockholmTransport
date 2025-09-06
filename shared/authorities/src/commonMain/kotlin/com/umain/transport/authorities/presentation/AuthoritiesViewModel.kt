@@ -2,6 +2,8 @@ package com.umain.transport.authorities.presentation
 
 import com.umain.transport.authorities.domain.model.Authority
 import com.umain.transport.authorities.domain.repository.AuthoritiesRepository
+import com.umain.transport.core.data.DataResult
+import com.umain.transport.core.data.NetworkError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,17 +27,27 @@ class AuthoritiesViewModel(
     fun loadAuthorities() {
         _uiState.update { it.copy(isLoading = true, error = null) }
         coroutineScope.launch {
-            authoritiesRepository.getAllAuthorities()
-                .onSuccess { authoritiesList ->
+            when (val result = authoritiesRepository.getAllAuthorities()) {
+                is DataResult.Success -> {
                     _uiState.update {
-                        it.copy(isLoading = false, authorities = authoritiesList)
+                        it.copy(isLoading = false, authorities = result.data)
                     }
                 }
-                .onFailure { error ->
+                is DataResult.Error -> {
                     _uiState.update {
-                        it.copy(isLoading = false, error = error.message ?: "An unknown error occurred")
+                        it.copy(isLoading = false, error = result.error.toUserFriendlyMessage())
                     }
                 }
+            }
+        }
+    }
+
+    private fun NetworkError.toUserFriendlyMessage(): String {
+        return when (this) {
+            NetworkError.NoInternet -> "No internet connection. Please check your network."
+            NetworkError.ServerError -> "A server error occurred. Please try again later."
+            NetworkError.Timeout -> "The request timed out. Please try again."
+            is NetworkError.Unknown -> "An unexpected error occurred: $message"
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.umain.transport.stoppoints.presentation
 
+import com.umain.transport.core.data.DataResult
+import com.umain.transport.core.data.NetworkError
 import com.umain.transport.stoppoints.domain.model.StopPoint
 import com.umain.transport.stoppoints.domain.repository.StopPointsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -25,17 +27,27 @@ class StopPointsViewModel(
     fun loadStopPoints() {
         _uiState.update { it.copy(isLoading = true, error = null) }
         coroutineScope.launch {
-            stopPointsRepository.getAllStopPoints()
-                .onSuccess { stopPointsList ->
+            when (val result = stopPointsRepository.getAllStopPoints()) {
+                is DataResult.Success -> {
                     _uiState.update {
-                        it.copy(isLoading = false, stopPoints = stopPointsList)
+                        it.copy(isLoading = false, stopPoints = result.data)
                     }
                 }
-                .onFailure { error ->
+                is DataResult.Error -> {
                     _uiState.update {
-                        it.copy(isLoading = false, error = error.message ?: "An unknown error occurred")
+                        it.copy(isLoading = false, error = result.error.toUserFriendlyMessage())
                     }
                 }
+            }
+        }
+    }
+
+    private fun NetworkError.toUserFriendlyMessage(): String {
+        return when (this) {
+            NetworkError.NoInternet -> "No internet connection. Please check your network."
+            NetworkError.ServerError -> "A server error occurred. Please try again later."
+            NetworkError.Timeout -> "The request timed out. Please try again."
+            is NetworkError.Unknown -> "An unexpected error occurred: $message"
         }
     }
 }
