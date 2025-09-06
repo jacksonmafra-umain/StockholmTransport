@@ -27,8 +27,6 @@ internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatform
         applyDefaultHierarchyTemplate()
 
         sourceSets.commonMain.dependencies {
-            implementation(this@configureKotlinMultiplatform.rootProject.project(":shared:core"))
-
             implementation(libs.findLibrary("kotlinx-coroutines-core").get())
             api(libs.findLibrary("koin-core").get())
             implementation(libs.findLibrary("kotlinx-datetime").get())

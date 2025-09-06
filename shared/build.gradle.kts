@@ -3,7 +3,6 @@ plugins {
     id("com.android.library")
     id("com.vanniktech.maven.publish")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.github.gmazzo.buildconfig")
 }
 
 kotlin {
@@ -23,6 +22,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(project(":shared:core"))
             api(project(":shared:lines"))
             api(project(":shared:sites"))
             api(project(":shared:departures"))
@@ -38,9 +38,4 @@ android {
     defaultConfig {
         minSdk = 24
     }
-}
-
-buildConfig {
-    packageName("com.umain.transport.config")
-    buildConfigField("String", "API_BASE_URL", "\"${project.property("serverHostURL")}\"")
 }
