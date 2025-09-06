@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
@@ -34,9 +36,32 @@ kotlin {
             target.set("es2015")
         }
     }
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+
+    val xcframeworkName = "StockholmTransport"
+    val xcf = XCFramework(xcframeworkName)
+
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach {
+        it.binaries.framework {
+            baseName = xcframeworkName
+
+            export(project(":shared:core"))
+            export(project(":shared:lines"))
+            export(project(":shared:sites"))
+            export(project(":shared:departures"))
+            export(project(":shared:stoppoints"))
+            export(project(":shared:authorities"))
+
+            binaryOption("bundleId", "com.umain.transport.StockholmTransport")
+
+            xcf.add(this)
+        }
+    }
+
+
 
     sourceSets {
         commonMain.dependencies {
