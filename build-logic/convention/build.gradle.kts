@@ -5,6 +5,12 @@ plugins {
     `kotlin-dsl`
 }
 
+repositories {
+    google()
+    gradlePluginPortal()
+    mavenCentral()
+}
+
 kotlin {
     jvmToolchain(17)
 }
@@ -18,6 +24,7 @@ dependencies {
     compileOnly(libs.plugins.compose.jetbrains.toDep())
     compileOnly(libs.plugins.multiplatform.toDep())
     compileOnly(libs.plugins.compose.compiler.toDep())
+    compileOnly(libs.plugins.buildconfig.toDep())
 }
 
 fun Provider<PluginDependency>.toDep() = map {

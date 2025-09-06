@@ -1,9 +1,9 @@
 package com.umain.transport.convention
 
 import com.android.build.api.dsl.LibraryExtension
+import com.github.gmazzo.buildconfig.BuildConfigExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.declarative.dsl.schema.FqName.Empty.packageName
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
@@ -23,8 +23,8 @@ class KmpCoreConventionPlugin : Plugin<Project> {
 
         extensions.configure<BuildConfigExtension> {
             packageName("com.umain.transport.config")
-            buildConfigField("String", "API_BASE_URL", "\"${project.property("serverHostURL")}\"")
-            buildConfigField("String", "API_KEY", "\"${project.property("apiKey")}\"")
+            buildConfigField("String", "API_BASE_URL", "${project.property("serverHostURL")}")
+            buildConfigField("String", "API_KEY", "${project.property("apiKey")}")
         }
     }
 }
