@@ -11,7 +11,7 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
-import io.ktor.utils.io.errors.IOException
+import kotlinx.io.IOException
 
 class StopPointsRepositoryImpl(private val httpClient: HttpClient) : StopPointsRepository {
     private val tag = "StopPointsRepository"
@@ -40,7 +40,11 @@ class StopPointsRepositoryImpl(private val httpClient: HttpClient) : StopPointsR
         return StopPoint(
             id = this.id,
             name = this.name,
-            zone = this.stopArea.name // Usando o nome da stopArea como 'zone' para o modelo de domínio
+            type = this.type,
+            stopAreaName = this.stopArea.name,
+            authorityName = this.transportAuthority.name,
+            latitude = this.lat,
+            longitude = this.lon
         )
     }
 }

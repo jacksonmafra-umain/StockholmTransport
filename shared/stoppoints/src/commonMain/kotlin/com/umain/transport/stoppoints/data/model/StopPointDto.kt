@@ -5,16 +5,28 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class StopPointDto(
-    @SerialName("StopPointNumber")
-    val stopPointNumber: Int,
-    @SerialName("StopPointName")
-    val stopPointName: String,
-    @SerialName("StopAreaNumber")
-    val stopAreaNumber: Int,
-    @SerialName("LocationNorthing")
-    val locationNorthing: Double,
-    @SerialName("LocationEasting")
-    val locationEasting: Double,
-    @SerialName("ZoneShortName")
-    val zoneShortName: String,
+    val id: Int,
+    val gid: Long,
+    val name: String,
+    val designation: String? = null,
+    val type: String,
+    val lat: Double,
+    val lon: Double,
+    @SerialName("stop_area")
+    val stopArea: StopAreaDto,
+    @SerialName("transport_authority")
+    val transportAuthority: TransportAuthorityDto
+)
+
+@Serializable
+data class StopAreaDto(
+    val id: Int,
+    val name: String,
+    val type: String
+)
+
+@Serializable
+data class TransportAuthorityDto(
+    val id: Int,
+    val name: String
 )

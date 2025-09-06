@@ -20,5 +20,11 @@ class KmpCoreConventionPlugin : Plugin<Project> {
         extensions.configure<LibraryExtension> {
             configureKotlinAndroid(this)
         }
+
+        extensions.configure<BuildConfigExtension> {
+            packageName("com.umain.transport.config")
+            buildConfigField("String", "API_BASE_URL", "\"${project.property("serverHostURL")}\"")
+            buildConfigField("String", "API_KEY", "\"${project.property("apiKey")}\"")
+        }
     }
 }
