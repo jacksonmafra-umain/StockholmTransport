@@ -1,18 +1,15 @@
 package com.umain.transport.convention
 
-import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.gradle.kotlin.dsl.dependencies
 
 class KotlinMultiplatformConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
-        with(pluginManager) {
-            apply(libs.findPlugin("multiplatform").get().get().pluginId)
-            apply(libs.findPlugin("android.library").get().get().pluginId)
+        pluginManager.apply("umain.transport.kmp.core")
+
+        dependencies {
+            add("commonMainImplementation", project(":shared:core"))
         }
-        extensions.configure<KotlinMultiplatformExtension>(::configureKotlinMultiplatform)
-        extensions.configure<LibraryExtension>(::configureKotlinAndroid)
     }
 }

@@ -1,5 +1,5 @@
 plugins {
-    id("umain.transport.kmp.library")
+    id("umain.transport.kmp.core")
 }
 
 kotlin {

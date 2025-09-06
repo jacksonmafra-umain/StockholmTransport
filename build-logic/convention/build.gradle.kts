@@ -33,10 +33,15 @@ tasks {
 
 gradlePlugin {
     plugins {
-        register("kotlinMultiplatform") {
+        register("kotlinMultiplatformCore") {
+            id = "umain.transport.kmp.core"
+            implementationClass = "com.umain.transport.convention.KmpCoreConventionPlugin"
+        }
+        register("kotlinMultiplatformLibrary") {
             id = "umain.transport.kmp.library"
             implementationClass = "com.umain.transport.convention.KotlinMultiplatformConventionPlugin"
         }
+
         register("composeMultiplatform") {
             id = "umain.transport.kmp.compose"
             implementationClass = "com.umain.transport.convention.ComposeMultiplatformConventionPlugin"
