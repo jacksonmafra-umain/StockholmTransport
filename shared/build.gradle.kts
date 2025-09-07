@@ -86,12 +86,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(project(":shared:core"))
-            api(project(":shared:lines"))
-            api(project(":shared:sites"))
-            api(project(":shared:departures"))
-            api(project(":shared:stoppoints"))
-            api(project(":shared:authorities"))
+            implementation(project(":shared:core"))
+            implementation(project(":shared:lines"))
+            implementation(project(":shared:sites"))
+            implementation(project(":shared:departures"))
+            implementation(project(":shared:stoppoints"))
+            implementation(project(":shared:authorities"))
         }
     }
 }
@@ -107,7 +107,7 @@ android {
 mavenPublishing {
     publishToMavenCentral()
 
-    signAllPublications()
+    // signAllPublications()
 
     coordinates("com.umain.transport", "stockholm-transport", "1.0.0")
 
