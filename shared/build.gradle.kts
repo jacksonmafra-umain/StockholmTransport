@@ -8,6 +8,10 @@ plugins {
 }
 
 kotlin {
+    compilerOptions {
+        optIn.add("kotlin.js.ExperimentalJsExport")
+    }
+
     jvmToolchain(21)
 
     androidTarget {
@@ -35,6 +39,25 @@ kotlin {
         compilerOptions {
             target.set("es2015")
         }
+
+        compilations["main"].packageJson {
+
+            name = "@jacksonmafra-umain/stockholm-transport"
+            version = "1.0.0"
+            main = "stockholm-transport.js"
+
+            customField(
+                "repository",
+                mapOf(
+                    "type" to "git",
+                    "url" to "https://github.com/eidra-umain/stockholm-transport.git",
+                ),
+            )
+            customField(
+                "author",
+                "Jackson Mafra <jackson.mafra@umain.com>",
+            )
+        }
     }
 
     val xcframeworkName = "StockholmTransport"
@@ -43,7 +66,7 @@ kotlin {
     listOf(
         iosX64(),
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach {
         it.binaries.framework {
             baseName = xcframeworkName
@@ -60,8 +83,6 @@ kotlin {
             xcf.add(this)
         }
     }
-
-
 
     sourceSets {
         commonMain.dependencies {
@@ -84,6 +105,10 @@ android {
 }
 
 mavenPublishing {
+    publishToMavenCentral()
+
+    signAllPublications()
+
     coordinates("com.umain.transport", "stockholm-transport", "1.0.0")
 
     pom {
