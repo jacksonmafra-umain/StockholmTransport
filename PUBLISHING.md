@@ -1,6 +1,6 @@
 # Library Publishing Guide
 
-This document outlines the process for publishing the `StockholmTransport` library to local environments for testing, and to public/private registries for distribution.
+This document outlines the process for publishing the `StockholmTransport` library to local environments for development, and to remote registries for public distribution.
 
 ## 1. Prerequisites: Secret Management
 
@@ -24,9 +24,9 @@ signing.secretKeyRingFile=/full/path/to/your/secring.gpg
 githubToken=your_github_personal_access_token
 ```
 
-## 2. Publishing to a Local Environment (for Testing)
+## 2. Local Development & Testing
 
-Publishing locally is essential for testing the library from a consumer project before releasing it publicly.
+This is the recommended workflow for day-to-day development and testing the library from a consumer app.
 
 ### Android/JVM (to Maven Local)
 
@@ -38,15 +38,37 @@ This publishes the `.aar` and `.jar` artifacts to your local Maven repository (`
     ```
 
 2.  **Use in a consumer project:**
-    In the consumer project's `settings.gradle.kts`, add `mavenLocal()` as a repository. Then, you can declare the dependency as usual:
+    In the consumer project's `settings.gradle.kts`, add `mavenLocal()` as a repository. Then, you can declare the dependency:
     ```kotlin
     // in consumer's build.gradle.kts
     implementation("com.umain.transport:stockholm-transport:1.0.0-SNAPSHOT")
     ```
 
-### JavaScript (using NPM Link)
+### iOS (Local Framework Integration for Fast Development)
 
-`npm link` is the standard way to test local NPM packages.
+This is the **recommended method for local development**. It directly links your KMP shared module to your Xcode project, providing a seamless and fast development loop.
+
+1.  **Link the Framework to the Xcode Project:**
+    - Run a Gradle build once to generate the initial framework: `./gradlew :shared:assembleStockholmTransportXCFramework`
+    - Open your `iosApp/iosApp.xcworkspace` in Xcode.
+    - In the Project Navigator, drag the generated `StockholmTransport.xcframework` from `shared/build/XCFrameworks/release/` into the "Frameworks, Libraries, and Embedded Content" section under your `iosApp` target's "General" tab.
+    - When prompted, ensure "Copy items if needed" is **unchecked**. Set the framework's "Embed" status to **"Do Not Embed"**.
+
+2.  **Add the Pre-build Script Action:**
+    - In Xcode, go to **Product → Scheme → Edit Scheme...**.
+    - Select the **Build** section and click the **+** icon to choose **New Run Script Action**.
+    - Drag this new script to be the very first build step.
+    - Paste the following script:
+      ```bash
+      # Navigates to the KMP project root and runs the task to build and embed the framework
+      cd "$SRCROOT/../"
+      ./gradlew :shared:embedAndSignAppleFrameworkForXcode
+      ```
+    - In the **Provide build settings from** dropdown, select your main app target (`iosApp`).
+
+Now, when you build in Xcode (▶️), the script runs automatically, ensuring you always have the latest Kotlin code.
+
+### JavaScript (using NPM Link)
 
 1.  **Build the JS package:**
     ```bash
@@ -54,9 +76,9 @@ This publishes the `.aar` and `.jar` artifacts to your local Maven repository (`
     ```
 
 2.  **Create a global symbolic link:**
-    Navigate to the output directory and run `npm link`.
+    Navigate to the correct output directory and run `npm link`.
     ```bash
-    cd shared/build/packages/js/
+    cd build/js/packages/shared/
     npm link
     ```
 
@@ -64,229 +86,143 @@ This publishes the `.aar` and `.jar` artifacts to your local Maven repository (`
     Navigate to your web project's directory and link the package.
     ```bash
     cd /path/to/your/web-project/
-    npm link @your-npm-username/stockholm-transport
+    npm link @jacksonmafra-umain/stockholm-transport
     ```
-    Now you can `import` the library as if it were installed from NPM.
 
-### iOS (Direct Project Dependency)
+## 3. Publishing to Remote Registries
 
-For iOS, the most straightforward way to test locally is to add the `StockholmTransport` Xcode project as a dependency to your consumer app's Xcode project directly. This avoids the need for a local framework publishing step.
-
-## 3. Publishing to Public Registries
-
-This section covers publishing to standard public registries.
+This section covers publishing production releases.
 
 ### 3.1. Android/JVM (to Maven Central)
 
-This publishes a production-ready `.aar` artifact.
+The required metadata is already configured in `shared/build.gradle.kts`.
 
-#### Step 1: Configure Publishing Metadata
-
-Add the following blocks to your `shared/build.gradle.kts` file to describe your library as required by Maven Central.
-
-```kotlin
-// Add this to the end of shared/build.gradle.kts
-
-publishing {
-    singleVariant("release") {
-        withSourcesJar()
-        withJavadocJar()
-    }
-}
-
-mavenPublishing {
-    coordinates("com.umain.transport", "stockholm-transport", "1.0.0")
-
-    pom {
-        name.set("Stockholm Transport KMP Library")
-        description.set("A KMP library for the Stockholm public transport API.")
-        url.set("https://github.com/your-username/your-repository")
-
-        licenses {
-            license {
-                name.set("The Apache License, Version 2.0")
-                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-            }
-        }
-        developers {
-            developer {
-                id.set("your-id")
-                name.set("Your Name")
-                email.set("your-email@example.com")
-            }
-        }
-        scm {
-            url.set("https://github.com/your-username/your-repository")
-            connection.set("scm:git:git://github.com/your-username/your-repository.git")
-            developerConnection.set("scm:git:ssh://git@github.com:your-username/your-repository.git")
-        }
-    }
-}
-```
-
-#### Step 2: Run the Publish Command
-
-With your secrets configured in `local.properties`, run the following command:
-
+**Run the Publish Command:**
+With your Sonatype secrets configured in `local.properties`, run:
 ```bash
 ./gradlew publishAllPublicationsToMavenCentralRepository
 ```
 
 ### 3.2. JavaScript (to NPM Registry)
 
-This publishes the library to the public NPM registry.
-
-#### Step 1: Configure `package.json`
-
-Customize the generated `package.json` by adding this block inside `kotlin { js(IR) { ... } }` in your `shared/build.gradle.kts`.
-
-```kotlin
-// Inside kotlin { js(IR) { ... } } in shared/build.gradle.kts
-compilations.all {
-    packageJson {
-        name = "@your-npm-username/stockholm-transport"
-        version = "1.0.0"
-        main = "stockholm-transport.js"
-        repository("git", "https://github.com/your-username/your-repository.git")
-    }
-}
-```
-
-#### Step 2: Publish to NPM
+The `package.json` metadata is already configured in `shared/build.gradle.kts`.
 
 1.  **Log in to NPM** (one-time setup):
     ```bash
     npm login
     ```
 
-2.  **Build the JS packages:**
+2.  **Build and publish:**
     ```bash
     ./gradlew jsPublicPackageJson
-    ```
-
-3.  **Navigate and publish:**
-    ```bash
-    cd shared/build/packages/js/
+    cd build/js/packages/shared/
     npm publish --access public
     ```
 
 ### 3.3. iOS (via Swift Package Manager)
 
-This is the modern approach for distributing iOS frameworks, using a binary `.xcframework` hosted on GitHub Releases.
+This approach uses a binary `.xcframework` hosted on GitHub Releases.
 
-#### Step 1: Generate the `.xcframework`
-
-Add this task to your `shared/build.gradle.kts` to create a universal framework.
-
-```kotlin
-// Add this to the end of shared/build.gradle.kts
-import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-
-val xcf = XCFramework()
-kotlin.targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
-    if (this.konanTarget.family.isAppleFamily) {
-        binaries.framework {
-            baseName = "StockholmTransport"
-            xcf.add(this)
-        }
-    }
-}
-
-tasks.register("createXCFramework", Copy::class) {
-    from(xcf.outputFile)
-    into(buildDir.resolve("xcframework"))
-}
-```
-Run the task:
-```bash
-./gradlew createXCFramework
-```
-This creates `StockholmTransport.xcframework` inside `shared/build/xcframework/`.
-
-#### Step 2: Host the Framework
-
-1.  Compress the `StockholmTransport.xcframework` into a `.zip` file.
-2.  Create a new release on your project's GitHub page and upload this `.zip` file as a binary asset.
-3.  Once uploaded, calculate the zip's checksum: `swift package compute-checksum StockholmTransport.xcframework.zip`.
-
-#### Step 3: Create the `Package.swift` File
-
-In a **separate Git repository**, create a `Package.swift` file. This repository will serve as the SPM package definition.
-
-```swift
-// swift-tools-version:5.3
-import PackageDescription
-
-let version = "1.0.0"
-let checksum = "PASTE_YOUR_CHECKSUM_HERE"
-let url = "URL_TO_YOUR_XCframework.zip_ON_GITHUB_RELEASES"
-
-let package = Package(
-    name: "StockholmTransport",
-    platforms: [.iOS(.v14)],
-    products: [
-        .library(name: "StockholmTransport", targets: ["StockholmTransport"])
-    ],
-    targets: [
-        .binaryTarget(name: "StockholmTransport", url: url, checksum: checksum)
-    ]
-)
-```
-Developers can now add your library in Xcode using the URL of this new Git repository.
-
-## 4. Publishing to GitHub Packages
-
-GitHub Packages is an excellent alternative for hosting both public and private packages.
-
-### 4.1. Android/JVM (to GitHub Packages)
-
-#### Step 1: Configure the Repository
-
-Add the following to your `shared/build.gradle.kts` inside the `mavenPublishing { ... }` block.
-
-```kotlin
-// Inside mavenPublishing { ... } in shared/build.gradle.kts
-repositories {
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/your-username/your-repository")
-        credentials {
-            username = System.getenv("GITHUB_ACTOR") ?: property("mavenCentralUsername") as String
-            password = System.getenv("GITHUB_TOKEN") ?: property("githubToken") as String
-        }
-    }
-}
-```
-
-#### Step 2: Publish
-
-Ensure your `githubToken` is set in `local.properties`. Then run:
-
-```bash
-./gradlew publish
-```
-
-### 4.2. JavaScript (to GitHub Packages)
-
-#### Step 1: Configure `.npmrc`
-
-Create a file named `.npmrc` in the root of your project with the following content. This tells NPM to associate your package scope with the GitHub registry.
-
-```
-@your-npm-username:registry=https://npm.pkg.github.com/
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
-
-#### Step 2: Publish
-
-Ensure your `GITHUB_TOKEN` environment variable is set or available. The process is the same as publishing to the public registry; the `.npmrc` file will automatically redirect the request to GitHub.
-
-1.  Build the packages:
+1.  **Assemble the Universal XCFramework:**
     ```bash
-    ./gradlew jsPublicPackageJson
+    ./gradlew :shared:assembleStockholmTransportXCFramework
     ```
-2.  Navigate and publish:
+
+2.  **Host the Framework:**
+    - Compress the generated `StockholmTransport.xcframework` into a `.zip` file.
+    - Create a new release on your project's GitHub page and upload the `.zip` file as a binary asset.
+    - Calculate the zip's checksum: `swift package compute-checksum StockholmTransport.xcframework.zip`.
+
+3.  **Create the `Package.swift` Manifest:**
+    In a separate Git repository (e.g., `stockholm-transport-spm`), create a `Package.swift` file:
+
+    ```swift
+    // swift-tools-version:5.3
+    import PackageDescription
+
+    let version = "1.0.0" // Must match your GitHub release tag
+    let checksum = "PASTE_YOUR_CHECKSUM_HERE"
+    let url = "https://github.com/eidra-umain/stockholm-transport/releases/download/\(version)/StockholmTransport.xcframework.zip"
+
+    let package = Package(
+        name: "StockholmTransport",
+        platforms: [.iOS(.v14)],
+        products: [
+            .library(name: "StockholmTransport", targets: ["StockholmTransport"])
+        ],
+        targets: [
+            .binaryTarget(name: "StockholmTransport", url: url, checksum: checksum)
+        ]
+    )
+    ```
+    Commit, tag with the version, and push. Developers can now add your library in Xcode using the URL of this manifest repository.
+
+## 4. Publishing to GitHub Packages (Alternative)
+
+GitHub Packages is an excellent alternative to Maven Central and NPM, especially for private packages or for keeping all your project's artifacts in one place.
+
+### Android/JVM
+
+This process publishes your `.aar` and other Maven artifacts directly to your GitHub repository's package registry.
+
+1.  **Configure the Repository:**
+    Add the following `repositories` block inside the `mavenPublishing { ... }` block in your `shared/build.gradle.kts` file.
+
+    ```kotlin
+    // Inside mavenPublishing { ... } in shared/build.gradle.kts
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/eidra-umain/stockholm-transport")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR") ?: "jacksonmafra-umain"
+                password = System.getenv("GITHUB_TOKEN") ?: property("githubToken") as String
+            }
+        }
+    }
+    ```
+    *Note: `System.getenv("GITHUB_ACTOR")` and `System.getenv("GITHUB_TOKEN")` are standard environment variables used in GitHub Actions for CI/CD. The configuration falls back to your local properties for manual publishing.*
+
+2.  **Publish:**
+    Ensure your `githubToken` is set in `local.properties`. Then, run the specific publish task for this repository. The task name is generated from the repository name (`GitHubPackages`).
+
     ```bash
-    cd shared/build/packages/js/
+    ./gradlew publishAllPublicationsToGitHubPackagesRepository
+    ```
+
+### JavaScript
+
+This process publishes your JavaScript package to the GitHub Packages NPM registry, scoped to your user or organization.
+
+1.  **Configure `.npmrc`:**
+    Create a file named `.npmrc` in the root of your project. This file tells NPM that any package under the `@jacksonmafra-umain` scope should be published to and installed from the GitHub registry.
+
+    ```
+    @jacksonmafra-umain:registry=https://npm.pkg.github.com/
+    ```
+
+2.  **Authenticate with GitHub Packages:**
+    You need to log in to the GitHub NPM registry. This is a separate login from the public NPM registry.
+
+    ```bash
+    npm login --registry=https://npm.pkg.github.com
+    ```
+    -   **Username:** Enter your GitHub username (`jacksonmafra-umain`).
+    -   **Password:** Enter your Personal Access Token (PAT) that you created with `write:packages` scope. **Do not use your GitHub password.**
+    -   **Email:** Enter your public GitHub email address.
+
+3.  **Build and Publish:**
+    The process is the same as for the public registry. The `.npmrc` file will automatically redirect the `publish` command to GitHub.
+
+    ```bash
+    # Step 1: Build the package
+    ./gradlew jsPublicPackageJson
+
+    # Step 2: Navigate to the output directory
+    cd build/js/packages/shared/
+
+    # Step 3: Publish to GitHub Packages
     npm publish
     ```
+
+Your package will now be available on your GitHub repository's "Packages" page.
