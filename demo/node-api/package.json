@@ -1,0 +1,13 @@
+{
+  "name": "stockholm-transport-demo-api",
+  "version": "1.0.0",
+  "description": "A Node.js API demo consuming the KMP library.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "5.0.0"
+  }
+}
