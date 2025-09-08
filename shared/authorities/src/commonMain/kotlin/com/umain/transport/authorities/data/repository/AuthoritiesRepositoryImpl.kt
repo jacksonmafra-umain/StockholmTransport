@@ -18,7 +18,7 @@ class AuthoritiesRepositoryImpl(private val httpClient: HttpClient) : Authoritie
 
     override suspend fun getAllAuthorities(): DataResult<List<Authority>> {
         return try {
-            val response = httpClient.get("transport-authorities").body<List<AuthorityDto>>()
+            val response = httpClient.get("v1/transport-authorities").body<List<AuthorityDto>>()
             DataResult.Success(response.map { it.toDomain() })
         } catch (e: Exception) {
             AppLogger.e(tag, "Failed to fetch all authorities", e)

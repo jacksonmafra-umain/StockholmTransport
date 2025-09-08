@@ -7,6 +7,8 @@ import com.umain.transport.lines.domain.model.TransportMode
 import com.umain.transport.lines.domain.repository.LinesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,14 +22,14 @@ data class LinesUiState(
 
 class LinesViewModel(
     private val linesRepository: LinesRepository,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) {
+    private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val _uiState = MutableStateFlow(LinesUiState())
     val uiState = _uiState.asStateFlow()
 
     fun loadLines() {
         _uiState.update { it.copy(isLoading = true, error = null) }
-        coroutineScope.launch {
+        viewModelScope.launch {
             when (val result = linesRepository.getAllLines()) {
                 is DataResult.Success -> {
                     _uiState.update {
@@ -41,6 +43,10 @@ class LinesViewModel(
                 }
             }
         }
+    }
+
+    fun onCleared() {
+        viewModelScope.cancel()
     }
 
     private fun NetworkError.toUserFriendlyMessage(): String =

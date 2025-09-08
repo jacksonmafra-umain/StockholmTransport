@@ -18,7 +18,7 @@ class StopPointsRepositoryImpl(private val httpClient: HttpClient) : StopPointsR
 
     override suspend fun getAllStopPoints(): DataResult<List<StopPoint>> {
         return try {
-            val response = httpClient.get("stop-points").body<List<StopPointDto>>()
+            val response = httpClient.get("v1/stop-points").body<List<StopPointDto>>()
             DataResult.Success(response.map { it.toDomain() })
         } catch (e: Exception) {
             AppLogger.e(tag, "Failed to fetch all stop points", e)

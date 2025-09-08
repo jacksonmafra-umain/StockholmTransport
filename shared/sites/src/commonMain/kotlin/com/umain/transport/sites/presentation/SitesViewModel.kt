@@ -6,6 +6,8 @@ import com.umain.transport.sites.domain.model.Site
 import com.umain.transport.sites.domain.repository.SitesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -19,14 +21,14 @@ data class SitesUiState(
 
 class SitesViewModel(
     private val sitesRepository: SitesRepository,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) {
+    private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val _uiState = MutableStateFlow(SitesUiState())
     val uiState = _uiState.asStateFlow()
 
     fun loadSites() {
         _uiState.update { it.copy(isLoading = true, error = null) }
-        coroutineScope.launch {
+        viewModelScope.launch {
             when (val result = sitesRepository.getAllSites()) {
                 is DataResult.Success -> {
                     _uiState.update {
@@ -40,6 +42,10 @@ class SitesViewModel(
                 }
             }
         }
+    }
+
+    fun onCleared() {
+        viewModelScope.cancel()
     }
 
     private fun NetworkError.toUserFriendlyMessage(): String =

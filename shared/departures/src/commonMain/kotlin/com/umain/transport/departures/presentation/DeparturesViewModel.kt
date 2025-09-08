@@ -6,6 +6,8 @@ import com.umain.transport.departures.domain.model.Departure
 import com.umain.transport.departures.domain.repository.DeparturesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -19,14 +21,14 @@ data class DeparturesUiState(
 
 class DeparturesViewModel(
     private val departuresRepository: DeparturesRepository,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) {
+    private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val _uiState = MutableStateFlow(DeparturesUiState())
     val uiState = _uiState.asStateFlow()
 
     fun loadDepartures(siteId: Int) {
         _uiState.update { it.copy(isLoading = true, error = null, departures = emptyList()) }
-        coroutineScope.launch {
+        viewModelScope.launch {
             when (val result = departuresRepository.getDeparturesForSite(siteId)) {
                 is DataResult.Success -> {
                     _uiState.update {
@@ -40,6 +42,10 @@ class DeparturesViewModel(
                 }
             }
         }
+    }
+
+    fun onCleared() {
+        viewModelScope.cancel()
     }
 
     private fun NetworkError.toUserFriendlyMessage(): String =

@@ -6,6 +6,8 @@ import com.umain.transport.stoppoints.domain.model.StopPoint
 import com.umain.transport.stoppoints.domain.repository.StopPointsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -19,14 +21,14 @@ data class StopPointsUiState(
 
 class StopPointsViewModel(
     private val stopPointsRepository: StopPointsRepository,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
 ) {
+    private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val _uiState = MutableStateFlow(StopPointsUiState())
     val uiState = _uiState.asStateFlow()
 
     fun loadStopPoints() {
         _uiState.update { it.copy(isLoading = true, error = null) }
-        coroutineScope.launch {
+        viewModelScope.launch {
             when (val result = stopPointsRepository.getAllStopPoints()) {
                 is DataResult.Success -> {
                     _uiState.update {
@@ -41,6 +43,11 @@ class StopPointsViewModel(
             }
         }
     }
+
+    fun onCleared() {
+        viewModelScope.cancel()
+    }
+
 
     private fun NetworkError.toUserFriendlyMessage(): String =
         when (this) {

@@ -20,7 +20,7 @@ class DeparturesRepositoryImpl(private val httpClient: HttpClient) : DeparturesR
 
     override suspend fun getDeparturesForSite(siteId: Int): DataResult<List<Departure>> {
         return try {
-            val response = httpClient.get("sites/$siteId/departures") {
+            val response = httpClient.get("v1/sites/$siteId/departures") {
                 parameter("forecast", 60)
             }.body<DeparturesResponseDto>()
             DataResult.Success(response.departures.map { it.toDomain() })

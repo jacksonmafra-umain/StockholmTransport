@@ -18,7 +18,7 @@ class SitesRepositoryImpl(private val httpClient: HttpClient) : SitesRepository 
 
     override suspend fun getAllSites(): DataResult<List<Site>> {
         return try {
-            val response = httpClient.get("sites").body<List<SiteDto>>()
+            val response = httpClient.get("v1/sites").body<List<SiteDto>>()
             DataResult.Success(response.map { it.toDomain() })
         } catch (e: Exception) {
             AppLogger.e(tag, "Failed to fetch all sites", e)

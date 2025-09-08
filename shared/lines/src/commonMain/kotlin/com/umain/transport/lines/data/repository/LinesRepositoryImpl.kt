@@ -22,7 +22,7 @@ class LinesRepositoryImpl(
 
     override suspend fun getAllLines(): DataResult<Map<TransportMode, List<Line>>> {
         return try {
-            val response = httpClient.get("lines") {
+            val response = httpClient.get("v1/lines") {
                 parameter("transport_authority_id", 1)
             }.body<List<LinesResponse>>().firstOrNull()
 

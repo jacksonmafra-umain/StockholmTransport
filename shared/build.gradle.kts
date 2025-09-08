@@ -100,13 +100,12 @@ kotlin {
         val androidMain by getting {
             kotlin.srcDirs("core/src/androidMain/kotlin")
             dependencies {
+                implementation(libs.ktor.client.okhttp)
                 implementation(libs.koin.android)
                 implementation(libs.kotlinx.coroutines.android)
             }
         }
 
-        // --- CORREÇÃO APLICADA AQUI ---
-        // Replicando a hierarquia de source sets nativos padrão manualmente.
         val nativeMain by creating {
             dependsOn(commonMain)
         }
