@@ -35,14 +35,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-
-include(":library")
-include(
-    ":shared",
-    ":shared:core",
-    ":shared:lines",
-    ":shared:sites",
-    ":shared:departures",
-    ":shared:stoppoints",
-    ":shared:authorities"
-)
+include(":shared")
+project(":shared").name = "stockholm-transport"
