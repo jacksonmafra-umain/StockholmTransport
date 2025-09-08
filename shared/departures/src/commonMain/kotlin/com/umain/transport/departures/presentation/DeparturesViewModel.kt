@@ -4,6 +4,7 @@ import com.umain.transport.core.data.DataResult
 import com.umain.transport.core.data.NetworkError
 import com.umain.transport.departures.domain.model.Departure
 import com.umain.transport.departures.domain.repository.DeparturesRepository
+import com.umain.transport.lines.presentation.LinesUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -12,19 +13,35 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+import kotlin.js.JsName
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 data class DeparturesUiState(
     val isLoading: Boolean = false,
     val departures: List<Departure> = emptyList(),
     val error: String? = null,
 )
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class DeparturesViewModel(
     private val departuresRepository: DeparturesRepository,
 ) {
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val _uiState = MutableStateFlow(DeparturesUiState())
     val uiState = _uiState.asStateFlow()
+
+    @JsName("subscribeToState")
+    fun subscribe(onStateUpdate: (DeparturesUiState) -> Unit) {
+        viewModelScope.launch {
+            uiState.collect {
+                onStateUpdate(it)
+            }
+        }
+    }
 
     fun loadDepartures(siteId: Int) {
         _uiState.update { it.copy(isLoading = true, error = null, departures = emptyList()) }

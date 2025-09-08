@@ -1,4 +1,7 @@
+@file:OptIn(ExperimentalDistributionDsl::class)
+
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 import java.time.ZonedDateTime
@@ -33,7 +36,7 @@ Use pre-installed Node.js
 https://kotlinlang.org/docs/js-project-setup.html#use-pre-installed-node-js
  */
 project.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin> {
-    project.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec>().download = false
+    project.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec>().download = true
 }
 
 /*
@@ -54,49 +57,41 @@ kotlin {
     }
     jvm()
     js(IR) {
-        outputModuleName = libMavenPublish
-
+        version = libBaseVersion
         compilations["main"].packageJson {
-            customField("generated", mapOf("one" to 1, "two" to 2))
+            name = "$libMavenPublish"
+            version = libBaseVersion
+            main = "$libMavenPublish.js"
+            customField("repository", mapOf("type" to "git", "url" to libSiteUrl))
+            customField("author", "$developerName <$developerEmail>")
             val now = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
             customField("buildTimestamp", now)
         }
 
-        /*
-        Distribution target directory
-        By default, the results of a Kotlin/JS project build reside in the
-        /build/dist/<targetName>/<binaryName> directory within the project root.
-         */
-        useEsModules()
-        nodejs(){
+        binaries.executable()
+
+        useCommonJs()
+        nodejs {
+
             distribution {
-                outputDirectory.set(projectDir.resolve("output"))
+                distributionName = "$libMavenPublish.node.js"
+                outputDirectory.set(buildDir.resolve("js/packages/$libMavenPublish"))
             }
         }
+
         browser {
             distribution {
-                outputDirectory.set(projectDir.resolve("output"))
+                outputDirectory.set(buildDir.resolve("output"))
             }
             commonWebpackConfig {
                 cssSupport {
                     enabled = true
                 }
-                outputFileName = "$libMavenPublish.js"
+                outputFileName = "$libMavenPublish.browser.js"
                 sourceMaps = false
             }
         }
-        generateTypeScriptDefinitions()
-        binaries.executable()
-        compilerOptions {
-            target.set("es2015")
-        }
-        compilations["main"].packageJson {
-            name = "$libMavenPublish"
-            version = "$libBaseVersion"
-            main = "$libMavenPublish.js"
-            customField("repository", mapOf("type" to "git", "url" to libSiteUrl))
-            customField("author", "$developerName <$developerEmail>")
-        }
+        // generateTypeScriptDefinitions()
     }
     iosX64()
     iosArm64()

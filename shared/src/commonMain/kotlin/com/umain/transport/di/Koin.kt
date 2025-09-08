@@ -8,11 +8,11 @@ import com.umain.transport.sites.di.sitesModule
 import com.umain.transport.stoppoints.di.stopPointsModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
-/**
- * Ponto de entrada público para inicializar a injeção de dependência da biblioteca.
- * Consumidores da biblioteca devem chamar esta função.
- */
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
     startKoin {
         appDeclaration()

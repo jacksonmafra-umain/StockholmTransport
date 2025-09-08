@@ -1,5 +1,10 @@
 package com.umain.transport.lines.domain.model
 
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 data class Line(
     val id: Int,
     val name: String,
@@ -8,6 +13,8 @@ data class Line(
     val authority: String,
 )
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 enum class TransportMode {
     METRO,
     TRAM,

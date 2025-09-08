@@ -1,5 +1,6 @@
 package com.umain.transport.sites.presentation
 
+import com.umain.transport.authorities.presentation.AuthoritiesUiState
 import com.umain.transport.core.data.DataResult
 import com.umain.transport.core.data.NetworkError
 import com.umain.transport.sites.domain.model.Site
@@ -12,19 +13,35 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
+import kotlin.js.JsName
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 data class SitesUiState(
     val isLoading: Boolean = false,
     val sites: List<Site> = emptyList(),
     val error: String? = null,
 )
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 class SitesViewModel(
     private val sitesRepository: SitesRepository,
 ) {
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val _uiState = MutableStateFlow(SitesUiState())
     val uiState = _uiState.asStateFlow()
+
+    @JsName("subscribeToState")
+    fun subscribe(onStateUpdate: (SitesUiState) -> Unit) {
+        viewModelScope.launch {
+            uiState.collect {
+                onStateUpdate(it)
+            }
+        }
+    }
 
     fun loadSites() {
         _uiState.update { it.copy(isLoading = true, error = null) }
