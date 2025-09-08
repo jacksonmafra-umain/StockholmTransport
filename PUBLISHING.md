@@ -92,7 +92,7 @@ This document outlines the process for publishing the `StockholmTransport` libra
 
 ## 1. Architecture Overview
 
-The project uses a dedicated publication module (`:library`) to create a single, clean Maven artifact that aggregates all internal feature modules (`:shared:core`, `:shared:lines`, etc.). The `:shared` module is used to generate the unified XCFramework for iOS. This separation ensures clean metadata for all consumers.
+The project uses a dedicated publication module (`:library`) to create a single, clean Maven artifact that aggregates all internal feature modules (`:stockholm-transport:core`, `:stockholm-transport:lines`, etc.). The `:shared` module is used to generate the unified XCFramework for iOS. This separation ensures clean metadata for all consumers.
 
 ## 2. Prerequisites: Secret Management
 
@@ -137,7 +137,7 @@ This publishes a single, unified artifact to your local Maven repository (`~/.m2
 This method directly links your KMP shared module to your Xcode project for a fast development loop.
 
 1.  **Link the Framework to the Xcode Project:**
-    - Run a Gradle build once to generate the initial framework: `./gradlew :shared:assembleStockholmTransportXCFramework`
+    - Run a Gradle build once to generate the initial framework: `./gradlew :stockholm-transport:assembleStockholmTransportXCFramework`
     - Open your `demo/compose-app/iosApp/iosApp.xcworkspace` in Xcode.
     - Drag the generated `StockholmTransport.xcframework` from `shared/build/XCFrameworks/release/` into the "Frameworks, Libraries, and Embedded Content" section under your `iosApp` target's "General" tab.
     - When prompted, ensure "Copy items if needed" is **unchecked**. Set the framework's "Embed" status to **"Do Not Embed"**.
@@ -149,7 +149,7 @@ This method directly links your KMP shared module to your Xcode project for a fa
     - Paste the following script:
       ```bash
       cd "$SRCROOT/../../" # Navigates to the root of the main project
-      ./gradlew :shared:embedAndSignAppleFrameworkForXcode
+      ./gradlew :stockholm-transport:embedAndSignAppleFrameworkForXcode
       ```
     - In the **Provide build settings from** dropdown, select your main app target (`iosApp`).
 
@@ -178,7 +178,7 @@ The `package.json` metadata is configured in `shared/build.gradle.kts`.
 
 2.  **Build and publish:**
     ```bash
-    ./gradlew :shared:jsPublicPackageJson
+    ./gradlew :stockholm-transport:jsPublicPackageJson
     cd shared/build/packages/js/
     npm publish --access public
     ```
@@ -189,7 +189,7 @@ This approach uses a binary `.xcframework` hosted on GitHub Releases.
 
 1.  **Assemble the Universal XCFramework:**
     ```bash
-    ./gradlew :shared:assembleStockholmTransportXCFramework
+    ./gradlew :stockholm-transport:assembleStockholmTransportXCFramework
     ```
 
 2.  **Host the Framework:**

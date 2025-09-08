@@ -1,4 +1,9 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
 
 val libDeveloperOrg: String by project
 val libMavenPublish: String by project
@@ -23,6 +28,24 @@ group = libDeveloperOrg
 version = libBaseVersion
 base.archivesName.set(libMavenPublish)
 
+/*
+Use pre-installed Node.js
+https://kotlinlang.org/docs/js-project-setup.html#use-pre-installed-node-js
+ */
+project.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin> {
+    project.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec>().download = false
+}
+
+/*
+Reporting that yarn.lock has been updated
+https://kotlinlang.org/docs/js-project-setup.html#reporting-that-yarn-lock-has-been-updated
+ */
+rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin> {
+    rootProject.the<YarnRootExtension>().yarnLockMismatchReport =
+        YarnLockMismatchReport.WARNING // NONE | FAIL
+    rootProject.the<YarnRootExtension>().reportNewYarnLock = false
+    rootProject.the<YarnRootExtension>().yarnLockAutoReplace = false
+}
 kotlin {
     jvmToolchain(jvmToolchainVersion.toInt())
 
@@ -31,9 +54,29 @@ kotlin {
     }
     jvm()
     js(IR) {
+        outputModuleName = libMavenPublish
+
+        compilations["main"].packageJson {
+            customField("generated", mapOf("one" to 1, "two" to 2))
+            val now = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+            customField("buildTimestamp", now)
+        }
+
+        /*
+        Distribution target directory
+        By default, the results of a Kotlin/JS project build reside in the
+        /build/dist/<targetName>/<binaryName> directory within the project root.
+         */
         useEsModules()
-        nodejs()
+        nodejs(){
+            distribution {
+                outputDirectory.set(projectDir.resolve("output"))
+            }
+        }
         browser {
+            distribution {
+                outputDirectory.set(projectDir.resolve("output"))
+            }
             commonWebpackConfig {
                 cssSupport {
                     enabled = true
@@ -42,13 +85,14 @@ kotlin {
                 sourceMaps = false
             }
         }
+        generateTypeScriptDefinitions()
         binaries.executable()
         compilerOptions {
             target.set("es2015")
         }
         compilations["main"].packageJson {
-            name = "@$developerId/$libMavenPublish"
-            version = libBaseVersion
+            name = "$libMavenPublish"
+            version = "$libBaseVersion"
             main = "$libMavenPublish.js"
             customField("repository", mapOf("type" to "git", "url" to libSiteUrl))
             customField("author", "$developerName <$developerEmail>")
