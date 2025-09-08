@@ -40,8 +40,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.kotlinx.serialization.json)
-
-            api(libs.koin.core)
+            implementation(libs.stockholm.transport)
+            implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
 
@@ -55,10 +55,10 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.stockholm.transport)
             implementation(compose.uiTooling)
             implementation(libs.androidx.activityCompose)
             implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.koin.core)
             implementation(libs.koin.android)
             implementation(libs.koin.compose)
         }
@@ -71,7 +71,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
         targetSdk = 35
 
         applicationId = "com.umain.transport.app.androidApp"
