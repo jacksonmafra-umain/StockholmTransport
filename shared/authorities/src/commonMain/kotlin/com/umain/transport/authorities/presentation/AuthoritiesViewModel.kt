@@ -20,38 +20,44 @@ data class AuthoritiesUiState(
     val error: String? = null,
 )
 
+// We ignore the primary constructor because it uses a non-exportable type (AuthoritiesRepository).
+// Koin will still use this constructor on the Kotlin side.
 @OptIn(ExperimentalJsExport::class)
 @JsExport
-class AuthoritiesViewModel(
-    private val authoritiesRepository: AuthoritiesRepository,
-) : BaseViewModel<AuthoritiesUiState>() {
-    private val _uiState = MutableStateFlow(AuthoritiesUiState())
-    override val uiState = _uiState.asStateFlow()
+class AuthoritiesViewModel
+    @JsExport.Ignore
+    constructor(
+        private val authoritiesRepository: AuthoritiesRepository,
+    ) : BaseViewModel<AuthoritiesUiState>() {
+        private val _uiState = MutableStateFlow(AuthoritiesUiState())
 
-    fun loadAuthorities() {
-        _uiState.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
-            when (val result = authoritiesRepository.getAllAuthorities()) {
-                is DataResult.Success -> {
-                    _uiState.update {
-                        it.copy(isLoading = false, authorities = result.data)
+        @JsExport.Ignore
+        override val uiState = _uiState.asStateFlow()
+
+        fun loadAuthorities() {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            viewModelScope.launch {
+                when (val result = authoritiesRepository.getAllAuthorities()) {
+                    is DataResult.Success -> {
+                        _uiState.update {
+                            it.copy(isLoading = false, authorities = result.data)
+                        }
                     }
-                }
-                is DataResult.Error -> {
-                    _uiState.update {
-                        it.copy(isLoading = false, error = result.error.toUserFriendlyMessage())
+                    is DataResult.Error -> {
+                        _uiState.update {
+                            it.copy(isLoading = false, error = result.error.toUserFriendlyMessage())
+                        }
                     }
                 }
             }
         }
-    }
 
-    private fun NetworkError.toUserFriendlyMessage(): String =
-        when (this) {
-            NetworkError.NoInternet -> "No internet connection. Please check your network."
-            NetworkError.ServerError -> "A server error occurred. Please try again later."
-            NetworkError.Timeout -> "The request timed out. Please try again."
-            NetworkError.NotFound -> "The requested information could not be found."
-            is NetworkError.Unknown -> "An unexpected error occurred: $message"
-        }
-}
+        private fun NetworkError.toUserFriendlyMessage(): String =
+            when (this) {
+                NetworkError.NoInternet -> "No internet connection. Please check your network."
+                NetworkError.ServerError -> "A server error occurred. Please try again later."
+                NetworkError.Timeout -> "The request timed out. Please try again."
+                NetworkError.NotFound -> "The requested information could not be found."
+                is NetworkError.Unknown -> "An unexpected error occurred: $message"
+            }
+    }

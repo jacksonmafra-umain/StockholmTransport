@@ -5,11 +5,7 @@ import com.umain.transport.stoppoints.domain.repository.StopPointsRepository
 import com.umain.transport.stoppoints.presentation.StopPointsViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
-import kotlin.js.ExperimentalJsExport
-import kotlin.js.JsExport
 
-@OptIn(ExperimentalJsExport::class)
-@JsExport
 val stopPointsModule =
     module {
         single<StopPointsRepository> { StopPointsRepositoryImpl(get()) }

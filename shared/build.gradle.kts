@@ -69,17 +69,20 @@ kotlin {
         }
 
         binaries.executable()
-
-        useCommonJs()
         nodejs {
+            compilerOptions {
+                freeCompilerArgs.add("-Xexpect-actual-classes")
+            }
 
             distribution {
-                distributionName = "$libMavenPublish.node.js"
-                outputDirectory.set(buildDir.resolve("js/packages/$libMavenPublish"))
+                outputDirectory.set(buildDir.resolve("output"))
             }
         }
 
         browser {
+            compilerOptions {
+                freeCompilerArgs.add("-Xexpect-actual-classes")
+            }
             distribution {
                 outputDirectory.set(buildDir.resolve("output"))
             }
@@ -91,7 +94,7 @@ kotlin {
                 sourceMaps = false
             }
         }
-        // generateTypeScriptDefinitions()
+        generateTypeScriptDefinitions()
     }
     iosX64()
     iosArm64()
@@ -117,7 +120,7 @@ kotlin {
                 "sites/src/commonMain/kotlin",
                 "departures/src/commonMain/kotlin",
                 "stoppoints/src/commonMain/kotlin",
-                "authorities/src/commonMain/kotlin"
+                "authorities/src/commonMain/kotlin",
             )
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
@@ -152,6 +155,9 @@ kotlin {
             dependsOn(nativeMain)
         }
         val iosMain by creating {
+            compilerOptions {
+                freeCompilerArgs.add("-Xexpect-actual-classes")
+            }
             dependsOn(appleMain)
             kotlin.srcDirs("core/src/iosMain/kotlin")
             dependencies {
@@ -171,6 +177,9 @@ kotlin {
         }
         val jsMain by getting {
             kotlin.srcDirs("core/src/jsMain/kotlin")
+            compilerOptions {
+                freeCompilerArgs.add("-Xexpect-actual-classes")
+            }
             dependencies {
                 implementation(libs.ktor.client.js)
             }

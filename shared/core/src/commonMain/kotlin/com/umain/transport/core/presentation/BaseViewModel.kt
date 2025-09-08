@@ -1,11 +1,7 @@
 package com.umain.transport.core.presentation
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
@@ -21,12 +17,16 @@ open class BaseViewModel<T> {
      * The CoroutineScope for this ViewModel. It uses a SupervisorJob
      * to ensure that failures in one coroutine do not cancel the entire scope.
      */
+    @JsExport.Ignore
     protected val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     /**
      * This must be implemented by subclasses to expose their StateFlow.
      * It is not exported to JS as StateFlow is not JS-compatible.
      */
+    // We tell the compiler to ignore this property when exporting to JS,
+    // as StateFlow is not a JS-compatible type.
+    @JsExport.Ignore
     protected open val uiState: StateFlow<T>? = null
 
     /**
