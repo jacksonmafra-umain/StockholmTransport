@@ -5,7 +5,11 @@ import com.umain.transport.authorities.domain.repository.AuthoritiesRepository
 import com.umain.transport.authorities.presentation.AuthoritiesViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
+import kotlin.js.ExperimentalJsExport
+import kotlin.js.JsExport
 
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 val authoritiesModule =
     module {
         single<AuthoritiesRepository> { AuthoritiesRepositoryImpl(get()) }
