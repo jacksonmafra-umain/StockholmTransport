@@ -34,11 +34,17 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime)
             implementation(libs.androidx.navigation.compose)
             implementation(libs.kotlinx.serialization.json)
+
+            api(libs.koin.core)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.compose.viewmodel.navigation)
+
         }
 
         commonTest.dependencies {
@@ -49,9 +55,12 @@ kotlin {
         }
 
         androidMain.dependencies {
+            implementation(libs.stockholm.transport)
             implementation(compose.uiTooling)
             implementation(libs.androidx.activityCompose)
             implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.koin.android)
+            implementation(libs.koin.compose)
         }
 
     }
