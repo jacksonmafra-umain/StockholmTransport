@@ -36,6 +36,7 @@ dependencyResolutionManagement {
     }
 }
 
+include(":library")
 include(
     ":shared",
     ":shared:core",

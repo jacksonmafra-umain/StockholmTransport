@@ -7,9 +7,10 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
 internal fun Project.configureKotlinMultiplatform(extension: KotlinMultiplatformExtension) =
     extension.apply {
-        jvmToolchain(17)
+        jvmToolchain((project.findProperty("jvmToolchainVersion") as? String)?.toInt() ?: 17)
 
         androidTarget {
+            publishLibraryVariants("release")
             compilerOptions {
                 jvmTarget.set(JvmTarget.JVM_17)
             }

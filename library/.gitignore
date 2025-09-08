@@ -1,0 +1,24 @@
+# Arquivos de Sistema
+.DS_Store
+*.swp
+*~
+
+# Arquivos gerados pelo Build
+/build
+/out
+/target
+*/build/*
+
+# Arquivos do IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+.kotlin
+# Arquivos do Gradle
+.gradle/
+gradle-app.setting
+gradle/wrapper/gradle-wrapper.properties
+
+# Arquivos locais
+local.properties

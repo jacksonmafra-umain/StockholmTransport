@@ -12,20 +12,18 @@ internal fun Project.configureKotlinAndroid(
         .drop(2)
         .joinToString(".")
     namespace = if (moduleName.isNotEmpty()) {
-        "com.umain.transport.$moduleName"
+        "${project.property("libDeveloperOrg")}.$moduleName"
     } else {
-        "com.umain.transport"
+        "${project.property("libDeveloperOrg")}"
     }
 
-    compileSdk = libs
-        .findVersion("android-compileSdk")
-        .get()
-        .requiredVersion
-        .toInt()
+
+    compileSdk = (project.property("android.compileSdk") as String).toInt()
 
     defaultConfig {
-        minSdk = 24
+        minSdk = (project.property("android.minSdk") as String).toInt()
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
