@@ -1,49 +1,81 @@
 import express from 'express';
+import kmp from 'StockholmTransport-stockholm-transport';
 
-/*
-import * as kmp from 'stockholm-transport';
-OR
-import kmp from 'stockholm-transport';
-// OR
-import { com, org } from 'stockholm-transport';
-*/
-import * as kmp from 'stockholm-transport';
-
-console.log(Object.keys(kmp));
-
-/*
 // --- 1. Initialize the KMP Library ---
-// The initKoin function is the entry point to our library's dependency injection.
-kmp.com.umain.transport.di.initKoin();
+// This function sets up the entire dependency graph.
+kmp.com.umain.transport.di.initKoinForJs();
 
-// Get the Koin instance. This is our service locator.
-const koin = kmp.org.koin.core.context.GlobalContext.INSTANCE.get();
+// --- 2. Get a handle to our public JS API ---
+const transportApi = kmp.com.umain.transport.js.StockholmTransportApi;
 
-// --- 2. Setup Express Server ---
+// --- 3. Setup Express Server ---
 const app = express();
 const port = 3000;
 
-// A simple data structure to represent our library's modules
 const modules = [
-    { id: 'lines', title: 'Transport Lines' },
-    { id: 'sites', title: 'Sites / Stations' },
-    { id: 'departures', title: 'Departures' },
-    { id: 'stoppoints', title: 'Stop Points' },
-    { id: 'authorities', title: 'Transport Authorities' },
+    { id: 'lines', title: 'Transport Lines', getViewModel: transportApi.getLinesViewModel },
+    { id: 'sites', title: 'Sites / Stations', getViewModel: transportApi.getSitesViewModel },
+    { id: 'departures', title: 'Departures', getViewModel: transportApi.getDeparturesViewModel },
+    { id: 'stoppoints', title: 'Stop Points', getViewModel: transportApi.getStopPointsViewModel },
+    { id: 'authorities', title: 'Transport Authorities', getViewModel: transportApi.getAuthoritiesViewModel },
 ];
 
-// --- 3. Define API Endpoints ---
-// Endpoint to list all available modules
+// --- 4. Define API Endpoints ---
+
 app.get('/modules', (req, res) => {
-    console.log('Request received for /modules');
-    res.json(modules);
+    // We only return the id and title, not the function.
+    res.json(modules.map(m => ({ id: m.id, title: m.title })));
 });
 
-// We will implement the other endpoints in the next step.
+app.get('/modules/:moduleId', async (req, res) => {
+    const { moduleId } = req.params;
+    const moduleInfo = modules.find(m => m.id === moduleId);
 
+    if (!moduleInfo) {
+        return res.status(404).json({ error: 'Module not found' });
+    }
+
+    try {
+        // Get a fresh ViewModel instance using our JS API function
+        const viewModel = moduleInfo.getViewModel();
+
+        const result = await new Promise(resolve => {
+            viewModel.subscribe(state => {
+                if (!state.isLoading) {
+                    resolve(state);
+                }
+            });
+
+            // A generic way to call the 'load' function
+            const loadFunctionName = `load${moduleId.charAt(0).toUpperCase() + moduleId.slice(1)}`;
+            if (viewModel[loadFunctionName]) {
+                // Special case for departures which needs an ID
+                if (moduleId === 'departures') {
+                    viewModel[loadFunctionName](9192); // Demo siteId
+                } else {
+                    viewModel[loadFunctionName]();
+                }
+            } else {
+                // This case should not happen if ViewModels are consistent
+                resolve({ error: `Load function ${loadFunctionName} not found on ViewModel.` });
+            }
+        });
+
+        // Clean up the ViewModel's coroutine scope
+        viewModel.onCleared();
+
+        if (result.error) {
+            res.status(500).json({ error: result.error });
+        } else {
+            res.json(result);
+        }
+    } catch (e) {
+        console.error(`Error processing module ${moduleId}:`, e);
+        res.status(500).json({ error: 'An internal server error occurred' });
+    }
+});
+
+// --- 5. Start the Server ---
 app.listen(port, () => {
     console.log(`Demo API server listening on http://localhost:${port}`);
-    console.log('Available endpoints:');
-    console.log(`  GET /modules`);
 });
- */

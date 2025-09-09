@@ -2,11 +2,11 @@
 
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-
 
 val libDeveloperOrg: String by project
 val libMavenPublish: String by project
@@ -28,7 +28,7 @@ plugins {
 }
 
 group = libDeveloperOrg
-version = libBaseVersion
+version = property("libBaseVersion") as String
 base.archivesName.set(libMavenPublish)
 
 /*
@@ -49,6 +49,12 @@ rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlu
     rootProject.the<YarnRootExtension>().reportNewYarnLock = false
     rootProject.the<YarnRootExtension>().yarnLockAutoReplace = false
 }
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
 kotlin {
     jvmToolchain(jvmToolchainVersion.toInt())
 
@@ -57,44 +63,13 @@ kotlin {
     }
     jvm()
     js(IR) {
-        version = libBaseVersion
-        compilations["main"].packageJson {
-            name = "$libMavenPublish"
-            version = libBaseVersion
-            main = "$libMavenPublish.js"
-            customField("repository", mapOf("type" to "git", "url" to libSiteUrl))
-            customField("author", "$developerName <$developerEmail>")
-            val now = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-            customField("buildTimestamp", now)
-        }
+        browser()
+        nodejs()
+    }
 
+    js(IR) {
+        nodejs()
         binaries.executable()
-        nodejs {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexpect-actual-classes")
-            }
-
-            distribution {
-                outputDirectory.set(buildDir.resolve("output"))
-            }
-        }
-
-        browser {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexpect-actual-classes")
-            }
-            distribution {
-                outputDirectory.set(buildDir.resolve("output"))
-            }
-            commonWebpackConfig {
-                cssSupport {
-                    enabled = true
-                }
-                outputFileName = "$libMavenPublish.browser.js"
-                sourceMaps = false
-            }
-        }
-        generateTypeScriptDefinitions()
     }
     iosX64()
     iosArm64()
@@ -113,6 +88,12 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings.apply {
+                optIn("kotlin.js.ExperimentalJsExport")
+            }
+        }
+
         val commonMain by getting {
             kotlin.srcDirs(
                 "core/src/commonMain/kotlin",
@@ -230,3 +211,108 @@ publishing {
         }
     }
 }
+
+tasks.named("jsDevelopmentExecutableCompileSync") {
+    dependsOn("jsNodeProductionRun")
+    mustRunAfter("jsNodeProductionRun")
+}
+
+tasks.withType<KotlinWebpack>().configureEach {
+    // We configure only the tasks related to the nodejs target
+    if (name.startsWith("js") && name.endsWith("Webpack") && !name.contains("Browser")) {
+        mainOutputFileName = "$libMavenPublish.js"
+        output.libraryTarget = "commonjs2"
+        outputDirectory =
+            layout.buildDirectory
+                .dir("js/packages/$libMavenPublish")
+                .get()
+                .asFile
+
+        // Explicitly declare the dependency to fix validation errors
+        val syncTaskName =
+            if (name.contains("Production")) {
+                "jsProductionLibraryCompileSync"
+            } else {
+                "jsDevelopmentLibraryCompileSync"
+            }
+        dependsOn(tasks.named(syncTaskName))
+    }
+}
+
+tasks.register("printJsPackageDirs") {
+    doLast {
+        println("--- JS Package Information ---")
+        val nodePackageDir =
+            layout.buildDirectory
+                .dir("js/packages/$libMavenPublish")
+                .get()
+                .asFile
+        println("Node.js package directory: $nodePackageDir")
+        println("Does it exist? ${nodePackageDir.exists()}")
+        if (nodePackageDir.exists()) {
+            println("Contents:")
+            nodePackageDir.listFiles()?.forEach { println("  - ${it.name}") }
+        }
+
+        val browserDistDir =
+            layout.buildDirectory
+                .dir("dist/js/productionExecutable")
+                .get()
+                .asFile
+        println("\nBrowser distribution directory: $browserDistDir")
+        println("Does it exist? ${browserDistDir.exists()}")
+        if (browserDistDir.exists()) {
+            println("Contents:")
+            browserDistDir.listFiles()?.forEach { println("  - ${it.name}") }
+        }
+        println("--------------------------")
+    }
+}
+
+rootProject.layout.buildDirectory.dir("../build")
+subprojects {
+    project.layout.buildDirectory.dir("$rootProject.layout.buildDirectory/$project.name")
+}
+
+tasks.named("build") {
+    finalizedBy("printJsPackageDirs")
+}
+
+tasks.named<Delete>("clean") {
+    delete(
+        rootProject.layout.buildDirectory
+            .get()
+            .asFile,
+        file("build"),
+        file("shared/build"),
+        file("output"),
+    )
+}
+
+tasks.register<Delete>("cleanAll") {
+    delete(
+        rootProject.layout.buildDirectory
+            .get()
+            .asFile,
+        file("build"),
+        file("shared/build"),
+        file("output"),
+    )
+}
+
+object DynamicVersion {
+    fun setDynamicVersion(
+        file: File,
+        version: String,
+    ) {
+        val cleanedVersion = version.split('+')[0]
+        file.writeText(cleanedVersion)
+    }
+}
+
+tasks.register("versionFile") {
+    val file = File(projectDir, "version.txt")
+
+    DynamicVersion.setDynamicVersion(file, project.version.toString())
+}
+
