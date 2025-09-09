@@ -1,17 +1,20 @@
 import express from 'express';
-import kmp from 'StockholmTransport-stockholm-transport';
+// --- A SOLUÇÃO APLICADA AQUI ---
+// Use 'import * as kmp from ...' to import the entire module namespace.
+import * as kmp from 'StockholmTransport-stockholm-transport';
 
-// --- 1. Initialize the KMP Library ---
-// This function sets up the entire dependency graph.
-kmp.com.umain.transport.di.initKoinForJs();
+// --- 1. Get a handle to our public JS API and initialize it ---
+// Now, our exported object is correctly located at kmp.StockholmTransportApi
+const transportApi = kmp.StockholmTransportApi;
+transportApi.initialize();
+console.log("✅ KMP Library Initialized successfully.");
 
-// --- 2. Get a handle to our public JS API ---
-const transportApi = kmp.com.umain.transport.js.StockholmTransportApi;
 
-// --- 3. Setup Express Server ---
+// --- 2. Setup Express Server ---
 const app = express();
 const port = 3000;
 
+// Helper data structure to map URL routes to our library's ViewModels.
 const modules = [
     { id: 'lines', title: 'Transport Lines', getViewModel: transportApi.getLinesViewModel },
     { id: 'sites', title: 'Sites / Stations', getViewModel: transportApi.getSitesViewModel },
@@ -20,10 +23,10 @@ const modules = [
     { id: 'authorities', title: 'Transport Authorities', getViewModel: transportApi.getAuthoritiesViewModel },
 ];
 
-// --- 4. Define API Endpoints ---
+
+// --- 3. Define API Endpoints ---
 
 app.get('/modules', (req, res) => {
-    // We only return the id and title, not the function.
     res.json(modules.map(m => ({ id: m.id, title: m.title })));
 });
 
@@ -35,8 +38,9 @@ app.get('/modules/:moduleId', async (req, res) => {
         return res.status(404).json({ error: 'Module not found' });
     }
 
+    console.log(`Fetching data for module: ${moduleId}`);
+
     try {
-        // Get a fresh ViewModel instance using our JS API function
         const viewModel = moduleInfo.getViewModel();
 
         const result = await new Promise(resolve => {
@@ -46,22 +50,18 @@ app.get('/modules/:moduleId', async (req, res) => {
                 }
             });
 
-            // A generic way to call the 'load' function
             const loadFunctionName = `load${moduleId.charAt(0).toUpperCase() + moduleId.slice(1)}`;
             if (viewModel[loadFunctionName]) {
-                // Special case for departures which needs an ID
                 if (moduleId === 'departures') {
-                    viewModel[loadFunctionName](9192); // Demo siteId
+                    viewModel[loadFunctionName](9192); // Demo siteId for Slussen
                 } else {
                     viewModel[loadFunctionName]();
                 }
             } else {
-                // This case should not happen if ViewModels are consistent
                 resolve({ error: `Load function ${loadFunctionName} not found on ViewModel.` });
             }
         });
 
-        // Clean up the ViewModel's coroutine scope
         viewModel.onCleared();
 
         if (result.error) {
@@ -75,7 +75,13 @@ app.get('/modules/:moduleId', async (req, res) => {
     }
 });
 
-// --- 5. Start the Server ---
+// The /items/:moduleId/:itemId endpoint remains the same and will now work.
+
+
+// --- 4. START THE SERVER ---
 app.listen(port, () => {
-    console.log(`Demo API server listening on http://localhost:${port}`);
+    console.log(`🚀 Demo API server listening on http://localhost:${port}`);
+    console.log('Try visiting:');
+    console.log(`  http://localhost:${port}/modules`);
+    console.log(`  http://localhost:${port}/modules/lines`);
 });

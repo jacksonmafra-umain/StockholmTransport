@@ -6,19 +6,14 @@ import com.umain.transport.departures.di.departuresModule
 import com.umain.transport.lines.di.linesModule
 import com.umain.transport.sites.di.sitesModule
 import com.umain.transport.stoppoints.di.stopPointsModule
+import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
-import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
 
-/**
- * Internal entry point for Kotlin consumers (like composeApp).
- * It allows passing extra configurations.
- * It is NOT exported to JS.
- */
-fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
-    startKoin {
+fun initKoin(appDeclaration: KoinAppDeclaration = {}): KoinApplication {
+    return startKoin {
         appDeclaration()
         modules(
             coreModule,
@@ -31,13 +26,8 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
     }
 }
 
-/**
- * Public, parameter-less entry point for JavaScript consumers.
- * It is exported to JS with a clean signature.
- */
-@OptIn(ExperimentalJsExport::class)
 @JsExport
 @JsName("initKoin")
 fun initKoinForJs() {
-    initKoin() // Calls the internal function with default parameters
+    initKoin()
 }
