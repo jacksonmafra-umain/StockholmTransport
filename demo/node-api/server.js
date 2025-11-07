@@ -1,5 +1,4 @@
 import express from 'express';
-// --- A SOLUÇÃO APLICADA AQUI ---
 // Use 'import * as kmp from ...' to import the entire module namespace.
 import * as kmp from 'StockholmTransport-stockholm-transport';
 
@@ -25,7 +24,6 @@ const modules = [
 
 
 // --- 3. Define API Endpoints ---
-
 app.get('/modules', (req, res) => {
     res.json(modules.map(m => ({ id: m.id, title: m.title })));
 });
@@ -74,9 +72,6 @@ app.get('/modules/:moduleId', async (req, res) => {
         res.status(500).json({ error: 'An internal server error occurred' });
     }
 });
-
-// The /items/:moduleId/:itemId endpoint remains the same and will now work.
-
 
 // --- 4. START THE SERVER ---
 app.listen(port, () => {
