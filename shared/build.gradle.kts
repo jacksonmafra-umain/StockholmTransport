@@ -62,15 +62,14 @@ kotlin {
         publishLibraryVariants("release")
     }
     jvm()
-    js(IR) {
-        browser()
-        nodejs()
-    }
 
     js(IR) {
-        nodejs()
+        browser()
+        useEsModules()
+        generateTypeScriptDefinitions()
         binaries.executable()
     }
+    
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -160,6 +159,9 @@ kotlin {
             kotlin.srcDirs("core/src/jsMain/kotlin")
             compilerOptions {
                 freeCompilerArgs.add("-Xexpect-actual-classes")
+                freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+                freeCompilerArgs.add("-opt-in=kotlin.js.ExperimentalJsExport")
+                freeCompilerArgs.add("-Xes-long-as-bigint")
             }
             dependencies {
                 implementation(libs.ktor.client.js)
