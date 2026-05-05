@@ -4,7 +4,6 @@ import com.umain.transport.core.data.DataResult
 import com.umain.transport.core.data.NetworkError
 import com.umain.transport.core.presentation.BaseViewModel
 import com.umain.transport.lines.domain.model.Line
-import com.umain.transport.lines.domain.model.TransportMode
 import com.umain.transport.lines.domain.repository.LinesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +16,12 @@ import kotlin.js.JsExport
 @JsExport
 data class LinesUiState(
     val isLoading: Boolean = false,
-    val linesByMode: Map<TransportMode, List<Line>> = emptyMap(),
+    // Flat list, not Map<TransportMode, List<Line>>. Kotlin/JS Maps and
+    // enums leak their internal field names when JSON.stringify'd
+    // (h5_1 / z_1 / a1_1 / …). A List<Line> with `transportMode: String`
+    // crosses the JS boundary cleanly. Consumers regroup as needed:
+    //   uiState.lines.groupBy { it.transportMode }
+    val lines: List<Line> = emptyList(),
     val error: String? = null,
 )
 
@@ -40,8 +44,9 @@ class LinesViewModel
             viewModelScope.launch {
                 when (val result = linesRepository.getAllLines()) {
                     is DataResult.Success -> {
+                        val flat = result.data.values.flatten()
                         _uiState.update {
-                            it.copy(isLoading = false, linesByMode = result.data)
+                            it.copy(isLoading = false, lines = flat)
                         }
                     }
                     is DataResult.Error -> {

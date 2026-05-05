@@ -9,7 +9,10 @@ data class Line(
     val id: Int,
     val name: String,
     val designation: String,
-    val transportMode: TransportMode,
+    // String, not TransportMode, so JS consumers see "METRO" instead of
+    // Kotlin's internal enum representation (`{z_1: "METRO", a1_1: 0}`)
+    // when the state is serialized via JSON.stringify.
+    val transportMode: String,
     val authority: String,
 )
 
