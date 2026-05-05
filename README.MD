@@ -21,6 +21,42 @@ The library is highly modularized to promote reuse and separation of concerns.
 -   `shared/core`: Contains cross-cutting code, such as the network client (Ktor) setup, dependency injection (Koin) definitions, and the multiplatform logger.
 -   `shared/{feature}`: Each main API entity (e.g., `lines`, `sites`, `departures`) has its own module. Each of these modules follows the Clean Architecture structure internally.
 
+## Dev workflow with `sl` (the project CLI)
+
+Running the four front doors (Android, iOS, JVM, Web) from a single backend is the talk-day workflow. The repo ships an interactive CLI at [`tools/sl-cli/`](tools/sl-cli/) that orchestrates the whole loop:
+
+```bash
+# one-time setup
+cd tools/sl-cli && npm install
+export NGROK_AUTHTOKEN=<your-token>      # https://dashboard.ngrok.com
+
+# from the repo root, REPL mode
+./tools/sl-cli/bin/sl.js
+▶ sl › start                              # boots Node API (nodemon) + ngrok, writes URL to gradle.properties
+▶ sl › publish                            # rebuilds library: mavenLocal + JS bundle + iOS XCFramework
+▶ sl › status                             # prints running services + current API URL
+▶ sl › stop                               # stops services, restores gradle.properties
+▶ sl › exit
+```
+
+Or as one-shot subcommands:
+
+```bash
+./tools/sl-cli/bin/sl.js start            # leaves services running; Ctrl+C to stop and restore
+./tools/sl-cli/bin/sl.js publish --no-ios # skip the iOS XCFramework (faster)
+./tools/sl-cli/bin/sl.js status
+```
+
+What `start` does, in order:
+1. Spawns `nodemon` against [`demo/node-api/server.js`](demo/node-api/server.js).
+2. Opens an ngrok tunnel to `:3000` via the [@ngrok/ngrok](https://www.npmjs.com/package/@ngrok/ngrok) SDK.
+3. Backs up [`gradle.properties`](gradle.properties) → `gradle.properties.sl-cli.bak`.
+4. Rewrites `serverHostURL="${ngrokUrl}/v1"` so any subsequent `publishToMavenLocal` bakes the public URL into `BuildConfig.API_BASE_URL`.
+
+The Node API at `:3000` exposes two surfaces: the original `/modules` ViewModel routes (used by [Slide 08 – DEMO Node](docs/SLIDES_PRESENTER_NOTES.md)), and a passthrough proxy at `/v1/*` that forwards onto `https://transport.integration.sl.se/v1/*`. The proxy is what the rebuilt mobile and web apps consume — they think they're talking to SL, they're actually talking to your laptop.
+
+`stop` (or `Ctrl+C` / EOF) closes the tunnel, kills nodemon, and restores `gradle.properties` from the backup.
+
 ## How to Build and Run the Demo App
 
 The project includes a demo application (`demo/compose-app`) that consumes the library and runs on both Android and iOS.
@@ -30,6 +66,10 @@ The project includes a demo application (`demo/compose-app`) that consumes the l
 1.  **Publish the library locally:** Before you can run the demo app, you must first publish the library to your local Maven repository. From the root directory of the `StockholmTransport` project, run:
     ```bash
     ./gradlew :stockholm-transport:publishToMavenLocal
+    ```
+    Or, equivalently — and with the JS bundle + iOS XCFramework rebuilt in the same pass:
+    ```bash
+    ./tools/sl-cli/bin/sl.js publish
     ```
 
 ### Android
@@ -44,6 +84,10 @@ The project includes a demo application (`demo/compose-app`) that consumes the l
 1.  Open the `demo/compose-app` directory in Android Studio and sync Gradle.
 2.  Open the Xcode project at `demo/compose-app/iosApp/iosApp.xcworkspace`.
 3.  Select an iOS simulator and click 'Run' (▶️) in Xcode. The project is already configured to find and embed the KMP shared framework.
+
+### Node demo (standalone)
+
+`demo/node-api` runs on its own with `npm run dev` (nodemon) or `npm start` (plain `node`). When the sl-cli's `start` is active, the Node demo is automatically the upstream behind the ngrok URL.
 
 ## How to Use the Library
 

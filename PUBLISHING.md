@@ -116,6 +116,17 @@ githubToken=your_github_personal_access_token
 
 This is the recommended workflow for day-to-day development and testing the library from a consumer app.
 
+### 3.0 One-shot publish via the project CLI (recommended)
+
+`./tools/sl-cli/bin/sl.js publish` runs the three publish steps below in sequence and refreshes the Node demo's `file:` dependency at the end:
+
+```bash
+./tools/sl-cli/bin/sl.js publish           # full chain (Android/JVM/JS + iOS XCFramework)
+./tools/sl-cli/bin/sl.js publish --no-ios  # skip the Apple build for faster iteration
+```
+
+The remainder of section 3 documents the underlying Gradle tasks the CLI calls.
+
 ### Android/JVM/JS (to Maven Local)
 
 This publishes a single, unified artifact to your local Maven repository (`~/.m2/repository`).
