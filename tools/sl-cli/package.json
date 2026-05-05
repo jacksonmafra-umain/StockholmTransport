@@ -1,0 +1,20 @@
+{
+  "name": "sl-cli",
+  "version": "0.1.0",
+  "description": "Interactive CLI for the Stockholm Transport KMP library — boot Node API behind ngrok, publish library packages, drive the talk demo.",
+  "type": "module",
+  "bin": {
+    "sl": "bin/sl.js"
+  },
+  "main": "bin/sl.js",
+  "scripts": {
+    "start": "node bin/sl.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@ngrok/ngrok": "^1.4.1",
+    "kleur": "^4.1.5"
+  }
+}
