@@ -21,7 +21,7 @@ val developerEmail: String by project
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.github.gmazzo.buildconfig")
     id("maven-publish")
@@ -59,8 +59,11 @@ java {
 kotlin {
     jvmToolchain(jvmToolchainVersion.toInt())
 
-    androidTarget {
-        publishLibraryVariants("release")
+    android {
+        namespace = libDeveloperOrg
+        compileSdk = (project.property("android.compileSdk") as String).toInt()
+        minSdk = (project.property("android.minSdk") as String).toInt()
+        withHostTestBuilder {}
     }
     jvm()
 
@@ -169,14 +172,6 @@ kotlin {
                 implementation(libs.ktor.client.js)
             }
         }
-    }
-}
-
-android {
-    namespace = libDeveloperOrg
-    compileSdk = (project.property("android.compileSdk") as String).toInt()
-    defaultConfig {
-        minSdk = (project.property("android.minSdk") as String).toInt()
     }
 }
 

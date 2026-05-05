@@ -1,34 +1,34 @@
 [versions]
 # Toolchain
-kotlin = "2.3.20"
-agp = "9.1.0-alpha08"
+kotlin = "2.3.21"
+agp = "9.1.1"
 android-compileSdk = "36"
 jdk = "21"
 
 # KMP libs
 kotlinx-coroutines = "1.10.2"
-ktor = "3.2.3"
+ktor = "3.4.3"
 kotlinx-serialization = "1.11.0"
 kotlinx-datetime = "0.7.1"
-kermit = "2.0.8"
+kermit = "2.1.0"
 
 # Koin
 # 1.0.0-RC1 is a Kotlin compiler plugin (not KSP). Applied via the
 # io.insert-koin.compiler.plugin Gradle plugin. Enables @Single / @Factory /
 # @Module with compile-time safety alongside the legacy module { } DSL.
 koin = "4.2.1"
-koin-compose = "1.1.5"
-koin-compiler = "1.0.0-RC1"
+koin-compose = "4.2.1"
+koin-compiler = "1.0.0-RC2"
 
 # Compose Multiplatform (used by the demo, not the library)
-compose = "1.8.2"
+compose = "1.10.3"
 androidx-activityCompose = "1.13.0"
 androidx-uiTest = "1.6.7"
 
 # Build Logic Plugins
-buildconfig = "5.6.7"
-maven-publish = "0.34.0"
-npm-publish = "4.1.1"
+buildconfig = "6.0.9"
+maven-publish = "0.36.0"
+npm-publish = "4.1.11"
 
 [libraries]
 # Coroutines
@@ -73,6 +73,10 @@ gradle-buildconfig = { module = "com.github.gmazzo:buildconfig-gradle-plugin", v
 multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+# AGP 9 KMP-aware Android library plugin. Replaces com.android.library
+# inside Kotlin Multiplatform modules.
+# https://developer.android.com/kotlin/multiplatform/plugin
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 # Compose
