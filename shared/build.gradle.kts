@@ -25,6 +25,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.github.gmazzo.buildconfig")
     id("maven-publish")
+    id("io.insert-koin.compiler.plugin")
 }
 
 group = libDeveloperOrg
@@ -105,6 +106,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
                 api(libs.koin.core)
+                api(libs.koin.annotations)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
