@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "express": "5.0.0",
-    "stockholm-transport": "file:../../build/js/packages/stockholm-transport"
+    "StockholmTransport-stockholm-transport": "file:../../build/js/packages/StockholmTransport-stockholm-transport"
   }
 }
