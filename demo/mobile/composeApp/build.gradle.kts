@@ -7,9 +7,12 @@ plugins {
     alias(libs.plugins.compose)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.koin.compiler)
 }
 
 kotlin {
+    jvmToolchain(libs.versions.jdk.get().toInt())
+
     androidTarget {
         //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
         instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
@@ -42,9 +45,9 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.stockholm.transport)
             implementation(libs.koin.core)
+            implementation(libs.koin.annotations)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
-
         }
 
         commonTest.dependencies {
@@ -68,11 +71,11 @@ kotlin {
 
 android {
     namespace = "com.umain.transport.app"
-    compileSdk = 35
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = 24
-        targetSdk = 35
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
 
         applicationId = "com.umain.transport.app.androidApp"
         versionCode = 1
