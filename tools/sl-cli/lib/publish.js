@@ -2,10 +2,14 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { c, info, ok, fail, prefixStream } from './ui.js';
 
+// `assembleXCFramework` became ambiguous in Gradle 9 + AGP 9 after the
+// XCFramework was renamed to "StockholmTransport" — Gradle now sees it
+// alongside the legacy auto-derived task name. Use the fully qualified
+// `assembleStockholmTransportXCFramework` to disambiguate.
 const GRADLE_TASKS = [
     [':stockholm-transport:publishToMavenLocal', 'Publishing library to mavenLocal (Android / JVM / iOS klibs)'],
     [':stockholm-transport:jsBrowserDistribution', 'Building JS bundle (browser + Node consumers)'],
-    [':stockholm-transport:assembleXCFramework', 'Assembling iOS XCFramework (Swift consumers via SPM)'],
+    [':stockholm-transport:assembleStockholmTransportXCFramework', 'Assembling iOS XCFramework (Swift consumers via SPM)'],
 ];
 
 export async function publishAll(repoRoot, { skipIos = false } = {}) {

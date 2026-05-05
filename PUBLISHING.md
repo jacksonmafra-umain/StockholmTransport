@@ -202,7 +202,7 @@ Releasing a new SPM-consumable version is three Gradle/git steps:
 
 1.  **Assemble the universal XCFramework:**
     ```bash
-    ./gradlew :stockholm-transport:assembleXCFramework
+    ./gradlew :stockholm-transport:assembleStockholmTransportXCFramework
     ```
     Output: `shared/build/XCFrameworks/release/StockholmTransport.xcframework`.
 
