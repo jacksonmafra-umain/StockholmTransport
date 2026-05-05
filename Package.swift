@@ -20,7 +20,7 @@ import PackageDescription
 
 let libraryVersion = "1.0.0"
 let libraryChecksum = "0000000000000000000000000000000000000000000000000000000000000000"
-let libraryURL = "https://github.com/eidra-umain/stockholm-transport/releases/download/\(libraryVersion)/stockholm-transport.xcframework.zip"
+let libraryURL = "https://github.com/eidra-umain/stockholm-transport/releases/download/\(libraryVersion)/StockholmTransport.xcframework.zip"
 
 let package = Package(
     name: "StockholmTransport",

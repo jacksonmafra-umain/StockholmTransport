@@ -191,15 +191,15 @@ Releasing a new SPM-consumable version is three Gradle/git steps:
 
 1.  **Assemble the universal XCFramework:**
     ```bash
-    ./gradlew :stockholm-transport:assembleStockholmTransportXCFramework
+    ./gradlew :stockholm-transport:assembleXCFramework
     ```
-    Output: `shared/build/XCFrameworks/release/stockholm-transport.xcframework`.
+    Output: `shared/build/XCFrameworks/release/StockholmTransport.xcframework`.
 
 2.  **Zip and upload to GitHub Releases:**
     ```bash
     cd shared/build/XCFrameworks/release
-    zip -r stockholm-transport.xcframework.zip stockholm-transport.xcframework
-    swift package compute-checksum stockholm-transport.xcframework.zip
+    zip -r StockholmTransport.xcframework.zip StockholmTransport.xcframework
+    swift package compute-checksum StockholmTransport.xcframework.zip
     ```
     Create the release on GitHub, attach the `.zip`, copy the checksum.
 
