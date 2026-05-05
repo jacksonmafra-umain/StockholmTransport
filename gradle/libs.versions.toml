@@ -1,22 +1,28 @@
 [versions]
-# Project
-kotlin = "2.2.10"
-agp = "8.10.1"
-android-compileSdk = "34"
-jdk = "17"
+# Toolchain
+kotlin = "2.3.20"
+agp = "9.1.0-alpha08"
+android-compileSdk = "36"
+jdk = "21"
 
-# KMP Libs
+# KMP libs
 kotlinx-coroutines = "1.10.2"
 ktor = "3.2.3"
-kotlinx-serialization = "1.9.0"
+kotlinx-serialization = "1.11.0"
 kotlinx-datetime = "0.7.1"
-koin = "4.1.1"
-koin-compose = "1.1.5"
 kermit = "2.0.8"
 
-# Compose Multiplatform
+# Koin
+# 1.0.0-RC1 is a Kotlin compiler plugin (not KSP). Applied via the
+# io.insert-koin.compiler.plugin Gradle plugin. Enables @Single / @Factory /
+# @Module with compile-time safety alongside the legacy module { } DSL.
+koin = "4.2.1"
+koin-compose = "1.1.5"
+koin-compiler = "1.0.0-RC1"
+
+# Compose Multiplatform (used by the demo, not the library)
 compose = "1.8.2"
-androidx-activityCompose = "1.10.1"
+androidx-activityCompose = "1.13.0"
 androidx-uiTest = "1.6.7"
 
 # Build Logic Plugins
@@ -46,11 +52,12 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 # Datetime
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
-# Koin (Dependency Injection)
+# Koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin-compose" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
 
 # Logging
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
@@ -71,6 +78,10 @@ kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", vers
 # Compose
 compose-jetbrains = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+# Koin compiler plugin (Kotlin compiler plugin, NOT KSP). Provides
+# compile-time DI verification for @Single / @Factory / @Module.
+koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-compiler" }
 
 # Build Tools
 buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
