@@ -78,7 +78,12 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
-    val xcframeworkName = libMavenPublish
+    // Swift convention is UpperCamelCase for module names, so the iOS
+    // XCFramework ships as "StockholmTransport" — matches the product
+    // declared in the repo-root Package.swift. The Maven artifactId
+    // (libMavenPublish = "stockholm-transport") stays in kebab case for
+    // Maven/Gradle convention.
+    val xcframeworkName = "StockholmTransport"
     val xcf = XCFramework(xcframeworkName)
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
         if (konanTarget.family.isAppleFamily) {
@@ -166,7 +171,11 @@ kotlin {
                 freeCompilerArgs.add("-Xexpect-actual-classes")
                 freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
                 freeCompilerArgs.add("-opt-in=kotlin.js.ExperimentalJsExport")
-                freeCompilerArgs.add("-Xes-long-as-bigint")
+                // -Xes-long-as-bigint was Kotlin 2.2's flag for mapping
+                // Kotlin Long -> JS BigInt; Kotlin 2.3 dropped it (the
+                // mapping is the default), so keeping it would emit
+                // "Flag is not supported by this version of the compiler"
+                // on every native link.
             }
             dependencies {
                 implementation(libs.ktor.client.js)
