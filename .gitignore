@@ -23,3 +23,13 @@ gradle/wrapper/gradle-wrapper.properties
 
 # Arquivos locais
 local.properties
+
+# sl-cli rewrites gradle.properties at runtime; this is its restore point
+gradle.properties.sl-cli.bak
+
+# sl-cli node deps
+tools/sl-cli/node_modules/
+tools/sl-cli/package-lock.json
+
+# demo/node-api locally installed deps
+demo/node-api/node_modules/
