@@ -134,26 +134,18 @@ This publishes a single, unified artifact to your local Maven repository (`~/.m2
 
 ### iOS (Local Framework Integration)
 
-This method directly links your KMP shared module to your Xcode project for a fast development loop.
+For day-to-day development against an Xcode project, the modern direct-integration pattern is the recommended approach — no manual `xcframework` drag, no CocoaPods. The Kotlin Gradle plugin's `embedAndSignAppleFrameworkForXcode` task injects the framework at build time via a single pre-build script.
 
-1.  **Link the Framework to the Xcode Project:**
-    - Run a Gradle build once to generate the initial framework: `./gradlew :stockholm-transport:assembleStockholmTransportXCFramework`
-    - Open your `demo/compose-app/iosApp/iosApp.xcworkspace` in Xcode.
-    - Drag the generated `StockholmTransport.xcframework` from `shared/build/XCFrameworks/release/` into the "Frameworks, Libraries, and Embedded Content" section under your `iosApp` target's "General" tab.
-    - When prompted, ensure "Copy items if needed" is **unchecked**. Set the framework's "Embed" status to **"Do Not Embed"**.
+In Xcode (Product → Scheme → Edit Scheme… → Build → Pre-actions → New Run Script Action), add **as the first build step**:
 
-2.  **Add the Pre-build Script Action:**
-    - In Xcode, go to **Product → Scheme → Edit Scheme...**.
-    - Select the **Build** section and add a **New Run Script Action**.
-    - Drag the script to be the very first build step.
-    - Paste the following script:
-      ```bash
-      cd "$SRCROOT/../../" # Navigates to the root of the main project
-      ./gradlew :stockholm-transport:embedAndSignAppleFrameworkForXcode
-      ```
-    - In the **Provide build settings from** dropdown, select your main app target (`iosApp`).
+```bash
+cd "$SRCROOT/../../"   # Repo root
+./gradlew :stockholm-transport:embedAndSignAppleFrameworkForXcode
+```
 
-Now, building in Xcode (▶️) automatically rebuilds and embeds the latest Kotlin code.
+In the **Provide build settings from** dropdown, select the iOS app target so `$CONFIGURATION`, `$ARCHS`, etc. are forwarded to Gradle.
+
+That is the entire setup. Building (▶️) in Xcode now rebuilds and embeds the latest Kotlin output every time. The `demo/mobile/iosApp/iosApp.xcodeproj` in this repo is already wired this way — open it as a reference.
 
 ## 4. Publishing to Remote Registries
 
@@ -185,41 +177,36 @@ The `package.json` metadata is configured in `shared/build.gradle.kts`.
 
 ### 4.3. iOS (via Swift Package Manager)
 
-This approach uses a binary `.xcframework` hosted on GitHub Releases.
+SPM is the **canonical iOS distribution path** for this library. CocoaPods is not supported and is not on the roadmap.
 
-1.  **Assemble the Universal XCFramework:**
+A `Package.swift` lives at the **root of this repository** ([Package.swift](Package.swift)) — there is no separate shim repo to maintain. Consumers just add the package URL in Xcode (`File → Add Package Dependencies…`):
+
+```
+https://github.com/eidra-umain/stockholm-transport
+```
+
+…and select the version they need. The manifest declares a `binaryTarget` that points to the matching `stockholm-transport.xcframework.zip` on GitHub Releases.
+
+Releasing a new SPM-consumable version is three Gradle/git steps:
+
+1.  **Assemble the universal XCFramework:**
     ```bash
     ./gradlew :stockholm-transport:assembleStockholmTransportXCFramework
     ```
+    Output: `shared/build/XCFrameworks/release/stockholm-transport.xcframework`.
 
-2.  **Host the Framework:**
-    - Compress the generated `StockholmTransport.xcframework` into a `.zip` file.
-    - Create a new release on your project's GitHub page and upload the `.zip` file as a binary asset.
-    - Calculate the zip's checksum: `swift package compute-checksum StockholmTransport.xcframework.zip`.
-
-3.  **Create the `Package.swift` Manifest:**
-    In a separate Git repository (e.g., `stockholm-transport-spm`), create a `Package.swift` file:
-
-    ```swift
-    // swift-tools-version:5.3
-    import PackageDescription
-
-    let version = "1.0.0" // Must match your GitHub release tag
-    let checksum = "PASTE_YOUR_CHECKSUM_HERE"
-    let url = "https://github.com/eidra-umain/stockholm-transport/releases/download/\(version)/StockholmTransport.xcframework.zip"
-
-    let package = Package(
-        name: "StockholmTransport",
-        platforms: [.iOS(.v14)],
-        products: [
-            .library(name: "StockholmTransport", targets: ["StockholmTransport"])
-        ],
-        targets: [
-            .binaryTarget(name: "StockholmTransport", url: url, checksum: checksum)
-        ]
-    )
+2.  **Zip and upload to GitHub Releases:**
+    ```bash
+    cd shared/build/XCFrameworks/release
+    zip -r stockholm-transport.xcframework.zip stockholm-transport.xcframework
+    swift package compute-checksum stockholm-transport.xcframework.zip
     ```
-    Commit, tag with the version, and push. Developers can now add your library in Xcode using the URL of this manifest repository.
+    Create the release on GitHub, attach the `.zip`, copy the checksum.
+
+3.  **Update `Package.swift` and tag:**
+    Set `libraryVersion` and `libraryChecksum` in [Package.swift](Package.swift) to match the release. Commit and push the tag — Xcode will resolve the package from the tag.
+
+> Tip: this whole sequence belongs in a `release.yml` GitHub Action so tagging triggers the upload + manifest rewrite automatically. That workflow is not yet wired in this repo.
 
 ## 4. Publishing to GitHub Packages (Alternative)
 
