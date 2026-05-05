@@ -1,6 +1,6 @@
 import express from 'express';
 // Use 'import * as kmp from ...' to import the entire module namespace.
-import * as kmp from 'StockholmTransport-stockholm-transport';
+import * as kmp from 'stockholm-transport';
 
 // --- 1. Get a handle to our public JS API and initialize it ---
 // Now, our exported object is correctly located at kmp.StockholmTransportApi
