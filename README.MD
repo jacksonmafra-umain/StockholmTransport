@@ -26,12 +26,11 @@ The library is highly modularized to promote reuse and separation of concerns.
 Running the four front doors (Android, iOS, JVM, Web) from a single backend is the talk-day workflow. The repo ships an interactive CLI at [`tools/sl-cli/`](tools/sl-cli/) that orchestrates the whole loop:
 
 ```bash
-# one-time setup
-cd tools/sl-cli && npm install
-export NGROK_AUTHTOKEN=<your-token>      # https://dashboard.ngrok.com
+# one-time setup — run from anywhere
+export NGROK_AUTHTOKEN=<your-token>      # https://dashboard.ngrok.com (free tier works)
 
-# from the repo root, REPL mode
-./tools/sl-cli/bin/sl.js
+# REPL mode, from the repo root
+./sl
 ▶ sl › start                              # boots Node API (nodemon) + ngrok, writes URL to gradle.properties
 ▶ sl › publish                            # rebuilds library: mavenLocal + JS bundle + iOS XCFramework
 ▶ sl › status                             # prints running services + current API URL
@@ -42,9 +41,20 @@ export NGROK_AUTHTOKEN=<your-token>      # https://dashboard.ngrok.com
 Or as one-shot subcommands:
 
 ```bash
-./tools/sl-cli/bin/sl.js start            # leaves services running; Ctrl+C to stop and restore
-./tools/sl-cli/bin/sl.js publish --no-ios # skip the iOS XCFramework (faster)
-./tools/sl-cli/bin/sl.js status
+./sl start            # leaves services running; Ctrl+C to stop and restore
+./sl publish --no-ios # skip the iOS XCFramework (faster)
+./sl status
+```
+
+The `./sl` wrapper auto-runs `npm install` in `tools/sl-cli/` the first time it's invoked, so there's no separate setup step.
+
+For a real global `sl` command (the `gemini`/`claude` experience):
+
+```bash
+cd tools/sl-cli && npm link
+# now you can run `sl ...` from anywhere
+sl start
+sl publish
 ```
 
 What `start` does, in order:
@@ -69,7 +79,7 @@ The project includes a demo application (`demo/compose-app`) that consumes the l
     ```
     Or, equivalently — and with the JS bundle + iOS XCFramework rebuilt in the same pass:
     ```bash
-    ./tools/sl-cli/bin/sl.js publish
+    ./sl publish
     ```
 
 ### Android

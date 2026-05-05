@@ -118,11 +118,11 @@ This is the recommended workflow for day-to-day development and testing the libr
 
 ### 3.0 One-shot publish via the project CLI (recommended)
 
-`./tools/sl-cli/bin/sl.js publish` runs the three publish steps below in sequence and refreshes the Node demo's `file:` dependency at the end:
+`./sl publish` runs the three publish steps below in sequence and refreshes the Node demo's `file:` dependency at the end:
 
 ```bash
-./tools/sl-cli/bin/sl.js publish           # full chain (Android/JVM/JS + iOS XCFramework)
-./tools/sl-cli/bin/sl.js publish --no-ios  # skip the Apple build for faster iteration
+./sl publish           # full chain (Android/JVM/JS + iOS XCFramework)
+./sl publish --no-ios  # skip the Apple build for faster iteration
 ```
 
 The remainder of section 3 documents the underlying Gradle tasks the CLI calls.

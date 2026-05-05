@@ -10,31 +10,50 @@ Interactive REPL that orchestrates the four-platform demo loop:
 ## Setup
 
 ```bash
-cd tools/sl-cli
-npm install
 export NGROK_AUTHTOKEN=<your-token>     # free at https://dashboard.ngrok.com
 ```
 
-The CLI also requires a working Gradle wrapper at the repo root and `npm` on PATH.
+That's it. The repo-root `./sl` wrapper auto-installs `tools/sl-cli/`'s npm deps on first run, so there's no separate `npm install` step.
+
+The CLI requires a working Gradle wrapper at the repo root and `npm` on PATH.
 
 ## Use
+
+The recommended entrypoint is `./sl` at the repo root — it's a tiny shell wrapper that resolves the right path regardless of cwd:
 
 REPL:
 
 ```bash
-./tools/sl-cli/bin/sl.js
+./sl
 ▶ sl › help
 ```
 
 One-shot:
 
 ```bash
-./tools/sl-cli/bin/sl.js start            # services run until Ctrl+C
-./tools/sl-cli/bin/sl.js publish          # build + publish, then exit
-./tools/sl-cli/bin/sl.js publish --no-ios # skip the iOS XCFramework
-./tools/sl-cli/bin/sl.js status
-./tools/sl-cli/bin/sl.js stop             # restore gradle.properties from backup
+./sl start            # services run until Ctrl+C
+./sl publish          # build + publish, then exit
+./sl publish --no-ios # skip the iOS XCFramework
+./sl status
+./sl stop             # restore gradle.properties from backup
 ```
+
+If you're already inside `tools/sl-cli/`, `node bin/sl.js …` works too.
+
+## Install globally (the gemini / claude experience)
+
+If you want a real global `sl` command on PATH:
+
+```bash
+cd tools/sl-cli
+npm link              # symlinks the bin into your global npm prefix
+
+# from anywhere on the system
+sl start
+sl publish
+```
+
+`npm unlink -g sl-cli` undoes it.
 
 ## Commands
 
