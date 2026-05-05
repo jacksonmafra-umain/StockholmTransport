@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Services } from '../lib/services.js';
 import { publishAll } from '../lib/publish.js';
+import { resolveAndroidHome, resolveJavaHome } from '../lib/env.js';
 import { banner, c, dim, fail, info, ok, PROMPT, tag, warn } from '../lib/ui.js';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -73,6 +74,11 @@ async function cmdStatus() {
     info(`ngrok URL: ${s.ngrokUrl ? c.bold(s.ngrokUrl) : c.dim('not connected')}`);
     info(`gradle.properties serverHostURL: ${c.bold(s.gradleUrl ?? '(unset)')}`);
     if (s.hasBackup) warn('A backup of gradle.properties exists — run `stop` to restore.');
+
+    const android = resolveAndroidHome();
+    const java = resolveJavaHome();
+    info(`ANDROID_HOME: ${android ? c.green(android.value) + c.dim(`  (${android.source})`) : c.red('not found')}`);
+    info(`JAVA_HOME (21): ${java ? c.green(java.value) + c.dim(`  (${java.source})`) : c.red('not found')}`);
     return 0;
 }
 
