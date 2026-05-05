@@ -29,7 +29,7 @@ The project includes a demo application (`demo/compose-app`) that consumes the l
 
 1.  **Publish the library locally:** Before you can run the demo app, you must first publish the library to your local Maven repository. From the root directory of the `StockholmTransport` project, run:
     ```bash
-    ./gradlew :library:publishToMavenLocal
+    ./gradlew :stockholm-transport:publishToMavenLocal
     ```
 
 ### Android
