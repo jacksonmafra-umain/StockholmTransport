@@ -3,8 +3,10 @@ import express from 'express';
 import * as kmp from 'StockholmTransport-stockholm-transport';
 
 // --- 1. Get a handle to our public JS API and initialize it ---
-// Now, our exported object is correctly located at kmp.StockholmTransportApi
-const transportApi = kmp.StockholmTransportApi;
+// Kotlin/JS exports `object` declarations as a class with a static
+// getInstance() — call it once to unwrap the singleton, then drive it
+// like any normal JS object.
+const transportApi = kmp.StockholmTransportApi.getInstance();
 transportApi.initialize();
 console.log("✅ KMP Library Initialized successfully.");
 
@@ -14,12 +16,16 @@ const app = express();
 const port = 3000;
 
 // Helper data structure to map URL routes to our library's ViewModels.
+// Each getViewModel is wrapped in an arrow so the singleton `this` is
+// preserved — capturing `transportApi.getLinesViewModel` as a bare
+// property reference loses the binding and the generated Kotlin code
+// can no longer reach its private Koin field.
 const modules = [
-    { id: 'lines', title: 'Transport Lines', getViewModel: transportApi.getLinesViewModel },
-    { id: 'sites', title: 'Sites / Stations', getViewModel: transportApi.getSitesViewModel },
-    { id: 'departures', title: 'Departures', getViewModel: transportApi.getDeparturesViewModel },
-    { id: 'stoppoints', title: 'Stop Points', getViewModel: transportApi.getStopPointsViewModel },
-    { id: 'authorities', title: 'Transport Authorities', getViewModel: transportApi.getAuthoritiesViewModel },
+    { id: 'lines', title: 'Transport Lines', getViewModel: () => transportApi.getLinesViewModel() },
+    { id: 'sites', title: 'Sites / Stations', getViewModel: () => transportApi.getSitesViewModel() },
+    { id: 'departures', title: 'Departures', getViewModel: () => transportApi.getDeparturesViewModel() },
+    { id: 'stoppoints', title: 'Stop Points', getViewModel: () => transportApi.getStopPointsViewModel() },
+    { id: 'authorities', title: 'Transport Authorities', getViewModel: () => transportApi.getAuthoritiesViewModel() },
 ];
 
 
