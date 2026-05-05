@@ -22,15 +22,14 @@ class LinesRepositoryImpl(
 
     override suspend fun getAllLines(): DataResult<Map<TransportMode, List<Line>>> {
         return try {
+            // SL returns a single object grouped by transport mode
+            // ({ "metro": [...], "tram": [...], ... }) — not a list — when
+            // transport_authority_id is fixed. Decoding as List<LinesResponse>
+            // throws "Expected start of the array '[' but had '{'".
             val response = httpClient.get("v1/lines") {
                 parameter("transport_authority_id", 1)
-            }.body<List<LinesResponse>>().firstOrNull()
-
-            if (response == null) {
-                DataResult.Success(emptyMap())
-            } else {
-                DataResult.Success(mapResponseToDomain(response))
-            }
+            }.body<LinesResponse>()
+            DataResult.Success(mapResponseToDomain(response))
         } catch (e: Exception) {
             AppLogger.e(tag, "Failed to fetch all lines", e)
             val networkError = when (e) {
@@ -58,22 +57,14 @@ class LinesRepositoryImpl(
         ).filter { it.value.isNotEmpty() }
 
     private fun LineDto.toDomain(): Line {
-        val mode =
-            when (transportMode.uppercase()) {
-                "METRO" -> TransportMode.METRO
-                "TRAM" -> TransportMode.TRAM
-                "TRAIN" -> TransportMode.TRAIN
-                "BUS" -> TransportMode.BUS
-                "SHIP" -> TransportMode.SHIP
-                "FERRY" -> TransportMode.FERRY
-                "TAXI" -> TransportMode.TAXI
-                else -> TransportMode.UNKNOWN
-            }
+        val mode = TransportMode.entries
+            .firstOrNull { it.name == transportMode.uppercase() }
+            ?: TransportMode.UNKNOWN
         return Line(
             id = this.id,
             name = this.name,
             designation = this.designation,
-            transportMode = mode,
+            transportMode = mode.name,
             authority = this.transportAuthority.name,
         )
     }
