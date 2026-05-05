@@ -79,10 +79,48 @@ app.get('/modules/:moduleId', async (req, res) => {
     }
 });
 
-// --- 4. START THE SERVER ---
+// --- 4. SL PROXY — forwards /v1/* to the upstream SL Transport API ---
+// When the sl-cli writes the ngrok URL into gradle.properties as
+// serverHostURL="${ngrokUrl}/v1", the rebuilt mobile/web apps issue
+// requests like ${ngrokUrl}/v1/lines?... — this middleware mirrors
+// those onto the real https://transport.integration.sl.se/v1/* so a
+// single ngrok tunnel becomes the network endpoint for every client.
+const SL_UPSTREAM = 'https://transport.integration.sl.se';
+
+app.use('/v1', async (req, res, next) => {
+    const upstreamUrl = SL_UPSTREAM + req.originalUrl;
+    try {
+        const headers = { ...req.headers };
+        delete headers.host;
+        delete headers['content-length'];
+        delete headers['accept-encoding'];
+
+        const upstreamRes = await fetch(upstreamUrl, {
+            method: req.method,
+            headers,
+            body: ['GET', 'HEAD'].includes(req.method) ? undefined : req,
+            duplex: 'half',
+        });
+
+        const body = Buffer.from(await upstreamRes.arrayBuffer());
+        res.status(upstreamRes.status);
+        upstreamRes.headers.forEach((value, key) => {
+            const lower = key.toLowerCase();
+            if (lower !== 'content-encoding' && lower !== 'transfer-encoding' && lower !== 'content-length') {
+                res.setHeader(key, value);
+            }
+        });
+        res.send(body);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// --- 5. START THE SERVER ---
 app.listen(port, () => {
     console.log(`🚀 Demo API server listening on http://localhost:${port}`);
     console.log('Try visiting:');
     console.log(`  http://localhost:${port}/modules`);
     console.log(`  http://localhost:${port}/modules/lines`);
+    console.log(`  http://localhost:${port}/v1/lines?transport_authority_id=1   (SL passthrough)`);
 });

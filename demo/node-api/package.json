@@ -5,10 +5,14 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon --quiet --watch server.js --watch ../../build/js/packages/StockholmTransport-stockholm-transport server.js"
   },
   "dependencies": {
     "express": "5.0.0",
     "StockholmTransport-stockholm-transport": "file:../../build/js/packages/StockholmTransport-stockholm-transport"
+  },
+  "devDependencies": {
+    "nodemon": "3.1.10"
   }
 }
