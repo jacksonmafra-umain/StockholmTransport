@@ -513,6 +513,73 @@
         'Hagsätra':             { code: 'T19', side: 'left' },
     };
 
+    // Per-station label rotation in degrees (counter-clockwise). Used for
+    // stations packed along a horizontal trunk where straight horizontal
+    // labels would collide ("Hässelby strand · Hässelby gård · Johannelund
+    // · …" stacking on top of each other). Convention: -45° tilts the text
+    // up-and-right, mirroring how the official SL map angles its labels
+    // along the green western trunk and the red south horizontal.
+    const LABEL_ROTATION = {
+        // Green western trunk
+        'Hässelby gård':         -45,
+        'Johannelund':           -45,
+        'Vällingby':             -45,
+        'Råcksta':               -45,
+        'Blackeberg':            -45,
+        'Islandstorget':         -45,
+        'Ängbyplan':             -45,
+        'Åkeshov':               -45,
+        'Brommaplan':            -45,
+        'Abrahamsberg':          -45,
+        'Stora mossen':          -45,
+        'Alvik':                 -45,
+        'Kristineberg':          -45,
+        'Thorildsplan':          -45,
+        // Green city-core trunk
+        'S:t Eriksplan':         -45,
+        'Odenplan':              -45,
+        'Rådmansgatan':          -45,
+        'Hötorget':              -45,
+        // Red south horizontal
+        'Mariatorget':           -45,
+        'Zinkensdamm':           -45,
+        'Hornstull':             -45,
+        'Liljeholmen':           -45,
+        'Aspudden':              -45,
+        'Örnsberg':              -45,
+        'Axelsberg':             -45,
+        // Red T13 SW diagonal — labels parallel to the line
+        'Mälarhöjden':           -30,
+        'Bredäng':               -30,
+        'Sätra':                 -30,
+        'Skärholmen':            -30,
+        'Vårberg':               -30,
+        'Vårby gård':            -30,
+        'Masmo':                 -30,
+        'Fittja':                -30,
+        'Alby':                  -30,
+        'Hallunda':              -30,
+        // Red T14 SW arm
+        'Midsommarkransen':      -45,
+        'Telefonplan':           -45,
+        'Hägerstensåsen':        -45,
+        'Västertorp':            -45,
+        // Green T19 SW arm — labels angle the other way
+        'Globen':                 30,
+        'Enskede gård':           30,
+        'Sockenplan':             30,
+        'Svedmyra':               30,
+        'Stureby':                30,
+        'Bandhagen':              30,
+        'Högdalen':               30,
+        'Rågsved':                30,
+        // Green T17 east arm
+        'Hammarbyhöjden':        -30,
+        'Björkhagen':            -30,
+        'Kärrtorp':              -30,
+        'Bagarmossen':           -30,
+    };
+
     // Major junctions get white pills with their name in dark text.
     const JUNCTIONS = ['Slussen', 'Gamla stan', 'Fridhemsplan'];
 
@@ -578,12 +645,22 @@
 
         const side = LABEL_SIDE[name] || 'right';
         const off = labelOffset(side);
-        stationsGroup.appendChild(svg('text', {
+        const rot = LABEL_ROTATION[name];
+        const labelAttrs = {
             x: x + off.dx,
             y: y + off.dy,
             'text-anchor': off.anchor,
             class: 'station-label',
-        }, name));
+        };
+        if (rot) {
+            // Rotate around the station dot itself so the label fans out
+            // diagonally without drifting from the line.
+            labelAttrs['text-anchor'] = 'start';
+            labelAttrs.x = x + 8;
+            labelAttrs.y = y + 4;
+            labelAttrs.transform = `rotate(${rot} ${x} ${y})`;
+        }
+        stationsGroup.appendChild(svg('text', labelAttrs, name));
     }
 
     // ---- Render terminus pills ------------------------------------------
