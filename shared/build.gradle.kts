@@ -110,6 +110,7 @@ kotlin {
                 "departures/src/commonMain/kotlin",
                 "stoppoints/src/commonMain/kotlin",
                 "authorities/src/commonMain/kotlin",
+                "realtime/src/commonMain/kotlin",
             )
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
@@ -118,6 +119,9 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
+                // Realtime trip stream — TripUpdateDataSource opens a Ktor
+                // WebSocket against the simulator's /updates/{tripId} path.
+                implementation(libs.ktor.client.websockets)
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.kermit)
                 implementation(libs.ktor.client.logging)
