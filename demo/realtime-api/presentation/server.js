@@ -98,7 +98,16 @@ export async function createServer() {
         try {
             const {lineId} = req.params;
             const trip = await SimulationEngine.startTrip(lineId);
-            res.render('trip-view.njk', {tripId: trip._id.toString(), lineId});
+            // Pull the matching Line so the trip-view can colour its
+            // header puck with the SL line palette without a second
+            // round-trip from the client.
+            const line = await Line.findById(lineId).lean();
+            res.render('trip-view.njk', {
+                tripId: trip._id.toString(),
+                lineId,
+                lineCode: line?.code ?? '',
+                lineMode: line?.mode ?? '',
+            });
         } catch (error) {
             console.error(error);
             res.status(500).send(error.message);
