@@ -4,6 +4,8 @@ This repository contains a Kotlin Multiplatform (KMP) library that serves as the
 
 The library is designed to be the single source of truth, handling all data fetching, business logic, and state management. The client applications (Android, iOS, Web) are intentionally "dumb," responsible only for rendering the UI based on the data provided by this library.
 
+For a single, code-anchored map of every artefact in the repo (library modules, demos, CLI, slides, Docker, distribution channels), see [docs/FEATURES.md](docs/FEATURES.md).
+
 ## Architecture
 
 The project strictly follows **Clean Architecture** principles to ensure a clear separation of concerns, testability, and maintainability.
@@ -98,6 +100,41 @@ The project includes a demo application (`demo/compose-app`) that consumes the l
 ### Node demo (standalone)
 
 `demo/node-api` runs on its own with `npm run dev` (nodemon) or `npm start` (plain `node`). When the sl-cli's `start` is active, the Node demo is automatically the upstream behind the ngrok URL.
+
+## Realtime train-positions stack
+
+A second pair of demos sits alongside the static-API ones — for live train positions streamed over WebSocket:
+
+- **[`demo/realtime-api/`](demo/realtime-api/)** — Express + `ws` + MongoDB simulator. Tick-driven `SimulationEngine` advances vehicles between stops and pushes `WebSocketMessage(currentStop, nextThreeStops, finalDestination)` over `WS /updates/{tripId}`. HTTP routes (`/api/lines`, `/api/sites`, `/api/trips/active`, etc.) feed selection screens. Bumped to `node:22-alpine`, `mongo:8.0`, Express 5, Mongoose 8.18, `multer 2`, `ws 8.18.3` and runs as a non-root container user.
+- **[`demo/realtime-mobile/`](demo/realtime-mobile/)** — Compose Multiplatform app (Android + iOS) on the same toolchain catalogue as the library (Kotlin 2.3.21, AGP 9.1.1, Compose 1.10.3, Ktor 3.4.3 with `ktor-client-websockets`, Koin 4.2.1 + Koin Compiler Plugin). Two screens: `TripSelectionScreen` (picks an active trip) and `TripScreen` (subscribes to `/updates/{tripId}` and renders the rolling station info). Package `com.umain.transport.realtime.*`.
+
+Run the realtime stack on its own:
+
+```bash
+docker compose up mongo realtime-api
+# realtime-api on :3001, mongo on :27017
+```
+
+Or the full unified stack (static + realtime + DB) — see the next section.
+
+## Docker — unified stack
+
+[`docker-compose.yml`](docker-compose.yml) at the repo root brings up everything any client could want to consume:
+
+| Service        | Port  | Image / build context                         |
+|----------------|-------|------------------------------------------------|
+| `mongo`        | 27017 | `mongo:8.0` (volume-backed, healthchecked)    |
+| `node-api`     | 3000  | [`demo/node-api/Dockerfile`](demo/node-api/Dockerfile)   |
+| `realtime-api` | 3001  | [`demo/realtime-api/Dockerfile`](demo/realtime-api/Dockerfile) |
+
+```bash
+./sl publish              # build the JS bundle node-api needs
+docker compose up         # all three services
+docker compose up mongo realtime-api    # realtime only
+docker compose down -v    # tear down + wipe Mongo volume
+```
+
+Both Dockerfiles use `node:22-alpine` and run under the unprivileged `node` user. Production images skip dev dependencies (`npm install --omit=dev`).
 
 ## How to Use the Library
 
