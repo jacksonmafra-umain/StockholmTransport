@@ -1,0 +1,69 @@
+# Unified stack for the Stockholm Transport demos.
+#
+# Brings up everything any client app might want to consume:
+# - mongo:        MongoDB 8 (state for the realtime simulator)
+# - node-api:     Static-SDK demo (Express + KMP/JS bundle) — port 3000.
+#                 Mirrors the talk's Act 1 demo.
+# - realtime-api: Realtime simulator (Express + ws + Mongo) — port 3001.
+#                 Powers demo/realtime-mobile and the train-position screens.
+#
+# Usage from the repo root:
+#   ./sl publish              # builds the JS bundle that node-api needs
+#   docker compose up         # boots all three services
+#   docker compose down -v    # stops and removes the Mongo volume
+#
+# To run only the realtime side (no static API):
+#   docker compose up mongo realtime-api
+#
+# Mongo data persists in the named volume mongo_data so re-running `up`
+# keeps the seeded simulator state.
+
+services:
+  mongo:
+    image: mongo:8.0
+    container_name: stockholm-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: stockholm_transport
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  node-api:
+    build:
+      context: .
+      dockerfile: demo/node-api/Dockerfile
+    container_name: stockholm-node-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    # No DB dep — the static demo proxies SL directly.
+
+  realtime-api:
+    build:
+      context: ./demo/realtime-api
+      dockerfile: Dockerfile
+    container_name: stockholm-realtime-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - MONGO_URI=mongodb://mongo:27017/stockholm_transport
+    ports:
+      # Host:container — exposes 3001 on the host so it sits next to node-api.
+      - "3001:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+volumes:
+  mongo_data:
