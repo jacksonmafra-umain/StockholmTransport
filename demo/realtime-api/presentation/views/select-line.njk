@@ -1,40 +1,503 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Select a Line</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stockholm Transport Simulator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"/>
+    <style>
+        :root {
+            --bg: #0A0E12;
+            --surface: #161B21;
+            --surface-2: #1F252C;
+            --fg: #E8EBEE;
+            --fg-muted: #B6BEC8;
+            --line: #303942;
+            --metro-blue: #0064A8;
+            --metro-red: #D71920;
+            --metro-green: #00853E;
+            --pendeltag: #B25196;
+            --tram: #E97713;
+            --bus: #D71920;
+            --waterway: #008CB4;
+            --taxi: #555;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .wrap {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 24px 96px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .header-puck {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--metro-blue), var(--metro-red));
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 900;
+            font-size: 18px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .subtitle {
+            color: var(--fg-muted);
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .step {
+            margin-top: 32px;
+            padding: 28px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            color: var(--fg-muted);
+            display: grid;
+            place-items: center;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid var(--line);
+        }
+
+        .step.active .step-number {
+            background: var(--metro-blue);
+            color: white;
+            border-color: var(--metro-blue);
+        }
+
+        .step.done .step-number {
+            background: var(--metro-green);
+            color: white;
+            border-color: var(--metro-green);
+        }
+
+        .step.done .step-number::before {
+            content: '✓';
+        }
+
+        .step.done .step-number-text { display: none; }
+
+        .step-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--fg);
+        }
+
+        .step.disabled .step-title { color: var(--fg-muted); }
+
+        .step-summary {
+            margin-left: auto;
+            color: var(--fg-muted);
+            font-size: 13px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .grid-types { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+        .grid-colors { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        .grid-lines { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+        .card-btn {
+            background: var(--surface-2);
+            border: 2px solid var(--line);
+            border-radius: 12px;
+            padding: 18px 16px;
+            color: var(--fg);
+            text-align: left;
+            cursor: pointer;
+            transition: all 150ms ease;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            font: inherit;
+        }
+
+        .card-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            border-color: var(--accent, var(--metro-blue));
+        }
+
+        .card-btn.selected {
+            border-color: var(--accent, var(--metro-blue));
+            background: color-mix(in srgb, var(--accent, var(--metro-blue)) 15%, var(--surface-2));
+        }
+
+        .card-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .card-btn .label {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .card-btn .meta {
+            font-size: 12px;
+            color: var(--fg-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-btn .badge-soon {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--surface);
+            color: var(--fg-muted);
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid var(--line);
+        }
+
+        .icon {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .color-card {
+            border: 2px solid var(--accent);
+            background: color-mix(in srgb, var(--accent) 18%, var(--surface-2));
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 18px;
+        }
+
+        .color-card .swatch {
+            width: 14px;
+            height: 56px;
+            border-radius: 4px;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .color-card .name {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .color-card .lines {
+            color: var(--fg-muted);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .line-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+        }
+
+        .line-puck {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent, var(--metro-blue));
+            color: white;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .line-card .designation {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .line-card .endpoints {
+            color: var(--fg-muted);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .step.disabled .grid {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .footer-help {
+            margin-top: 40px;
+            color: var(--fg-muted);
+            font-size: 12px;
+            line-height: 1.6;
+            border-top: 1px solid var(--line);
+            padding-top: 20px;
+        }
+
+        .footer-help code {
+            background: var(--surface-2);
+            color: var(--fg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--line);
+            font-size: 11px;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 20px; }
+            .step { padding: 20px; }
+        }
+    </style>
 </head>
 <body>
-  <div class="container mt-5">
-    <h1>Stockholm Transport Simulator</h1>
-    <p>Select a line to start a new trip simulation.</p>
-    <form action="" method="GET" id="line-form">
-      <div class="mb-3">
-        <label for="line-select" class="form-label">Available Lines</label>
-        <select class="form-select" id="line-select" required>
-          <option value="">-- Please choose a line --</option>
-          {% for line in lines %}
-            <option value="{{ line._id }}">{{ line.mode | capitalize }} - {{ line.code }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary">Start Simulation</button>
-    </form>
-  </div>
+<div class="wrap">
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-  <script>
-    document.getElementById('line-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const selectedLineId = document.getElementById('line-select').value;
-      if (selectedLineId) {
-        // Abre a simulação em uma nova aba
-        window.open(`/trip/start/${selectedLineId}`, '_blank');
-      }
+    <div class="header">
+        <div class="header-puck">SL</div>
+        <div>
+            <h1>Stockholm Transport Simulator</h1>
+            <div class="subtitle">Pick a transport type, line group, and route to start a live trip simulation.</div>
+        </div>
+    </div>
+
+    <!-- STEP 1: Transport type -->
+    <section class="step active done" id="step-type" data-step="1">
+        <div class="step-header">
+            <div class="step-number"><span class="step-number-text">1</span></div>
+            <div class="step-title">Transport type</div>
+            <div class="step-summary" id="summary-type">Metro</div>
+        </div>
+        <div class="grid grid-types">
+            <button type="button" class="card-btn selected" style="--accent: var(--metro-blue);" data-type="metro">
+                <div class="icon" style="background: var(--metro-blue);">M</div>
+                <div class="label">Metro</div>
+                <div class="meta">Tunnelbanan · 3 lines</div>
+            </button>
+            <button type="button" class="card-btn" style="--accent: var(--pendeltag);" data-type="train" disabled>
+                <span class="badge-soon">Soon</span>
+                <div class="icon" style="background: var(--pendeltag);">P</div>
+                <div class="label">Pendeltåg</div>
+                <div class="meta">Commuter rail</div>
+            </button>
+            <button type="button" class="card-btn" style="--accent: var(--tram);" data-type="tram" disabled>
+                <span class="badge-soon">Soon</span>
+                <div class="icon" style="background: var(--tram);">T</div>
+                <div class="label">Tram</div>
+                <div class="meta">Tvärbanan · light rail</div>
+            </button>
+            <button type="button" class="card-btn" style="--accent: var(--bus);" data-type="bus" disabled>
+                <span class="badge-soon">Soon</span>
+                <div class="icon" style="background: var(--bus);">B</div>
+                <div class="label">Bus</div>
+                <div class="meta">Stadsbuss</div>
+            </button>
+            <button type="button" class="card-btn" style="--accent: var(--waterway);" data-type="ship" disabled>
+                <span class="badge-soon">Soon</span>
+                <div class="icon" style="background: var(--waterway);">⚓</div>
+                <div class="label">Ship</div>
+                <div class="meta">Sjötrafik</div>
+            </button>
+            <button type="button" class="card-btn" style="--accent: var(--waterway);" data-type="ferry" disabled>
+                <span class="badge-soon">Soon</span>
+                <div class="icon" style="background: var(--waterway);">⛴</div>
+                <div class="label">Ferry</div>
+                <div class="meta">Sjötrafik</div>
+            </button>
+        </div>
+    </section>
+
+    <!-- STEP 2: Metro color group -->
+    <section class="step active" id="step-color" data-step="2">
+        <div class="step-header">
+            <div class="step-number"><span class="step-number-text">2</span></div>
+            <div class="step-title">Metro line</div>
+            <div class="step-summary" id="summary-color">—</div>
+        </div>
+        <div class="grid grid-colors">
+            <button type="button" class="card-btn color-card" style="--accent: var(--metro-blue);" data-color="blue" data-codes="10,11">
+                <div class="swatch"></div>
+                <div>
+                    <div class="name">Blå linjen</div>
+                    <div class="lines">Blue · T10, T11</div>
+                </div>
+            </button>
+            <button type="button" class="card-btn color-card" style="--accent: var(--metro-red);" data-color="red" data-codes="13,14">
+                <div class="swatch"></div>
+                <div>
+                    <div class="name">Röda linjen</div>
+                    <div class="lines">Red · T13, T14</div>
+                </div>
+            </button>
+            <button type="button" class="card-btn color-card" style="--accent: var(--metro-green);" data-color="green" data-codes="17,18,19">
+                <div class="swatch"></div>
+                <div>
+                    <div class="name">Gröna linjen</div>
+                    <div class="lines">Green · T17, T18, T19</div>
+                </div>
+            </button>
+        </div>
+    </section>
+
+    <!-- STEP 3: Specific line -->
+    <section class="step disabled" id="step-line" data-step="3">
+        <div class="step-header">
+            <div class="step-number"><span class="step-number-text">3</span></div>
+            <div class="step-title">Route</div>
+            <div class="step-summary" id="summary-line">—</div>
+        </div>
+        <div class="grid grid-lines" id="lines-grid">
+            <div style="color: var(--fg-muted); font-size: 13px; padding: 16px 0;">
+                Pick a line group above to see available routes.
+            </div>
+        </div>
+    </section>
+
+    <div class="footer-help">
+        Builds on the same KMP library and WebSocket simulator the realtime mobile demo uses. Starting a simulation opens
+        <code>/trip/start/&lt;lineId&gt;</code> in a new tab and streams live station updates over <code>WS /updates/&lt;tripId&gt;</code>.
+    </div>
+</div>
+
+<script>
+    const ALL_LINES = [
+        {% for line in lines %}
+            { id: "{{ line._id }}", code: "{{ line.code }}", mode: "{{ line.mode }}" }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    // Endpoint hint per metro line — pulled from the inline routesData in
+    // scripts/seed-routes-to-lines.js so the picker can show "T10: Hjulsta ↔ Kungsträdgården"
+    // without having to populate Line.stops on the server.
+    const ROUTE_ENDPOINTS = {
+        '10': ['Hjulsta', 'Kungsträdgården'],
+        '11': ['Akalla', 'Kungsträdgården'],
+        '13': ['Norsborg', 'Ropsten'],
+        '14': ['Fruängen', 'Mörby centrum'],
+        '17': ['Åkeshov', 'Skarpnäck'],
+        '18': ['Alvik', 'Farsta strand'],
+        '19': ['Hässelby strand', 'Hagsätra'],
+    };
+
+    const COLOR_VARS = {
+        blue: 'var(--metro-blue)',
+        red: 'var(--metro-red)',
+        green: 'var(--metro-green)',
+    };
+
+    const COLOR_LABELS = {
+        blue: 'Blå linjen',
+        red: 'Röda linjen',
+        green: 'Gröna linjen',
+    };
+
+    const stepType = document.getElementById('step-type');
+    const stepColor = document.getElementById('step-color');
+    const stepLine = document.getElementById('step-line');
+    const summaryColor = document.getElementById('summary-color');
+    const summaryLine = document.getElementById('summary-line');
+    const linesGrid = document.getElementById('lines-grid');
+
+    let selectedColor = null;
+
+    document.querySelectorAll('[data-color]').forEach(btn => {
+        btn.addEventListener('click', () => selectColor(btn));
     });
-  </script>
+
+    function selectColor(btn) {
+        const color = btn.dataset.color;
+        const codes = btn.dataset.codes.split(',');
+        selectedColor = color;
+
+        document.querySelectorAll('[data-color]').forEach(b => b.classList.toggle('selected', b === btn));
+
+        stepColor.classList.add('done');
+        summaryColor.textContent = COLOR_LABELS[color];
+
+        stepLine.classList.remove('disabled');
+        renderLines(color, codes);
+        stepLine.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+    }
+
+    function renderLines(color, codes) {
+        const accent = COLOR_VARS[color];
+        const matches = ALL_LINES.filter(l => l.mode === 'metro' && codes.includes(l.code));
+        if (!matches.length) {
+            linesGrid.innerHTML = '<div style="color: var(--fg-muted);">No metro lines seeded yet — run <code>npm run seed:routes</code>.</div>';
+            return;
+        }
+        linesGrid.innerHTML = matches.map(line => {
+            const endpoints = ROUTE_ENDPOINTS[line.code];
+            const designation = `T${line.code}`;
+            const sub = endpoints ? `${endpoints[0]} ↔ ${endpoints[1]}` : 'Tap to start a trip';
+            return `
+                <button type="button" class="card-btn line-card" style="--accent: ${accent};" data-line-id="${line.id}">
+                    <div class="line-puck" style="background: ${accent};">${line.code}</div>
+                    <div>
+                        <div class="designation">${designation}</div>
+                        <div class="endpoints">${sub}</div>
+                    </div>
+                </button>
+            `;
+        }).join('');
+
+        linesGrid.querySelectorAll('[data-line-id]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.lineId;
+                summaryLine.textContent = btn.querySelector('.designation').textContent;
+                stepLine.classList.add('done');
+                window.open(`/trip/start/${id}`, '_blank');
+            });
+        });
+    }
+</script>
 </body>
 </html>
