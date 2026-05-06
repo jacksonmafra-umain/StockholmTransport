@@ -37,7 +37,9 @@ services:
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
-    command: npm run dev
+    # docker:start = scripts/bootstrap.js (idempotent first-boot seeder
+    # that populates Mongo from data/*.json + openapi.json) then npm run dev.
+    command: npm run docker:start
 
 volumes:
   mongo_data:

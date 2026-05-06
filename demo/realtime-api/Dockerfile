@@ -8,9 +8,11 @@ RUN chown -R node:node /usr/src/app
 
 # Install dependencies first (leverage Docker layer caching). --no-audit and
 # --no-fund keep the build deterministic; npm-audit-fix happens in CI, not at
-# image build time.
+# image build time. Dev deps (nodemon, jest, supertest) are kept in this
+# image because the demo runs in --watch mode behind docker-compose. For a
+# real production push, use a multi-stage build that strips them.
 COPY --chown=node:node package*.json ./
-RUN npm ci --omit=dev --no-audit --no-fund || npm install --no-audit --no-fund
+RUN npm install --no-audit --no-fund
 
 # Copy app source under the unprivileged user.
 COPY --chown=node:node . .
