@@ -12,7 +12,7 @@ plugins {
 }
 
 buildConfig {
-    packageName("com.jacksonfdam.transportdisplaykmp.config")
+    packageName("com.umain.transport.realtime.config")
 
     buildConfigField("String", "SERVER_HOST_URL", "\"${project.property("serverHostURL")}\"")
     buildConfigField("String", "SERVER_HOST", "\"${project.property("serverHost")}\"")
@@ -89,14 +89,14 @@ kotlin {
 }
 
 android {
-    namespace = "com.jacksonfdam.transportdisplaykmp"
+    namespace = "com.umain.transport.realtime"
     compileSdk = 35
 
     defaultConfig {
         minSdk = 21
         targetSdk = 35
 
-        applicationId = "com.jacksonfdam.transportdisplaykmp.androidApp"
+        applicationId = "com.umain.transport.realtime.androidApp"
         versionCode = 1
         versionName = "1.0.0"
 
