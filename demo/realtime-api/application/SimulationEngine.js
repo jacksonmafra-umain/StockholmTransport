@@ -68,6 +68,13 @@ class Engine {
     async startTrip(lineId) {
         const line = await Line.findById(lineId).populate('stops').lean();
         if (!line) throw new Error('Line not found');
+        if (!Array.isArray(line.stops) || line.stops.length === 0) {
+            // Line is in Mongo but its `stops` association is empty, so the
+            // engine has no stations to advance through. Fail loudly instead
+            // of crashing later in _prepareDisplayPayload when it tries to
+            // dereference stops[currentStopIndex].
+            throw new Error(`Line ${line.code} (${line.mode}) has no stops; run 'npm run seed:routes' to populate Line.stops.`);
+        }
 
         const trip = await Trip.create({line: lineId});
         await VehicleState.create({trip: trip._id, line: lineId});
@@ -140,20 +147,29 @@ class Engine {
     }
 
     _prepareDisplayPayload(state, stops) {
-        const currentStop = stops[state.currentStopIndex];
+        if (!Array.isArray(stops) || stops.length === 0) {
+            return {
+                tripId: state.trip.toString(),
+                currentStop: {name: 'Unknown'},
+                nextThreeStops: [],
+                finalDestination: {name: 'Unknown'},
+            };
+        }
+        const idx = Math.min(Math.max(state.currentStopIndex, 0), stops.length - 1);
+        const currentStop = stops[idx] ?? stops[0];
         const finalDestination = state.direction === 1 ? stops[stops.length - 1] : stops[0];
         const nextThreeStops = [];
         for (let i = 1; i <= 3; i++) {
-            const nextIndex = state.currentStopIndex + (i * state.direction);
+            const nextIndex = idx + (i * state.direction);
             if (nextIndex >= 0 && nextIndex < stops.length) {
                 nextThreeStops.push(stops[nextIndex]);
             }
         }
         return {
             tripId: state.trip.toString(),
-            currentStop: {name: currentStop.name},
-            nextThreeStops: nextThreeStops.map(s => ({name: s.name})),
-            finalDestination: {name: finalDestination.name},
+            currentStop: {name: currentStop?.name ?? 'Unknown'},
+            nextThreeStops: nextThreeStops.map(s => ({name: s?.name ?? 'Unknown'})),
+            finalDestination: {name: finalDestination?.name ?? 'Unknown'},
         };
     }
 
