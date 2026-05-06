@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Simulation - {{ tripId }}</title>
+    <!-- Ícones do Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"/>
+    <style>
+        /* Estilo para simular a tela do display */
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .pid-container {
+            width: 100%;
+            max-width: 800px;
+            border: 5px solid #333;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Cabeçalho Azul */
+        .pid-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #0d6efd; /* Azul do Bootstrap */
+            color: white;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+
+        .pid-header .route-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.4rem;
+        }
+
+        .pid-header .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        /* Conteúdo Principal com a lista de paradas */
+        .pid-content {
+            padding: 20px;
+        }
+
+        .stop-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .stop-item {
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 12px 0 12px 50px; /* Espaço para a linha do tempo */
+            font-size: 1.2rem;
+        }
+
+        /* A Mágica da Linha do Tempo (Timeline) */
+        .stop-item .timeline-graphic {
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+        }
+
+        /* Linha vertical contínua */
+        .stop-item .timeline-graphic::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #0d6efd;
+        }
+
+        /* Círculo da parada */
+        .stop-item .timeline-graphic::after {
+            content: '';
+            position: absolute;
+            left: -5px; /* Centraliza o círculo na linha */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #f8f9fa;
+            border: 2px solid #0d6efd;
+        }
+
+        /* Esconde a linha no último item */
+        .stop-item:last-child .timeline-graphic::before {
+            display: none;
+        }
+
+        /* Estilo especial para o item de destino */
+        .stop-item.destination .timeline-graphic::after {
+            content: "\f5a1"; /* Ícone de pino do Bootstrap Icons */
+            font-family: "bootstrap-icons";
+            font-size: 1.5rem;
+            color: #333;
+            border: none;
+            background-color: transparent;
+            left: -12px; /* Ajuste de posição para o ícone */
+        }
+
+        .stop-item.destination .stop-name::before {
+            content: 'DESTINATION';
+            display: block;
+            font-size: 0.7rem;
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        /* Rodapé Roxo */
+        .pid-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #6f42c1; /* Roxo do Bootstrap */
+            color: white;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+        }
+
+        .pid-footer .current-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="pid-container">
+    <!-- Cabeçalho -->
+    <div class="pid-header">
+        <div class="route-info">
+            <i class="bi bi-bus-front"></i>
+            <span id="route-number">#--</span>
+            <span id="header-destination">Loading destination...</span>
+        </div>
+        <div class="logo">TC</div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="pid-content">
+        <ul class="stop-list" id="stop-list">
+            <!-- Paradas serão inseridas aqui pelo JavaScript -->
+            <li class="stop-item placeholder">
+                <div class="timeline-graphic"></div>
+                <div class="stop-name">Waiting for trip data...</div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="pid-footer">
+        <span class="welcome-message">Welcome Onboard!</span>
+        <span class="current-time" id="current-time">
+        <i class="bi bi-clock"></i>
+        <span>--:-- --</span>
+      </span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+<script>
+    const tripId = '{{ tripId }}';
+
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/updates/${tripId}`;
+    const ws = new WebSocket(wsUrl);
+
+    function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true});
+        const timeSpan = document.querySelector('#current-time span');
+        if (timeSpan) {
+            timeSpan.textContent = timeString;
+        }
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    ws.onopen = () => {
+        console.log(`Connected to WebSocket for trip ${tripId}`);
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'update' && data.tripId === tripId) {
+            document.getElementById('header-destination').textContent = data.finalDestination.name;
+
+            // Adiciona a estação atual ao topo da lista
+            const stopList = document.getElementById('stop-list');
+            stopList.innerHTML = ''; // Limpa a lista
+
+            const currentLi = document.createElement('li');
+            currentLi.className = 'stop-item current';
+            currentLi.innerHTML = `
+                <div class="timeline-graphic"></div>
+                <div class="stop-name">${data.currentStop.name}</div>
+            `;
+            stopList.appendChild(currentLi);
+
+            data.nextThreeStops.forEach(stop => {
+                const li = document.createElement('li');
+                li.className = 'stop-item';
+                li.innerHTML = `
+                    <div class="timeline-graphic"></div>
+                    <div class="stop-name">${stop.name}</div>
+                 `;
+                stopList.appendChild(li);
+            });
+
+            const destinationLi = document.createElement('li');
+            destinationLi.className = 'stop-item destination';
+            destinationLi.innerHTML = `
+                  <div class="timeline-graphic"></div>
+                  <div class="stop-name">${data.finalDestination.name}</div>
+            `;
+            stopList.appendChild(destinationLi);
+        }
+    };
+
+    ws.onclose = (event) => {
+        console.log('WebSocket connection closed:', event.reason);
+    };
+
+    ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+
+    const stopBtn = document.getElementById('stop-btn');
+    if (stopBtn) {
+        stopBtn.addEventListener('click', () => {
+            fetch(`/trip/stop/${tripId}`, { method: 'POST' })
+                .then(() => {
+                    alert('Simulation stopped. You can close this window.');
+                    document.body.innerHTML = '<h1>Simulation Stopped</h1>';
+                    ws.close();
+                });
+        });
+    }
+</script>
+
+</body>
+</html>
