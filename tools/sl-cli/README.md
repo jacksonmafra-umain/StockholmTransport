@@ -57,14 +57,49 @@ sl publish
 
 ## Commands
 
+Grouped the way `sl help` prints them.
+
+### ngrok dev loop
+
 | Command   | What it does                                                                                               |
 |-----------|------------------------------------------------------------------------------------------------------------|
 | `start`   | Spawn `nodemon demo/node-api/server.js`, open ngrok on `:3000`, back up + rewrite `gradle.properties`.     |
 | `stop`    | Close the tunnel, kill nodemon, restore `gradle.properties` from the `.sl-cli.bak` backup.                 |
-| `publish` | `:stockholm-transport:publishToMavenLocal` + `jsBrowserDistribution` + `assembleXCFramework` + `npm install` in `demo/node-api`. |
-| `status`  | Show: Node API up/down, current ngrok URL, current `serverHostURL`, whether a backup is pending.           |
-| `help`    | List commands.                                                                                             |
-| `exit`    | Stop services, then quit.                                                                                  |
+
+### Publish
+
+| Command                | What it does                                                                                               |
+|------------------------|------------------------------------------------------------------------------------------------------------|
+| `publish`              | `:stockholm-transport:publishToMavenLocal` + `jsBrowserDistribution` + `assembleStockholmTransportXCFramework` + `npm install` in `demo/node-api`. |
+| `publish --no-ios`     | Skip the Apple XCFramework build for faster iteration.                                                     |
+
+### Docker stack (background)
+
+| Command                       | What it does                                                                                                   |
+|-------------------------------|----------------------------------------------------------------------------------------------------------------|
+| `up [services…]`              | `docker compose up -d --build`. Boots `mongo` + `node-api` + `realtime-api` (or just the named services).      |
+| `up --no-build`               | Skip the rebuild step (fast restart of existing images).                                                       |
+| `down`                        | `docker compose down`. Stops every container; mongo_data volume is preserved.                                  |
+| `down --volumes` / `down -v`  | Also drops the `mongo_data` volume — wipes the seeded simulator state.                                         |
+| `ps`                          | Tabulated `docker compose ps` (service / state / ports), with running services in green.                       |
+| `logs <service> [--follow] [--tail N]` | Tail compose logs. Defaults to `--tail 100`; pass `--follow` to keep streaming.                       |
+
+### Realtime data
+
+| Command          | What it does                                                                                                                         |
+|------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `load`           | Bring the stack up; `bootstrap.js` inside the realtime-api container auto-seeds Mongo on the first boot.                             |
+| `seed`           | Force a re-seed inside the running container — runs `seed-from-trafiklab.js` then `seed-routes-to-lines.js` (both upsert).           |
+| `clear --yes`    | Destructive: `docker compose down -v`. Wipes the `mongo_data` volume so the next `up` re-bootstraps from scratch. Refuses without `--yes`. |
+| `wipe --yes`     | Alias for `clear --yes`.                                                                                                              |
+
+### Lifecycle
+
+| Command   | What it does                                                                                                                                                                              |
+|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `status`  | ngrok / nodemon state, current `serverHostURL`, ANDROID_HOME / JAVA_HOME detection, plus the Docker stack table (alias for `ps` at the end). |
+| `help`    | List the grouped commands above.                                                                                                                                                          |
+| `exit`    | Stop ngrok/nodemon services, then quit.                                                                                                                                                   |
 
 ## How `start` makes ngrok the talk-day backend
 

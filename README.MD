@@ -35,16 +35,26 @@ export NGROK_AUTHTOKEN=<your-token>      # https://dashboard.ngrok.com (free tie
 ./sl
 ▶ sl › start                              # boots Node API (nodemon) + ngrok, writes URL to gradle.properties
 ▶ sl › publish                            # rebuilds library: mavenLocal + JS bundle + iOS XCFramework
-▶ sl › status                             # prints running services + current API URL
-▶ sl › stop                               # stops services, restores gradle.properties
+▶ sl › up                                 # docker compose up -d (mongo + node-api + realtime-api in background)
+▶ sl › ps                                 # tabulated docker compose ps
+▶ sl › logs realtime-api --tail 50        # tail container logs
+▶ sl › seed                               # re-seed Mongo via the realtime-api container
+▶ sl › down                               # docker compose down (volume preserved)
+▶ sl › clear --yes                        # destructive: down -v (wipes mongo_data)
+▶ sl › status                             # ngrok + gradle URL + toolchain + docker stack table
+▶ sl › stop                               # stops ngrok/nodemon, restores gradle.properties
 ▶ sl › exit
 ```
 
 Or as one-shot subcommands:
 
 ```bash
-./sl start            # leaves services running; Ctrl+C to stop and restore
-./sl publish --no-ios # skip the iOS XCFramework (faster)
+./sl start                  # leaves services running; Ctrl+C to stop and restore
+./sl publish --no-ios       # skip the iOS XCFramework (faster)
+./sl up                     # boot the docker stack in background
+./sl logs realtime-api -f   # follow logs
+./sl seed                   # force re-seed Mongo
+./sl clear --yes            # nuke mongo_data volume
 ./sl status
 ```
 
