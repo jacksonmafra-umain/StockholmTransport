@@ -175,7 +175,7 @@
 
 <div class="map-wrapper">
     <div class="map-frame">
-        <svg class="metro" viewBox="0 0 1400 1020" xmlns="http://www.w3.org/2000/svg">
+        <svg class="metro" viewBox="0 0 1500 1080" xmlns="http://www.w3.org/2000/svg">
             <g id="lines"></g>
             <g id="stations"></g>
             <g id="termini"></g>
@@ -294,25 +294,29 @@
         'Fruängen':             [605, 905],
 
         // ============== GREEN — T19 WESTERN ARM ==============
-        'Hässelby strand':      [ 50, 470],
-        'Hässelby gård':        [ 95, 470],
-        'Johannelund':          [140, 470],
-        'Vällingby':            [185, 470],
-        'Råcksta':              [230, 470],
-        'Blackeberg':           [275, 470],
-        'Islandstorget':        [320, 470],
-        'Ängbyplan':            [365, 470],
+        // Western trunk shifted right so the Hässelby strand terminus has
+        // room for its [19][HÄSSELBY STRAND] label on the left without
+        // falling off the viewBox. With ~143 px reserved for the label and
+        // pill, x ≥ 230 keeps the leftmost edge above 0 in viewBox space.
+        'Hässelby strand':      [240, 470],
+        'Hässelby gård':        [275, 470],
+        'Johannelund':          [305, 470],
+        'Vällingby':            [335, 470],
+        'Råcksta':              [365, 470],
+        'Blackeberg':           [395, 470],
+        'Islandstorget':        [425, 470],
+        'Ängbyplan':            [455, 470],
 
         // ============== GREEN — T17/T19 ==============
-        'Åkeshov':              [410, 470],
-        'Brommaplan':           [450, 470],
-        'Abrahamsberg':         [485, 470],
-        'Stora mossen':         [520, 470],
+        'Åkeshov':              [490, 470],
+        'Brommaplan':           [520, 470],
+        'Abrahamsberg':         [550, 470],
+        'Stora mossen':         [580, 470],
 
         // ============== GREEN — T17/T18/T19 SHARED TRUNK ==============
-        'Alvik':                [560, 470],
-        'Kristineberg':         [605, 470],
-        'Thorildsplan':         [640, 470],
+        'Alvik':                [620, 470],
+        'Kristineberg':         [660, 470],
+        'Thorildsplan':         [700, 470],
         // Fridhemsplan (765, 470) shared with blue
         'S:t Eriksplan':        [800, 470],
         'Odenplan':             [840, 470],
@@ -499,18 +503,31 @@
     };
 
     // Termini get a coloured pill with the line code in white + station name to one side.
+    // Per-terminus rendering: which line code goes in the pill, and which
+    // side of the line tip the [pill][NAME] block extends. The convention
+    // matches the official SL map — pill always abuts the line tip, name
+    // reads outward into the page (i.e. the dot is at the inner edge of
+    // the [pill][NAME] block).
     const TERMINI = {
-        'Hjulsta':              { code: 'T10', side: 'right' },
-        'Akalla':               { code: 'T11', side: 'right' },
+        // 'left' side termini sit at outer edges of the map where the
+        // line continues from the dot inward into the page — Hjulsta,
+        // Akalla, Hässelby strand. The label sits 'before' the dot in
+        // reading order: [pill][NAME][dot].
+        'Hjulsta':              { code: 'T10', side: 'left' },
+        'Akalla':               { code: 'T11', side: 'left' },
+        'Hässelby strand':      { code: 'T19', side: 'left' },
+
+        // 'right' side termini sit at line ends where the label reads
+        // outward from the line tip: [dot][pill][NAME]. This is the
+        // common case for the SL map's south / east outer edges.
         'Kungsträdgården':      { code: 'T11', side: 'right' },
         'Mörby centrum':        { code: 'T14', side: 'right' },
         'Ropsten':              { code: 'T13', side: 'right' },
-        'Norsborg':             { code: 'T13', side: 'left' },
+        'Norsborg':             { code: 'T13', side: 'right' },
         'Fruängen':             { code: 'T14', side: 'right' },
         'Skarpnäck':            { code: 'T17', side: 'right' },
         'Farsta strand':        { code: 'T18', side: 'right' },
-        'Hässelby strand':      { code: 'T19', side: 'left' },
-        'Hagsätra':             { code: 'T19', side: 'left' },
+        'Hagsätra':             { code: 'T19', side: 'right' },
     };
 
     // Per-station label rotation in degrees (counter-clockwise). Used for
@@ -667,11 +684,32 @@
         const color = LINES[info.code]?.color || '#888';
         const side = info.side;
 
-        // Coloured pill with code
+        // Approximate width of the upper-cased terminus name in pixels.
+        // ~9 px per char at the 13 px terminus-name font matches the
+        // computed bounding box closely enough for layout.
+        const approxNameW = name.length * 9 + 8;
         const pillW = 42, pillH = 22;
-        let pillX, pillY, textX;
-        if (side === 'right') { pillX = x + 14;            pillY = y - pillH/2; textX = pillX + pillW/2; }
-        else                  { pillX = x - pillW - 14;    pillY = y - pillH/2; textX = pillX + pillW/2; }
+
+        // Layout convention from the official SL map:
+        //   side='right' → [dot] [pill] [NAME]   (label reads outward
+        //                                         from line tip)
+        //   side='left'  → [pill] [NAME] [dot]   (label reads INTO the
+        //                                         line tip — used at
+        //                                         Hässelby strand etc.
+        //                                         where the line CONTINUES
+        //                                         past the terminus)
+        let pillX, nameX, nameAnchor;
+        if (side === 'right') {
+            pillX = x + 14;
+            nameX = pillX + pillW + 8;
+            nameAnchor = 'start';
+        } else {
+            nameX = x - 14;
+            nameAnchor = 'end';
+            pillX = nameX - approxNameW - 8 - pillW;
+        }
+        const pillY = y - pillH / 2;
+        const textX = pillX + pillW / 2;
 
         terminiGroup.appendChild(svg('rect', {
             x: pillX, y: pillY, width: pillW, height: pillH,
@@ -680,18 +718,13 @@
             class: 'terminus-pill',
         }));
         terminiGroup.appendChild(svg('text', {
-            x: textX, y: pillY + pillH/2 + 5,
+            x: textX, y: pillY + pillH / 2 + 5,
             'text-anchor': 'middle',
             class: 'terminus-text',
         }, info.code));
-
-        // Station name beside the pill
-        let nameX, nameY, anchor;
-        if (side === 'right') { nameX = pillX + pillW + 8; nameY = y + 5; anchor = 'start'; }
-        else                  { nameX = pillX - 8;          nameY = y + 5; anchor = 'end'; }
         terminiGroup.appendChild(svg('text', {
-            x: nameX, y: nameY,
-            'text-anchor': anchor,
+            x: nameX, y: y + 5,
+            'text-anchor': nameAnchor,
             class: 'terminus-name',
         }, name));
 
