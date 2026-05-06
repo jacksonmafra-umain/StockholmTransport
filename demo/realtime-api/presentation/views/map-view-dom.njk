@@ -548,17 +548,12 @@
         'Aspudden':              -45,
         'Örnsberg':              -45,
         'Axelsberg':             -45,
-        // Red T13 SW diagonal — labels parallel to the line
-        'Mälarhöjden':           -30,
-        'Bredäng':               -30,
-        'Sätra':                 -30,
-        'Skärholmen':            -30,
-        'Vårberg':               -30,
-        'Vårby gård':            -30,
-        'Masmo':                 -30,
-        'Fittja':                -30,
-        'Alby':                  -30,
-        'Hallunda':              -30,
+        // Red T13 SW diagonal — keep labels horizontal so the 14 stations
+        // packed onto the Norsborg branch stair-step cleanly down the
+        // diagonal. -30° projected adjacent labels onto each other because
+        // dots are only ~30 px apart along the line; horizontal labels with
+        // side: 'right' stay in their own row by virtue of the diagonal.
+        // (No rotation entries here — falls back to LABEL_SIDE='right'.)
         // Red T14 SW arm
         'Midsommarkransen':      -45,
         'Telefonplan':           -45,
