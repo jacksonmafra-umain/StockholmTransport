@@ -8,6 +8,7 @@ import http from 'http';
 import nunjucks from 'nunjucks';
 import {WebSocketServer} from 'ws';
 import {SimulationEngine} from '../application/SimulationEngine.js';
+import {VehicleSimulator} from '../application/VehicleSimulator.js';
 
 import {connectMongo} from '../config/mongo.js';
 import {config} from '../config/env.js';
@@ -17,6 +18,39 @@ import {Stop} from '../domain/models/Stop.js';
 import {Timetable} from '../domain/models/Timetable.js';
 import {Vehicle} from '../domain/models/Vehicle.js';
 import {StopBoardService} from '../application/StopBoardService.js';
+
+// Pick a handful of seeded lines (one per transport mode where possible) and
+// start a SimulationEngine trip for each — guarantees /api/trips/active has
+// something to return on a fresh boot, so the realtime mobile demo lights up
+// without any manual /trip/start curl.
+async function autoStartDemoTrips() {
+    try {
+        // Mode is stored lowercase in the seed (e.g. "metro", "tram", …).
+        // Prefer lines whose `stops` array is non-empty — SimulationEngine
+        // can only advance through stations it knows about.
+        const modes = ['metro', 'train', 'tram', 'bus', 'ship', 'ferry'];
+        const picks = [];
+        for (const mode of modes) {
+            const line = await Line.findOne({mode, 'stops.0': {$exists: true}}).lean();
+            if (line) picks.push(line);
+        }
+        let ok = 0;
+        for (const line of picks) {
+            try {
+                await SimulationEngine.startTrip(line._id);
+                ok += 1;
+            } catch (err) {
+                console.warn(`[autoStartDemoTrips] failed for line ${line.code} (${line.mode}):`, err.message);
+            }
+        }
+        console.log(`[autoStartDemoTrips] ▶ started ${ok}/${picks.length} demo trip(s).`);
+        if (ok === 0) {
+            console.warn('[autoStartDemoTrips] no lines had populated stops — re-run scripts/bootstrap.js or `npm run seed:routes`.');
+        }
+    } catch (err) {
+        console.warn('[autoStartDemoTrips] skipped:', err.message);
+    }
+}
 
 const upload = multer({storage: multer.memoryStorage()});
 
@@ -312,8 +346,17 @@ export async function createServer() {
         }
     });
 
-    server.listen(config.port, () => {
+    server.listen(config.port, async () => {
         console.log(`Server (API & Simulation) listening on :${config.port}`);
+
+        // Drive the seeded vehicle fleet forward (interval-based tick).
+        const fleet = new VehicleSimulator();
+        fleet.start();
+        console.log('[VehicleSimulator] ▶ ticking every', config.tickMs, 'ms');
+
+        // Pre-seed in-memory active trips so the mobile demo has something to
+        // render on first connect.
+        await autoStartDemoTrips();
     });
 
     return {app, server};
