@@ -1,18 +1,23 @@
-# Use Node LTS
-FROM node:18-alpine
+# Pin to Node 22 LTS on Alpine — Node 18 hit EOL in April 2024.
+# Bump alongside the engines.node range in package.json.
+FROM node:22-alpine
 
-# Create app directory
+# Drop privileges: alpine ships a `node` user/group at uid/gid 1000.
 WORKDIR /usr/src/app
+RUN chown -R node:node /usr/src/app
 
-# Install dependencies first (leverage Docker layer caching)
-COPY package*.json ./
-RUN npm install --no-audit --no-fund
+# Install dependencies first (leverage Docker layer caching). --no-audit and
+# --no-fund keep the build deterministic; npm-audit-fix happens in CI, not at
+# image build time.
+COPY --chown=node:node package*.json ./
+RUN npm ci --omit=dev --no-audit --no-fund || npm install --no-audit --no-fund
 
-# Copy app source
-COPY . .
+# Copy app source under the unprivileged user.
+COPY --chown=node:node . .
 
-# Expose port
+USER node
+
 EXPOSE 3000
 
-# Default command (can be overridden by docker-compose)
-CMD ["npm", "run", "dev"]
+# Default command — overridden by docker-compose `command:` for dev (npm run dev).
+CMD ["node", "presentation/server.js"]
