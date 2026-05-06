@@ -27,19 +27,30 @@ async function isEmpty() {
     }
 }
 
-function runSeed() {
+function runScript(args) {
     return new Promise((resolve, reject) => {
-        const proc = spawn(
-            'node',
-            ['scripts/seed-from-trafiklab.js', '--data', './data', '--schema', './openapi.json'],
-            { stdio: 'inherit' },
-        );
+        const proc = spawn('node', args, { stdio: 'inherit' });
         proc.on('exit', (code) => {
             if (code === 0) resolve();
-            else reject(new Error(`seed-from-trafiklab.js exited ${code}`));
+            else reject(new Error(`${args[0]} exited ${code}`));
         });
         proc.on('error', reject);
     });
+}
+
+async function runSeed() {
+    // Pass 1: Trafiklab snapshots → Stop / Line / Timetable / Vehicle.
+    //         Lines come out without per-line `stops` ordering (seed
+    //         doesn't know route topology).
+    await runScript([
+        'scripts/seed-from-trafiklab.js',
+        '--data', './data',
+        '--schema', './openapi.json',
+    ]);
+    // Pass 2: inline route definitions → fills Line.stops with the ordered
+    //         station list per line code so SimulationEngine.startTrip can
+    //         actually advance through stops.
+    await runScript(['scripts/seed-routes-to-lines.js']);
 }
 
 async function main() {
