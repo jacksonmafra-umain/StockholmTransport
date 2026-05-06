@@ -1,17 +1,18 @@
-rootProject.name = "TransportDisplayKMP"
+rootProject.name = "Stockholm-Transport-Realtime"
 
 pluginManagement {
     repositories {
         google {
-            content { 
-              	includeGroupByRegex("com\\.android.*")
-              	includeGroupByRegex("com\\.google.*")
-              	includeGroupByRegex("androidx.*")
-              	includeGroupByRegex("android.*")
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+                includeGroupByRegex("android.*")
             }
         }
         gradlePluginPortal()
         mavenCentral()
+        mavenLocal()
     }
 }
 
@@ -33,14 +34,17 @@ toolchainManagement {
 dependencyResolutionManagement {
     repositories {
         google {
-            content { 
-              	includeGroupByRegex("com\\.android.*")
-              	includeGroupByRegex("com\\.google.*")
-              	includeGroupByRegex("androidx.*")
-              	includeGroupByRegex("android.*")
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+                includeGroupByRegex("android.*")
             }
         }
         mavenCentral()
+        // Picks up :stockholm-transport publishToMavenLocal output for the
+        // domain types this app re-uses from the library.
+        mavenLocal()
     }
 }
 include(":composeApp")
