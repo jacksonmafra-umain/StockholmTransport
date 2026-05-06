@@ -129,6 +129,20 @@ Run standalone: `cd demo/realtime-api && docker compose up`.
 
 The simulator engine (`application/SimulationEngine.js`) advances vehicles between stops on a fixed tick and pushes the new position out via `wss.clientsByTrip` — every connected mobile/web client sees the same trip in lockstep.
 
+#### Seeding + auto-start (zero-touch first boot)
+
+`docker compose up` is enough — the realtime-api container's command is `npm run docker:start`, which is `node scripts/bootstrap.js && npm run dev`. Bootstrap is **idempotent** (counts the `Stop` collection; no-ops if already populated):
+
+1. **Pass 1** — `scripts/seed-from-trafiklab.js` reads `data/{lines,sites,stop-points,departures,transport-authorities}.json` validated against `openapi.json` and inserts `Stop` / `Line` / `Timetable` / `Vehicle` documents.
+2. **Pass 2** — `scripts/seed-routes-to-lines.js` walks the inline `routesData` (Pendeltåg, Tunnelbana, Tvärbanan, …) and writes the ordered station list onto each `Line.stops`, which is what `SimulationEngine.startTrip` advances through.
+
+Then `presentation/server.js` boots and on `listen` calls:
+
+- `new VehicleSimulator().start()` — interval tick (default 5 s) that walks every running `Vehicle` along its `Timetable.stopTimes`, interpolating GeoJSON position between current and next stop.
+- `autoStartDemoTrips()` — picks one `Line` per transport mode whose `stops` is non-empty and `SimulationEngine.startTrip()`s each one. The mobile/web clients see them immediately at `GET /api/trips/active`.
+
+Force a re-seed: `docker compose down -v && docker compose up`.
+
 ### 2.4 `demo/realtime-mobile/` — Compose Multiplatform realtime app
 
 Two screens (Material 3, no map yet — cards only):
