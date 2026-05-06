@@ -127,6 +127,18 @@ This is the recommended workflow for day-to-day development and testing the libr
 
 The remainder of section 3 documents the underlying Gradle tasks the CLI calls.
 
+### 3.1 Local Docker stack for the demo backends
+
+For backend-side development (the realtime simulator's MongoDB schema, the static `/v1/*` proxy, etc.), bring everything up via the unified compose file:
+
+```bash
+./sl publish                        # build the Kotlin/JS bundle node-api consumes
+docker compose up                   # mongo + node-api (:3000) + realtime-api (:3001)
+docker compose up mongo realtime-api  # realtime stack only
+```
+
+`demo/realtime-api/` and `demo/node-api/` each ship their own `Dockerfile` (both `node:22-alpine`, run as the unprivileged `node` user). The realtime simulator's standalone compose lives at [demo/realtime-api/docker-compose.yml](demo/realtime-api/docker-compose.yml) for the case where you want to iterate on it without building `node-api` too.
+
 ### Android/JVM/JS (to Maven Local)
 
 This publishes a single, unified artifact to your local Maven repository (`~/.m2/repository`).
