@@ -62,10 +62,10 @@ Single Maven artefact `com.umain.transport:stockholm-transport:1.0.0` shipping A
 | Module        | Endpoint                                            | Domain types                       | ViewModel actions                      |
 |---------------|-----------------------------------------------------|------------------------------------|----------------------------------------|
 | `lines`       | `GET /v1/lines?transport_authority_id={id}`         | `Line(id, name, designation, transportMode: String, authority)`  | `loadLines()`        |
-| `sites`       | `GET /v1/sites`                                     | `Site(id, name, abbreviation, lat, lon)`                         | `loadSites()`        |
-| `stoppoints`  | `GET /v1/stop-points`                               | `StopPoint(id, name, ...)`                                       | `loadStopPoints()`   |
-| `departures`  | `GET /v1/sites/{siteId}/departures`                 | `Departure(line, destination, displayTime, ...)`                 | `loadDepartures(siteId)` |
-| `authorities` | `GET /v1/transport-authorities`                     | `Authority(id, name)`                                            | `loadAuthorities()`  |
+| `sites`       | `GET /v1/sites`                                     | `Site(id, name, latitude, longitude)`                            | `loadSites()`        |
+| `stoppoints`  | `GET /v1/stop-points`                               | `StopPoint(id, name, type, stopAreaName, authorityName, latitude, longitude)` | `loadStopPoints()`   |
+| `departures`  | `GET /v1/sites/{siteId}/departures`                 | `Departure(lineDesignation, destination, displayTime, transportMode)` | `loadDepartures(siteId)` |
+| `authorities` | `GET /v1/transport-authorities`                     | `Authority(id, name, formalName, city, country)`                 | `loadAuthorities()`  |
 | `realtime`    | `GET /api/trips/active` + `WS /updates/{tripId}`    | `Trip`, `Vehicle`, `ActiveTrip`, `TripDisplayInfo`, `Station`, `RealtimeConfig` | `loadActiveTrips()` (selection) / `startObservingTrip(tripId)` (display) |
 
 Every state is a JS-friendly shape — flat lists where possible, strings instead of Kotlin enums on the boundary (so `JSON.stringify` produces clean output for Node/browser consumers).
@@ -107,7 +107,7 @@ Express server wrapping the `:stockholm-transport` JS bundle.
 | `GET /modules/active-trips`            | Drives the realtime `TripSelectionViewModel`. Needs `./sl up` so `realtime-api` is reachable. |
 | `ALL  /v1/*`                           | Passthrough proxy onto `https://transport.integration.sl.se/v1/*`. The library's `httpClient.get("v1/lines")` lands here when `serverHostURL` points at this server (the sl-cli wires that automatically). |
 
-Run: `cd demo/node-api && npm run dev` (nodemon) or `npm start` (plain `node`). Boots in a few seconds, prints `🚀 Demo API server listening on http://localhost:3000`. It also sends permissive CORS headers so the browser SPA below can reach `/v1` cross-origin.
+Run: `cd demo/node-api && npm run dev` (nodemon) or `npm start` (plain `node`). Boots in a few seconds, prints `🚀 Demo API server listening on http://localhost:3000`. It sends permissive CORS headers so the browser SPA below can reach `/v1` cross-origin, and patches `globalThis.fetch` to rewrite the baked `*.ngrok` URL → `http://localhost:3000`, so `/modules/*` works even with no live ngrok tunnel (it hits its own `/v1` proxy directly).
 
 ### 2.1b `demo/spa-bootstrap/` — browser SPA (talk Act 2/3)
 

@@ -118,7 +118,7 @@ The project includes a demo application (`demo/mobile`) that consumes the librar
 
 ### Node demo (standalone)
 
-`demo/node-api` runs on its own with `npm run dev` (nodemon) or `npm start` (plain `node`). When the sl-cli's `start` is active, the Node demo is automatically the upstream behind the ngrok URL.
+`demo/node-api` runs on its own with `npm run dev` (nodemon) or `npm start` (plain `node`). When the sl-cli's `start` is active, the Node demo is automatically the upstream behind the ngrok URL. The server reroutes the library's baked `*.ngrok` URL to its own `localhost:3000/v1` proxy, so `/modules/*` returns real SL data **even with no live tunnel** — only real mobile devices need the ngrok URL.
 
 ### Web demo (browser SPA)
 
@@ -129,7 +129,7 @@ The project includes a demo application (`demo/mobile`) that consumes the librar
 cd demo/spa-bootstrap && npm install && npm run dev   # http://localhost:5173
 ```
 
-The browser talks to the same `/v1` passthrough the phones use; the Node demo's proxy sends CORS headers so the cross-origin requests aren't blocked. See [`demo/spa-bootstrap/README.md`](demo/spa-bootstrap/README.md).
+The browser talks to the same node-api the phones use, but a small dev shim reroutes the baked ngrok URL to `localhost:3000` (skipping ngrok's CORS-less browser interstitial); node-api serves permissive CORS so the cross-origin request succeeds. Like the Node demo, it needs no live tunnel. See [`demo/spa-bootstrap/README.md`](demo/spa-bootstrap/README.md).
 
 ## Realtime train-positions stack
 
