@@ -33,3 +33,14 @@ tools/sl-cli/package-lock.json
 
 # demo/node-api locally installed deps
 demo/node-api/node_modules/
+
+# Talk preparation — personal decks, notes, critiques and QR assets.
+# Kept out of git (the demos and library stay tracked; the prep does not).
+docs/Slides.pen
+docs/Architecture.pen
+docs/SLIDES_PRESENTER_NOTES.md
+docs/SLIDES_FOR_NOTEBOOKLM.md
+docs/CRITIQUE.md
+docs/DEBATE.md
+docs/DEMO_RUNBOOK.md
+docs/qr-code*.png

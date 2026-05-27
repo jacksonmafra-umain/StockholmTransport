@@ -53,12 +53,15 @@ Or as one-shot subcommands:
 ```bash
 ./sl start                  # leaves services running; Ctrl+C to stop and restore
 ./sl publish --no-ios       # skip the iOS XCFramework (faster)
-./sl up                     # boot the docker stack in background
+./sl up                     # boot the docker stack (force-recreates containers, keeps mongo_data)
+./sl up mongo realtime-api  # realtime stack only — use this when `./sl start` already holds :3000
 ./sl logs realtime-api -f   # follow logs
-./sl seed                   # force re-seed Mongo
-./sl clear --yes            # nuke mongo_data volume
+./sl seed                   # force re-seed Mongo (upserts; needs the stack up)
+./sl clear --yes            # nuke mongo_data volume (the only data-destroying command)
 ./sl status
 ```
+
+`up` force-recreates containers (`--force-recreate --remove-orphans`) and self-heals stale `container_name` conflicts, so it won't fail with "name is already in use"; the `mongo_data` volume is always preserved. **Caveat:** `./sl start` runs the Node API on host `:3000`, and the dockerised `node-api` maps the same port — so run the full `./sl up` only when `start` is *not* active; otherwise use `./sl up mongo realtime-api`.
 
 The `./sl` wrapper auto-runs `npm install` in `tools/sl-cli/` the first time it's invoked, so there's no separate setup step.
 
@@ -116,6 +119,17 @@ The project includes a demo application (`demo/mobile`) that consumes the librar
 ### Node demo (standalone)
 
 `demo/node-api` runs on its own with `npm run dev` (nodemon) or `npm start` (plain `node`). When the sl-cli's `start` is active, the Node demo is automatically the upstream behind the ngrok URL.
+
+### Web demo (browser SPA)
+
+[`demo/spa-bootstrap`](demo/spa-bootstrap/) is a Vite + React + TypeScript app that consumes the **same** `StockholmTransport-stockholm-transport` JS package the Node demo does — via the same `file:` dependency. It carries no business logic: five routes each call `useStockholmTransport(factory, loader)`, which wraps the library's `subscribe`/`onCleared` verbatim. The `/leak` route is the memory-leak teaching demo (a live subscription counter that climbs without `onCleared()` and stays flat with it).
+
+```bash
+./sl publish                 # build the JS package the app depends on
+cd demo/spa-bootstrap && npm install && npm run dev   # http://localhost:5173
+```
+
+The browser talks to the same `/v1` passthrough the phones use; the Node demo's proxy sends CORS headers so the cross-origin requests aren't blocked. See [`demo/spa-bootstrap/README.md`](demo/spa-bootstrap/README.md).
 
 ## Realtime train-positions stack
 

@@ -16,6 +16,7 @@ StockholmTransport/
 ├── demo/
 │   ├── mobile/                   # Compose Multiplatform demo of the static SDK (talk Act 1/2)
 │   ├── node-api/                 # Express + KMP/JS bundle (talk Act 1 demo)
+│   ├── spa-bootstrap/            # Vite + React + TS browser SPA — same JS package (talk Act 2/3)
 │   ├── realtime-api/             # Express + ws + MongoDB — train-position simulator
 │   └── realtime-mobile/          # Compose Multiplatform app for realtime trip display
 │
@@ -106,7 +107,11 @@ Express server wrapping the `:stockholm-transport` JS bundle.
 | `GET /modules/active-trips`            | Drives the realtime `TripSelectionViewModel`. Needs `./sl up` so `realtime-api` is reachable. |
 | `ALL  /v1/*`                           | Passthrough proxy onto `https://transport.integration.sl.se/v1/*`. The library's `httpClient.get("v1/lines")` lands here when `serverHostURL` points at this server (the sl-cli wires that automatically). |
 
-Run: `cd demo/node-api && npm run dev` (nodemon) or `npm start` (plain `node`). Boots in a few seconds, prints `🚀 Demo API server listening on http://localhost:3000`.
+Run: `cd demo/node-api && npm run dev` (nodemon) or `npm start` (plain `node`). Boots in a few seconds, prints `🚀 Demo API server listening on http://localhost:3000`. It also sends permissive CORS headers so the browser SPA below can reach `/v1` cross-origin.
+
+### 2.1b `demo/spa-bootstrap/` — browser SPA (talk Act 2/3)
+
+Vite + React + TypeScript app consuming the **same** `StockholmTransport-stockholm-transport` JS package via the same `file:` dependency as the Node demo — zero business logic in the browser. Five routes (`/lines`, `/sites`, `/departures`, `/stoppoints`, `/authorities`) each call `useStockholmTransport(factory, loader)` ([src/hooks/useStockholmTransport.ts](../demo/spa-bootstrap/src/hooks/useStockholmTransport.ts)), which wraps the library's `subscribe`/`onCleared` verbatim. The `/leak` route is the slide-18 demo: a live subscription counter that climbs when a widget mounts without `onCleared()` and stays flat with it. Run: `./sl publish` then `cd demo/spa-bootstrap && npm install && npm run dev` → `http://localhost:5173`.
 
 ### 2.2 `demo/mobile/` — Compose Multiplatform static-SDK demo
 
@@ -243,7 +248,7 @@ For the mDevCamp 2026 conference talk (2026-06-04, 35 min):
 Tracked in the repo's todo list (and called out in [PUBLISHING.md](PUBLISHING.md) where they're publish-related):
 
 - ~~`shared/realtime/` library module — promote the train-positions data layer from `demo/realtime-mobile/` into the library proper.~~ **Done (Option C):** `Trip`, `Vehicle`, `ActiveTrip`, `TripDisplayInfo`, `Station`, `RealtimeConfig`, `TripUpdateDataSource`, `TripRepository(Impl)`, `TripViewModel`, `TripSelectionViewModel` now live in `:stockholm-transport`. Realtime mobile + node-api both bind to library types.
-- `demo/web/` React + Vite app — the talk's Act 2 centerpiece (`useStockholmTransport` hook + memory-leak before/after route).
+- ~~`demo/web/` React + Vite app — the talk's Act 2 centerpiece (`useStockholmTransport` hook + memory-leak before/after route).~~ **Done:** lives at `demo/spa-bootstrap/` (Vite + React + TS), five feature routes + the `/leak` route, consuming the same JS package as the Node demo.
 - `npm-publish` Gradle plugin — actually publish a scoped `@umain/stockholm-transport` to npm with `peerDependencies` for Ktor/Koin/coroutines.
 - Auth on `/api/admin/import-trafiklab` in the realtime API.
 - Map rendering inside `realtime-mobile/TripScreen` (currently stops at Material3 cards).
