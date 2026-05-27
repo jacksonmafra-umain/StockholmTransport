@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vite/
+*.local
+npm-debug.log*
+
+# tsc -b / vite build artifacts
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
