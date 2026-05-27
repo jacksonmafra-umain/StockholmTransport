@@ -24,8 +24,7 @@ StockholmTransport/
 ├── sl                            # Repo-root wrapper for the CLI
 │
 ├── docs/
-│   ├── Slides.pen                # Pencil deck for mDevCamp 2026
-│   ├── SLIDES_PRESENTER_NOTES.md
+│   ├── PUBLISHING.md             # Maven Central / SPM / npm publishing flow
 │   └── FEATURES.md               # this file
 │
 ├── Package.swift                 # SPM manifest — iOS distribution
@@ -234,16 +233,7 @@ Kotlin/JS emits a generated `package.json` under `build/js/packages/StockholmTra
 
 ---
 
-## 6. Talk artefacts
-
-For the mDevCamp 2026 conference talk (2026-06-04, 35 min):
-
-- **Deck** — [docs/Slides.pen](Slides.pen). 21 cyberpunk-styled slides in a 3-act narrative (Dream → Reality → Payoff), opened in Pencil.
-- **Presenter notes** — [docs/SLIDES_PRESENTER_NOTES.md](SLIDES_PRESENTER_NOTES.md). Per-slide spoken script, demo cues with command sequences and timing caps, pre-flight checklist, anti-goals.
-
----
-
-## 7. What's still ahead
+## 6. What's still ahead
 
 Tracked in the repo's todo list (and called out in [PUBLISHING.md](PUBLISHING.md) where they're publish-related):
 

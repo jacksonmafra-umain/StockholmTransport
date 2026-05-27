@@ -6,7 +6,7 @@ The library is designed to be the single source of truth, handling all data fetc
 
 For a single, code-anchored map of every artefact in the repo (library modules, demos, CLI, slides, Docker, distribution channels), see [docs/FEATURES.md](docs/FEATURES.md).
 
-More docs: publishing flow (Maven Central / SPM / npm) in [docs/PUBLISHING.md](docs/PUBLISHING.md); the conference talk deck + presenter script in [docs/Slides.pen](docs/Slides.pen) and [docs/SLIDES_PRESENTER_NOTES.md](docs/SLIDES_PRESENTER_NOTES.md).
+More docs: publishing flow (Maven Central / SPM / npm) in [docs/PUBLISHING.md](docs/PUBLISHING.md). (The conference talk deck and presenter notes are personal talk-prep, kept locally and intentionally not tracked in this repo.)
 
 ## Architecture
 
