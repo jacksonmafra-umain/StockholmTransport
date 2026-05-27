@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "spa-bootstrap",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "demo/spa-bootstrap"],
+      "port": 5173
+    }
+  ]
+}

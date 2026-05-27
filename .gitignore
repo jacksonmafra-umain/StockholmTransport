@@ -34,6 +34,12 @@ tools/sl-cli/package-lock.json
 # demo/node-api locally installed deps
 demo/node-api/node_modules/
 
+# Claude Code — keep the shared preview launcher, ignore personal/local state
+.claude/settings.local.json
+.claude/worktrees/
+# stray orphan lockfile (no root package.json)
+/package-lock.json
+
 # Talk preparation — personal decks, notes, critiques and QR assets.
 # Kept out of git (the demos and library stay tracked; the prep does not).
 docs/Slides.pen
