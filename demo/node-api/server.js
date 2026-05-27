@@ -2,6 +2,23 @@ import express from 'express';
 // Use 'import * as kmp from ...' to import the entire module namespace.
 import * as kmp from 'StockholmTransport-stockholm-transport';
 
+// The library is published with the public ngrok URL baked into BuildConfig (so
+// phones can reach it). Server-side we don't need the tunnel — and it's often
+// offline or stale between `./sl start` sessions — so reroute the library's
+// static-SDK calls to this server's own /v1 proxy on :3000. This keeps the
+// /modules/* demo working regardless of ngrok state (which dead URL is baked
+// no longer matters). Mobile clients still use the real tunnel.
+const _nativeFetch = globalThis.fetch;
+const rewriteNgrok = (u) => u.replace(/^https?:\/\/[a-z0-9-]+\.ngrok(-free)?\.(app|io)/i, 'http://localhost:3000');
+globalThis.fetch = (input, init) => {
+    if (typeof input === 'string') return _nativeFetch(rewriteNgrok(input), init);
+    if (input instanceof URL) return _nativeFetch(rewriteNgrok(input.href), init);
+    if (input && typeof input === 'object' && 'url' in input) {
+        return _nativeFetch(new Request(rewriteNgrok(input.url), input), init);
+    }
+    return _nativeFetch(input, init);
+};
+
 // --- 1. Get a handle to our public JS API and initialize it ---
 // Kotlin/JS exports `object` declarations as a class with a static
 // getInstance() — call it once to unwrap the singleton, then drive it
