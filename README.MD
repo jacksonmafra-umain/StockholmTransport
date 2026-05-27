@@ -6,6 +6,8 @@ The library is designed to be the single source of truth, handling all data fetc
 
 For a single, code-anchored map of every artefact in the repo (library modules, demos, CLI, slides, Docker, distribution channels), see [docs/FEATURES.md](docs/FEATURES.md).
 
+More docs: publishing flow (Maven Central / SPM / npm) in [docs/PUBLISHING.md](docs/PUBLISHING.md); the conference talk deck + presenter script in [docs/Slides.pen](docs/Slides.pen) and [docs/SLIDES_PRESENTER_NOTES.md](docs/SLIDES_PRESENTER_NOTES.md).
+
 ## Architecture
 
 The project strictly follows **Clean Architecture** principles to ensure a clear separation of concerns, testability, and maintainability.
@@ -85,7 +87,7 @@ The Node API at `:3000` exposes three surfaces:
 
 ## How to Build and Run the Demo App
 
-The project includes a demo application (`demo/compose-app`) that consumes the library and runs on both Android and iOS.
+The project includes a demo application (`demo/mobile`) that consumes the library and runs on both Android and iOS.
 
 ### Prerequisites
 
@@ -100,15 +102,15 @@ The project includes a demo application (`demo/compose-app`) that consumes the l
 
 ### Android
 
-1.  Open the `demo/compose-app` directory as a separate project in Android Studio.
+1.  Open the `demo/mobile` directory as a separate project in Android Studio.
 2.  Let Gradle sync. It will find the library in your local Maven repository.
 3.  Select the `composeApp` run configuration.
 4.  Click 'Run' (▶️).
 
 ### iOS
 
-1.  Open the `demo/compose-app` directory in Android Studio and sync Gradle.
-2.  Open the Xcode project at `demo/compose-app/iosApp/iosApp.xcworkspace`.
+1.  Open the `demo/mobile` directory in Android Studio and sync Gradle.
+2.  Open the Xcode project at `demo/mobile/iosApp/iosApp.xcworkspace`.
 3.  Select an iOS simulator and click 'Run' (▶️) in Xcode. The project is already configured to find and embed the KMP shared framework.
 
 ### Node demo (standalone)

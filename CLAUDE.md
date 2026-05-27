@@ -10,7 +10,7 @@ The static-SDK API base URL + key come from `gradle.properties` (`serverHostURL`
 
 ## Module layout (important — not what it looks like)
 
-`settings.gradle.kts` only includes `:shared` and **renames it to `:stockholm-transport`**. So the Gradle path is `:stockholm-transport`, not `:shared` and not `:library` (despite what `README.MD` says — `PUBLISHING.md` is the accurate reference).
+`settings.gradle.kts` only includes `:shared` and **renames it to `:stockholm-transport`**. So the Gradle path is `:stockholm-transport`, not `:shared` and not `:library`. The publishing flow (Maven Central / SPM / npm) lives in [docs/PUBLISHING.md](docs/PUBLISHING.md).
 
 The directories `shared/core`, `shared/lines`, `shared/sites`, `shared/departures`, `shared/stoppoints`, `shared/authorities`, `shared/realtime` look like submodules but are **not** separate Gradle projects. They are pulled into the single `:stockholm-transport` module via `kotlin.srcDirs(...)` in [shared/build.gradle.kts](shared/build.gradle.kts) (see the `commonMain` / `androidMain` / `iosMain` / `jvmMain` / `jsMain` blocks). When adding a new feature folder, you must register its `src/commonMain/kotlin` path there or it will not compile.
 

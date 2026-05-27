@@ -137,7 +137,7 @@ docker compose up                   # mongo + node-api (:3000) + realtime-api (:
 docker compose up mongo realtime-api  # realtime stack only
 ```
 
-`demo/realtime-api/` and `demo/node-api/` each ship their own `Dockerfile` (both `node:22-alpine`, run as the unprivileged `node` user). The realtime simulator's standalone compose lives at [demo/realtime-api/docker-compose.yml](demo/realtime-api/docker-compose.yml) for the case where you want to iterate on it without building `node-api` too.
+`demo/realtime-api/` and `demo/node-api/` each ship their own `Dockerfile` (both `node:22-alpine`, run as the unprivileged `node` user). The realtime simulator's standalone compose lives at [demo/realtime-api/docker-compose.yml](../demo/realtime-api/docker-compose.yml) for the case where you want to iterate on it without building `node-api` too.
 
 ### Android/JVM/JS (to Maven Local)
 
@@ -204,10 +204,10 @@ The `package.json` metadata is configured in `shared/build.gradle.kts`.
 
 SPM is the **canonical iOS distribution path** for this library. CocoaPods is not supported and is not on the roadmap.
 
-A `Package.swift` lives at the **root of this repository** ([Package.swift](Package.swift)) — there is no separate shim repo to maintain. Consumers just add the package URL in Xcode (`File → Add Package Dependencies…`):
+A `Package.swift` lives at the **root of this repository** ([Package.swift](../Package.swift)) — there is no separate shim repo to maintain. Consumers just add the package URL in Xcode (`File → Add Package Dependencies…`):
 
 ```
-https://github.com/eidra-umain/stockholm-transport
+https://github.com/jacksonmafra-umain/StockholmTransport
 ```
 
 …and select the version they need. The manifest declares a `binaryTarget` that points to the matching `stockholm-transport.xcframework.zip` on GitHub Releases.
@@ -229,7 +229,7 @@ Releasing a new SPM-consumable version is three Gradle/git steps:
     Create the release on GitHub, attach the `.zip`, copy the checksum.
 
 3.  **Update `Package.swift` and tag:**
-    Set `libraryVersion` and `libraryChecksum` in [Package.swift](Package.swift) to match the release. Commit and push the tag — Xcode will resolve the package from the tag.
+    Set `libraryVersion` and `libraryChecksum` in [Package.swift](../Package.swift) to match the release. Commit and push the tag — Xcode will resolve the package from the tag.
 
 > Tip: this whole sequence belongs in a `release.yml` GitHub Action so tagging triggers the upload + manifest rewrite automatically. That workflow is not yet wired in this repo.
 
@@ -249,7 +249,7 @@ This process publishes your `.aar` and other Maven artifacts directly to your Gi
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/eidra-umain/stockholm-transport")
+            url = uri("https://maven.pkg.github.com/jacksonmafra-umain/StockholmTransport")
             credentials {
                 username = System.getenv("GITHUB_ACTOR") ?: "jacksonmafra-umain"
                 password = System.getenv("GITHUB_TOKEN") ?: property("githubToken") as String

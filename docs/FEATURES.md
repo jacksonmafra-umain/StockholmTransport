@@ -208,7 +208,7 @@ docker compose up
 
 ### 5.1 Android / JVM (Maven)
 
-Coordinate `com.umain.transport:stockholm-transport:1.0.0`. Local-dev: `./sl publish` populates `~/.m2`. Public publishing flow (Maven Central + GitHub Packages) is documented in [PUBLISHING.md](../PUBLISHING.md) §4.
+Coordinate `com.umain.transport:stockholm-transport:1.0.0`. Local-dev: `./sl publish` populates `~/.m2`. Public publishing flow (Maven Central + GitHub Packages) is documented in [PUBLISHING.md](PUBLISHING.md) §4.
 
 ### 5.2 iOS (Swift Package Manager)
 
@@ -240,7 +240,7 @@ For the mDevCamp 2026 conference talk (2026-06-04, 35 min):
 
 ## 7. What's still ahead
 
-Tracked in the repo's todo list (and called out in [PUBLISHING.md](../PUBLISHING.md) where they're publish-related):
+Tracked in the repo's todo list (and called out in [PUBLISHING.md](PUBLISHING.md) where they're publish-related):
 
 - ~~`shared/realtime/` library module — promote the train-positions data layer from `demo/realtime-mobile/` into the library proper.~~ **Done (Option C):** `Trip`, `Vehicle`, `ActiveTrip`, `TripDisplayInfo`, `Station`, `RealtimeConfig`, `TripUpdateDataSource`, `TripRepository(Impl)`, `TripViewModel`, `TripSelectionViewModel` now live in `:stockholm-transport`. Realtime mobile + node-api both bind to library types.
 - `demo/web/` React + Vite app — the talk's Act 2 centerpiece (`useStockholmTransport` hook + memory-leak before/after route).
