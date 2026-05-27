@@ -3,15 +3,864 @@
   "children": [
     {
       "type": "frame",
-      "id": "bi8Au",
+      "id": "USlNG",
       "x": 0,
       "y": 0,
-      "name": "Frame",
+      "name": "01 — Cover",
       "clip": true,
-      "width": 800,
-      "height": 600,
-      "fill": "#FFFFFF",
-      "layout": "none"
+      "width": 1920,
+      "height": 1080,
+      "fill": "$bg",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "nMp8T",
+          "x": 80,
+          "y": 60,
+          "name": "top bar",
+          "width": 1760,
+          "height": 36,
+          "fill": "#00000000",
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "F44Ep",
+              "name": "tlLeft",
+              "fill": "$neon",
+              "content": "▶ GX·X·X / QX708 — INITIALIZING",
+              "fontFamily": "$ff-caption",
+              "fontSize": 18,
+              "fontWeight": "normal",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "mehGf",
+              "name": "tlRight",
+              "fill": "$amber",
+              "content": "TALK / 35:00",
+              "fontFamily": "$ff-caption",
+              "fontSize": 18,
+              "fontWeight": "normal",
+              "letterSpacing": 2
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "Fegc7",
+          "x": 80,
+          "y": 108,
+          "name": "hairline",
+          "fill": "$panelLine",
+          "width": 1760,
+          "height": 2
+        },
+        {
+          "type": "frame",
+          "id": "kSjya",
+          "x": 120,
+          "y": 280,
+          "name": "kicker",
+          "width": 1080,
+          "height": 32,
+          "fill": "#00000000",
+          "gap": 14,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "WtIvb",
+              "name": "kBlock",
+              "fill": "$amber",
+              "width": 14,
+              "height": 14
+            },
+            {
+              "type": "text",
+              "id": "b8sTh",
+              "name": "kText",
+              "fill": "$fgMuted",
+              "content": "MDEVCAMP — 2026.06.04 — 15:35 — CROSS THE RAVE",
+              "fontFamily": "$ff-caption",
+              "fontSize": 20,
+              "fontWeight": "normal",
+              "letterSpacing": 3
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "gwg4M",
+          "x": 120,
+          "y": 330,
+          "name": "title1",
+          "fill": "$fg",
+          "content": "TAMING",
+          "lineHeight": 1,
+          "fontFamily": "$ff-display",
+          "fontSize": 200,
+          "fontWeight": "700",
+          "letterSpacing": -2
+        },
+        {
+          "type": "text",
+          "id": "Ih6BC",
+          "x": 120,
+          "y": 540,
+          "name": "title2",
+          "fill": "$fg",
+          "content": "THE WEB",
+          "lineHeight": 1,
+          "fontFamily": "$ff-display",
+          "fontSize": 200,
+          "fontWeight": "700",
+          "letterSpacing": -2
+        },
+        {
+          "type": "text",
+          "id": "Uur5A",
+          "x": 120,
+          "y": 750,
+          "name": "title3",
+          "fill": "$neon",
+          "content": "WITH KMP.",
+          "lineHeight": 1,
+          "fontFamily": "$ff-display",
+          "fontSize": 200,
+          "fontWeight": "700",
+          "letterSpacing": -2
+        },
+        {
+          "type": "frame",
+          "id": "B4O8V",
+          "x": 120,
+          "y": 980,
+          "name": "sub-bar",
+          "width": 1700,
+          "height": 36,
+          "fill": "#00000000",
+          "gap": 24,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "A7gCq",
+              "name": "sbName",
+              "fill": "$fg",
+              "content": "JACKSON MAFRA — MOBILE / UMAIN",
+              "fontFamily": "$ff-caption",
+              "fontSize": 20,
+              "fontWeight": "normal",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "Iu3OO",
+              "name": "sbDot",
+              "fill": "$neon",
+              "content": "//",
+              "fontFamily": "$ff-caption",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "I5qanF",
+              "name": "sbCo",
+              "fill": "$fgMuted",
+              "content": "A KMP LIBRARY SHIPPED TO 4 PLATFORMS — INCLUDING THE WEB",
+              "fontFamily": "$ff-caption",
+              "fontSize": 20,
+              "fontWeight": "normal",
+              "letterSpacing": 2
+            }
+          ]
+        },
+        {
+          "type": "path",
+          "id": "KcMHE",
+          "x": 1450,
+          "y": 520,
+          "name": "chev",
+          "opacity": 0.55,
+          "geometry": "M0 20l20-20 40 40-20 20z m30 30l20-20 40 40-20 20z",
+          "viewBox": [
+            0,
+            0,
+            100,
+            100
+          ],
+          "fill": "$neonDim",
+          "width": 380,
+          "height": 380
+        },
+        {
+          "type": "frame",
+          "id": "ju1hP",
+          "x": 1450,
+          "y": 60,
+          "name": "sigil",
+          "width": 200,
+          "height": 36,
+          "fill": "#00000000",
+          "gap": 10,
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "hWeW3",
+              "name": "sigDot",
+              "fill": "$neon",
+              "width": 12,
+              "height": 12
+            },
+            {
+              "type": "text",
+              "id": "e6PoIR",
+              "name": "sigText",
+              "fill": "$neon",
+              "content": "VP : 3742-011C",
+              "fontFamily": "$ff-caption",
+              "fontSize": 18,
+              "fontWeight": "normal",
+              "letterSpacing": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "D1hHZD",
+      "x": 2020,
+      "y": 0,
+      "name": "02 — About Me",
+      "clip": true,
+      "width": 1920,
+      "height": 1080,
+      "fill": "$bg",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "kfqaV",
+          "x": 80,
+          "y": 60,
+          "name": "amt",
+          "width": 1760,
+          "height": 36,
+          "fill": "#00000000",
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "l6IIB",
+              "fill": "$neon",
+              "content": "▶ WHO_AM_I.log",
+              "fontFamily": "$ff-caption",
+              "fontSize": 18,
+              "fontWeight": "normal",
+              "letterSpacing": 2
+            },
+            {
+              "type": "text",
+              "id": "F8DQQ",
+              "fill": "$fgMuted",
+              "content": "02 OF 21",
+              "fontFamily": "$ff-caption",
+              "fontSize": 18,
+              "fontWeight": "normal",
+              "letterSpacing": 2
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "lHrpy",
+          "x": 80,
+          "y": 108,
+          "fill": "$panelLine",
+          "width": 1760,
+          "height": 2
+        },
+        {
+          "type": "frame",
+          "id": "hD8pJ",
+          "x": 120,
+          "y": 200,
+          "name": "left",
+          "width": 980,
+          "height": 780,
+          "fill": "#00000000",
+          "layout": "vertical",
+          "gap": 24,
+          "children": [
+            {
+              "type": "frame",
+              "id": "B13pm",
+              "name": "amkk",
+              "fill": "#00000000",
+              "gap": 14,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "Pop6R",
+                  "fill": "$neon",
+                  "width": 14,
+                  "height": 14
+                },
+                {
+                  "type": "text",
+                  "id": "ACNXc",
+                  "fill": "$neon",
+                  "content": "// SYSTEM USER PROFILE — LOADING",
+                  "fontFamily": "$ff-caption",
+                  "fontSize": 22,
+                  "fontWeight": "normal",
+                  "letterSpacing": 4
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "jJGJB",
+              "fill": "$fg",
+              "textGrowth": "fixed-width",
+              "width": 980,
+              "content": "JACKSON",
+              "lineHeight": 1,
+              "fontFamily": "$ff-display",
+              "fontSize": 152,
+              "fontWeight": "700",
+              "letterSpacing": -2
+            },
+            {
+              "type": "text",
+              "id": "d2VPCy",
+              "fill": "$neon",
+              "textGrowth": "fixed-width",
+              "width": 980,
+              "content": "MAFRA.",
+              "lineHeight": 1,
+              "fontFamily": "$ff-display",
+              "fontSize": 152,
+              "fontWeight": "700",
+              "letterSpacing": -2
+            },
+            {
+              "type": "frame",
+              "id": "Ego3Q",
+              "name": "amrol",
+              "fill": "#00000000",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "MOrhN",
+                  "fill": "$fg",
+                  "content": "MOBILE ENGINEER / UMAIN",
+                  "fontFamily": "$ff-display",
+                  "fontSize": 36,
+                  "fontWeight": "700",
+                  "letterSpacing": -1
+                },
+                {
+                  "type": "text",
+                  "id": "M1CGto",
+                  "fill": "$fgMuted",
+                  "content": "ANDROID PRIMARILY — MOBILE-SECURITY",
+                  "fontFamily": "$ff-caption",
+                  "fontSize": 20,
+                  "fontWeight": "normal",
+                  "letterSpacing": 3
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LX0cL",
+              "name": "amtags",
+              "fill": "#00000000",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "s4lOj",
+                  "name": "t1",
+                  "fill": "#00000000",
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$panelLine"
+                  },
+                  "gap": 8,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "DkG0i",
+                      "fill": "$amber",
+                      "content": "BREAKING THINGS",
+                      "fontFamily": "$ff-caption",
+                      "fontSize": 16,
+                      "fontWeight": "normal",
+                      "letterSpacing": 3
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NBS6U",
+                  "name": "t2",
+                  "fill": "#00000000",
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$panelLine"
+                  },
+                  "gap": 8,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "P7Tgpi",
+                      "fill": "$amber",
+                      "content": "PEN TESTING",
+                      "fontFamily": "$ff-caption",
+                      "fontSize": 16,
+                      "fontWeight": "normal",
+                      "letterSpacing": 3
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WOBew",
+                  "name": "t3",
+                  "fill": "#00000000",
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$panelLine"
+                  },
+                  "gap": 8,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Skhr9",
+                      "fill": "$amber",
+                      "content": "WRITING",
+                      "fontFamily": "$ff-caption",
+                      "fontSize": 16,
+                      "fontWeight": "normal",
+                      "letterSpacing": 3
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xOLK5",
+                  "name": "t4",
+                  "fill": "#00000000",
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$panelLine"
+                  },
+                  "gap": 8,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "dgEas",
+                      "fill": "$amber",
+                      "content": "OBSESSED W/ FAILURE MODES",
+                      "fontFamily": "$ff-caption",
+                      "fontSize": 16,
+                      "fontWeight": "normal",
+                      "letterSpacing": 3
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "sxmWA",
+          "x": 1180,
+          "y": 200,
+          "name": "right-terminal",
+          "width": 660,
+          "height": 680,
+          "fill": "$panel",
+          "stroke": {
+            "thickness": 1,
+            "fill": "$panelLine"
+          },
+          "layout": "vertical",
+          "children": [
+            {
+              "type": "frame",
+              "id": "U5L54b",
+              "name": "amth",
+              "width": "fill_container",
+              "fill": "$bgDeep",
+              "stroke": {
+                "thickness": {
+                  "bottom": 1
+                },
+                "fill": "$panelLine"
+              },
+              "gap": 8,
+              "padding": [
+                12,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "nr67C",
+                  "fill": "$danger",
+                  "width": 10,
+                  "height": 10
+                },
+                {
+                  "type": "ellipse",
+                  "id": "EAaVF",
+                  "fill": "$amber",
+                  "width": 10,
+                  "height": 10
+                },
+                {
+                  "type": "ellipse",
+                  "id": "dsynU",
+                  "fill": "$neon",
+                  "width": 10,
+                  "height": 10
+                },
+                {
+                  "type": "text",
+                  "id": "lhHE1",
+                  "fill": "$fgMuted",
+                  "content": "  ~/about.log",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wq29e",
+              "name": "ambd",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#00000000",
+              "layout": "vertical",
+              "gap": 14,
+              "padding": 24,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "EBjh8",
+                  "fill": "$fg",
+                  "content": "$ cat ~/about.log",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "UMsbm",
+                  "fill": "$neon",
+                  "textGrowth": "fixed-width",
+                  "width": 612,
+                  "content": "\"I'm a mobile engineer at Umain,",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 21,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "E6g3c6",
+                  "fill": "$neon",
+                  "textGrowth": "fixed-width",
+                  "width": 612,
+                  "content": " mostly Android. Lately I've",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 21,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "TdLwd",
+                  "fill": "$neon",
+                  "textGrowth": "fixed-width",
+                  "width": 612,
+                  "content": " developed an obsession with",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 21,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "pvyei",
+                  "fill": "$neon",
+                  "textGrowth": "fixed-width",
+                  "width": 612,
+                  "content": " breaking things — not just",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 21,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "g12DE",
+                  "fill": "$neon",
+                  "textGrowth": "fixed-width",
+                  "width": 612,
+                  "content": " how apps work, but how they fail.",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 21,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "B31OG",
+                  "fill": "$neon",
+                  "textGrowth": "fixed-width",
+                  "width": 612,
+                  "content": " Reading. Writing. Pen testing.",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 21,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "y657Gt",
+                  "fill": "$neon",
+                  "textGrowth": "fixed-width",
+                  "width": 612,
+                  "content": " Mobile-security path.",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 21,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "id": "t28YWB",
+                  "fill": "$panelLine",
+                  "width": 80,
+                  "height": 2
+                },
+                {
+                  "type": "text",
+                  "id": "S4LrAz",
+                  "fill": "$fg",
+                  "content": "$ ls ~/.profile/links",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "s2k7v2",
+                  "fill": "$fg",
+                  "content": "github.com/jacksonfdam",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "JY5Gl",
+                  "fill": "$fg",
+                  "content": "linkedin.com/in/jacksonmafra",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "P5NeTV",
+                  "fill": "$fg",
+                  "content": "medium.com/@jacksonmafra",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 20,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "z1bpg",
+          "x": 1180,
+          "y": 900,
+          "name": "qr-slot",
+          "width": 660,
+          "height": 140,
+          "fill": "#00000000",
+          "gap": 18,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "na64w",
+              "name": "qrbox",
+              "width": 130,
+              "height": 130,
+              "fill": "$panel",
+              "stroke": {
+                "thickness": 1,
+                "fill": "$panelLine"
+              },
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "wr5gc",
+                  "fill": "$fgMuted",
+                  "content": "[ QR ]",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ltw7t",
+              "name": "qrtxt",
+              "fill": "#00000000",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "CovyI",
+                  "fill": "$neon",
+                  "content": "SCAN — JUMP TO REPO",
+                  "fontFamily": "$ff-caption",
+                  "fontSize": 18,
+                  "fontWeight": "normal",
+                  "letterSpacing": 3
+                },
+                {
+                  "type": "text",
+                  "id": "J980GB",
+                  "fill": "$fg",
+                  "content": "github.com/jacksonfdam",
+                  "fontFamily": "$ff-mono",
+                  "fontSize": 22,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "W7IVZ",
+          "x": 120,
+          "y": 1000,
+          "fill": "$fgMuted",
+          "content": " ",
+          "fontFamily": "$ff-caption",
+          "fontSize": 18,
+          "fontWeight": "normal",
+          "letterSpacing": 2
+        }
+      ]
     }
-  ]
+  ],
+  "variables": {
+    "amber": {
+      "type": "color",
+      "value": "#FFE600"
+    },
+    "amberDim": {
+      "type": "color",
+      "value": "#998A00"
+    },
+    "bg": {
+      "type": "color",
+      "value": "#000000"
+    },
+    "bgDeep": {
+      "type": "color",
+      "value": "#0A0F0D"
+    },
+    "danger": {
+      "type": "color",
+      "value": "#FF3D5C"
+    },
+    "ff-body": {
+      "type": "string",
+      "value": "Geist"
+    },
+    "ff-caption": {
+      "type": "string",
+      "value": "IBM Plex Mono"
+    },
+    "ff-display": {
+      "type": "string",
+      "value": "Geist Mono"
+    },
+    "ff-mono": {
+      "type": "string",
+      "value": "Geist Mono"
+    },
+    "fg": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "fgMuted": {
+      "type": "color",
+      "value": "#7A8C84"
+    },
+    "neon": {
+      "type": "color",
+      "value": "#4DFFA8"
+    },
+    "neonDim": {
+      "type": "color",
+      "value": "#1FA86F"
+    },
+    "panel": {
+      "type": "color",
+      "value": "#0F1614"
+    },
+    "panelLine": {
+      "type": "color",
+      "value": "#1F2A24"
+    }
+  }
 }
