@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AuthorityDto(
     val id: Int,
-    val gid: Long,
+    val gid: Long? = null,
     val name: String,
     @SerialName("formal_name")
     val formalName: String? = null,

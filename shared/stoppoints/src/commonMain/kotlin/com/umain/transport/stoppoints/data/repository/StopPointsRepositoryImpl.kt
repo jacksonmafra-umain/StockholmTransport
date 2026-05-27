@@ -41,10 +41,10 @@ class StopPointsRepositoryImpl(private val httpClient: HttpClient) : StopPointsR
             id = this.id,
             name = this.name,
             type = this.type,
-            stopAreaName = this.stopArea.name,
-            authorityName = this.transportAuthority.name,
-            latitude = this.lat,
-            longitude = this.lon
+            stopAreaName = this.stopArea?.name ?: "",
+            authorityName = this.transportAuthority?.name ?: "",
+            latitude = this.lat ?: 0.0,
+            longitude = this.lon ?: 0.0
         )
     }
 }

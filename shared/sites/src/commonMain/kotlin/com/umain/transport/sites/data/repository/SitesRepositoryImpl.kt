@@ -40,8 +40,8 @@ class SitesRepositoryImpl(private val httpClient: HttpClient) : SitesRepository 
         return Site(
             id = this.id,
             name = this.name,
-            latitude = this.lat,
-            longitude = this.lon
+            latitude = this.lat ?: 0.0,
+            longitude = this.lon ?: 0.0
         )
     }
 }

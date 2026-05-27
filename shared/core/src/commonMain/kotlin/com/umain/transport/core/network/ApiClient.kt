@@ -30,6 +30,10 @@ fun createHttpClient() = HttpClient {
             prettyPrint = true
             isLenient = true
             ignoreUnknownKeys = true
+            // A present-but-null value on a non-null property (with a default)
+            // degrades to the default instead of failing the whole response.
+            // Pairs with the nullable DTO fields for missing keys.
+            coerceInputValues = true
         })
     }
 
