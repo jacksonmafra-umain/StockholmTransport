@@ -27,6 +27,21 @@ console.log(`   realtime ▶ ${REALTIME_HTTP}  (ws ${REALTIME_HOST}:${REALTIME_P
 const app = express();
 const port = 3000;
 
+// CORS — the browser SPA (demo/spa-bootstrap, http://localhost:5173) talks to
+// the same /v1 passthrough the phones use, but cross-origin. Mobile and the
+// Node demo never trip CORS; a browser does. Allow any origin and short-circuit
+// the preflight so the KMP HttpClient's requests aren't blocked. (The mobile
+// apps and Node ignore these headers — only the browser needs them.)
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+    }
+    next();
+});
+
 // Helper data structure to map URL routes to our library's ViewModels.
 // Each getViewModel is wrapped in an arrow so the singleton `this` is
 // preserved — capturing `transportApi.getLinesViewModel` as a bare
