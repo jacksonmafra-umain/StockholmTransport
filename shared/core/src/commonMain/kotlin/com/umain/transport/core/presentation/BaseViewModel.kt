@@ -22,12 +22,12 @@ open class BaseViewModel<T> {
 
     /**
      * This must be implemented by subclasses to expose their StateFlow.
-     * It is not exported to JS as StateFlow is not JS-compatible.
+     * It is not exported to JS as StateFlow is not JS-compatible — JS
+     * consumers go through [subscribe] instead. Kotlin consumers (Compose,
+     * SwiftUI bridges, JVM tests) collect this directly.
      */
-    // We tell the compiler to ignore this property when exporting to JS,
-    // as StateFlow is not a JS-compatible type.
     @JsExport.Ignore
-    protected open val uiState: StateFlow<T>? = null
+    open val uiState: StateFlow<T>? = null
 
     /**
      * A JS-friendly way to subscribe to state updates.

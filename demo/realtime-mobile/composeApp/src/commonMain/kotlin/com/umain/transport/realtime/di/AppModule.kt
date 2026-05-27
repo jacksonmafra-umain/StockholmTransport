@@ -1,40 +1,28 @@
 package com.umain.transport.realtime.di
 
-import com.umain.transport.realtime.data.remote.TripUpdateDataSource
-import com.umain.transport.realtime.data.remote.provideHttpClient
-import com.umain.transport.realtime.data.repository.TripRepositoryImpl
-import com.umain.transport.realtime.domain.repository.TripRepository
-import com.umain.transport.realtime.presentation.TripSelectionViewModel
-import com.umain.transport.realtime.presentation.TripViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import org.koin.core.context.startKoin
+import com.umain.transport.di.initKoin as libraryInitKoin
+import com.umain.transport.realtime.RealtimeConfig
+import com.umain.transport.realtime.config.BuildConfig
 import org.koin.dsl.KoinAppDeclaration
-import org.koin.dsl.module
 
-fun initKoin(appDeclaration: KoinAppDeclaration = {}) = startKoin {
-    appDeclaration()
-    modules(
-        dataModule,
-        presentationModule
-    )
-}
-
-val dataModule = module {
-    single { provideHttpClient() }
-    single { TripUpdateDataSource(get()) }
-    single<TripRepository> { TripRepositoryImpl(dataSource = get(), httpClient = get()) }
-}
-
-val presentationModule = module {
-    factory {
-        val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-        TripViewModel(get(), scope)
-    }
-
-    factory {
-        val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-        TripSelectionViewModel(get(), scope)
-    }
-}
+/**
+ * Bootstraps the realtime-mobile demo by delegating to the
+ * `:stockholm-transport` library's [com.umain.transport.di.initKoin]. Every
+ * binding the demo needs (HttpClient, TripUpdateDataSource, TripRepository,
+ * TripViewModel, TripSelectionViewModel) ships in the library's
+ * `realtimeModule(...)` after Option C — the demo no longer carries its own
+ * data / domain / repository / viewmodel duplicates.
+ *
+ * Realtime simulator coordinates come from `BuildConfig` (Android emulator
+ * uses 10.0.2.2; iOS simulator uses 127.0.0.1; talk-day ngrok rewrites these
+ * via `./sl start`).
+ */
+fun initKoin(appDeclaration: KoinAppDeclaration = {}) = libraryInitKoin(
+    realtimeConfig = RealtimeConfig(
+        httpBaseUrl = BuildConfig.SERVER_HOST_URL,
+        wsHost = BuildConfig.SERVER_HOST,
+        wsPort = BuildConfig.SERVER_PORT,
+        wsSecure = BuildConfig.SERVER_HOST_URL.startsWith("https://"),
+    ),
+    appDeclaration = appDeclaration,
+)

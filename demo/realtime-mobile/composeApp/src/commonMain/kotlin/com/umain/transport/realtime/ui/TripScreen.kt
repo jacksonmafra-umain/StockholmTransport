@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.umain.transport.realtime.domain.model.Station
 import com.umain.transport.realtime.presentation.TripViewModel
 import com.umain.transport.realtime.theme.SLLines
 import org.koin.compose.koinInject
@@ -139,12 +140,15 @@ private fun LinePuck(lineNumber: String, lineColor: Color) {
  * Vertical metro-line metaphor: a coloured track on the left with station
  * dots; current station big and bright, next three smaller, terminus dot
  * filled in solid. Mirrors how stations are drawn on real SL maps.
+ *
+ * Stations are the library's [Station] domain type; we read `.name` once at
+ * the leaf (StationRow) so the UI stays decoupled from any future fields.
  */
 @Composable
 private fun StationRail(
-    currentStation: String,
-    nextStations: List<String>,
-    finalDestination: String,
+    currentStation: Station,
+    nextStations: List<Station>,
+    finalDestination: Station,
     lineColor: Color,
 ) {
     Column(
@@ -154,27 +158,27 @@ private fun StationRail(
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         StationRow(
-            name = currentStation,
+            name = currentStation.name,
             sublabel = "You are here",
             lineColor = lineColor,
             isCurrent = true,
-            connectorBelow = nextStations.isNotEmpty() || finalDestination.isNotEmpty(),
+            connectorBelow = nextStations.isNotEmpty() || finalDestination.name.isNotEmpty(),
         )
 
         nextStations.take(3).forEachIndexed { idx, station ->
             StationRow(
-                name = station,
+                name = station.name,
                 sublabel = "Next ${idx + 1}",
                 lineColor = lineColor,
                 isCurrent = false,
                 connectorBelow = idx < nextStations.size - 1 ||
-                    (finalDestination.isNotEmpty() && finalDestination != station),
+                    (finalDestination.name.isNotEmpty() && finalDestination.name != station.name),
             )
         }
 
-        if (finalDestination.isNotEmpty() && finalDestination != currentStation) {
+        if (finalDestination.name.isNotEmpty() && finalDestination.name != currentStation.name) {
             StationRow(
-                name = finalDestination,
+                name = finalDestination.name,
                 sublabel = "Final destination",
                 lineColor = lineColor,
                 isCurrent = false,

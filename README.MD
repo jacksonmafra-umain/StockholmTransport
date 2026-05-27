@@ -16,12 +16,12 @@ The project strictly follows **Clean Architecture** principles to ensure a clear
 
 ### Module Structure
 
-The library is highly modularized to promote reuse and separation of concerns.
+`settings.gradle.kts` includes a single Gradle subproject `:shared` and **renames it to `:stockholm-transport`** — that's the path you publish, build, and depend on. The `shared/<feature>` directories are *not* separate Gradle projects; they're folder slices pulled into the single module via `kotlin.srcDirs(...)` in [shared/build.gradle.kts](shared/build.gradle.kts).
 
--   `shared`: The main "umbrella" module responsible for creating the final XCFramework for iOS. It exports the APIs of all submodules.
--   `library`: A dedicated "publication" module that aggregates all other modules to create a single, clean artifact for Maven (for Android, JVM, and JS consumers).
--   `shared/core`: Contains cross-cutting code, such as the network client (Ktor) setup, dependency injection (Koin) definitions, and the multiplatform logger.
--   `shared/{feature}`: Each main API entity (e.g., `lines`, `sites`, `departures`) has its own module. Each of these modules follows the Clean Architecture structure internally.
+-   `shared/core` — cross-cutting Ktor HttpClient (with `WebSockets` installed), Koin core module, multiplatform logger, `BaseViewModel<T>`, `DataResult` / `NetworkError`.
+-   `shared/lines`, `shared/sites`, `shared/departures`, `shared/stoppoints`, `shared/authorities` — static SDK features. Each follows Clean Architecture internally and registers its repository + ViewModel in a Koin module.
+-   `shared/realtime` — realtime feature module (added in the Option C lift-into-library refactor). Owns `Trip`, `Vehicle`, `ActiveTrip`, `TripDisplayInfo`, `Station`, `RealtimeConfig`, plus the `TripUpdateDataSource` (Ktor WebSocket against `/updates/{tripId}`) and the `TripViewModel` / `TripSelectionViewModel`. After Option C, the realtime mobile app and the Node demo bind to these library types directly — they no longer carry duplicates.
+-   `shared/src/commonMain/kotlin/com/umain/transport/{di,js}/` — the public Koin bootstrap (`initKoin(realtimeConfig = …)`) and the `StockholmTransportApi` JS façade (`initialize` / `initializeWithRealtime` plus per-feature `getXxxViewModel()` accessors).
 
 ## Dev workflow with `sl` (the project CLI)
 
@@ -75,7 +75,11 @@ What `start` does, in order:
 3. Backs up [`gradle.properties`](gradle.properties) → `gradle.properties.sl-cli.bak`.
 4. Rewrites `serverHostURL="${ngrokUrl}/v1"` so any subsequent `publishToMavenLocal` bakes the public URL into `BuildConfig.API_BASE_URL`.
 
-The Node API at `:3000` exposes two surfaces: the original `/modules` ViewModel routes (used by [Slide 08 – DEMO Node](docs/SLIDES_PRESENTER_NOTES.md)), and a passthrough proxy at `/v1/*` that forwards onto `https://transport.integration.sl.se/v1/*`. The proxy is what the rebuilt mobile and web apps consume — they think they're talking to SL, they're actually talking to your laptop.
+The Node API at `:3000` exposes three surfaces:
+
+1. `/modules/{lines,sites,departures,stoppoints,authorities}` — static-SDK ViewModel routes used by the talk's Act 1 demo.
+2. `/modules/active-trips` — added after Option C; drives the library's realtime `TripSelectionViewModel` against the simulator. Requires the docker stack running (`./sl up`) so `realtime-api` is reachable.
+3. `/v1/*` — passthrough proxy to `https://transport.integration.sl.se/v1/*`. The rebuilt mobile and web apps think they're talking to SL; they're actually talking to your laptop.
 
 `stop` (or `Ctrl+C` / EOF) closes the tunnel, kills nodemon, and restores `gradle.properties` from the backup.
 
@@ -116,7 +120,7 @@ The project includes a demo application (`demo/compose-app`) that consumes the l
 A second pair of demos sits alongside the static-API ones — for live train positions streamed over WebSocket:
 
 - **[`demo/realtime-api/`](demo/realtime-api/)** — Express + `ws` + MongoDB simulator. Tick-driven `SimulationEngine` advances vehicles between stops and pushes `WebSocketMessage(currentStop, nextThreeStops, finalDestination)` over `WS /updates/{tripId}`. HTTP routes (`/api/lines`, `/api/sites`, `/api/trips/active`, etc.) feed selection screens. Bumped to `node:22-alpine`, `mongo:8.0`, Express 5, Mongoose 8.18, `multer 2`, `ws 8.18.3` and runs as a non-root container user.
-- **[`demo/realtime-mobile/`](demo/realtime-mobile/)** — Compose Multiplatform app (Android + iOS) on the same toolchain catalogue as the library (Kotlin 2.3.21, AGP 9.1.1, Compose 1.10.3, Ktor 3.4.3 with `ktor-client-websockets`, Koin 4.2.1 + Koin Compiler Plugin). Two screens: `TripSelectionScreen` (picks an active trip) and `TripScreen` (subscribes to `/updates/{tripId}` and renders the rolling station info). Package `com.umain.transport.realtime.*`.
+- **[`demo/realtime-mobile/`](demo/realtime-mobile/)** — Compose Multiplatform app (Android + iOS). After Option C this app **does not** carry its own Ktor / Serialization / data classes / repository / ViewModels — it depends on `:stockholm-transport` and consumes `TripViewModel`, `TripSelectionViewModel`, `RealtimeConfig`, and the domain types from the library. Two screens: `TripSelectionScreen` (picks an active trip) and `TripScreen` (subscribes to `/updates/{tripId}` and renders the rolling station info). Package `com.umain.transport.realtime.*`.
 
 Run the realtime stack on its own:
 
@@ -177,4 +181,34 @@ fun MyScreen(viewModel: LinesViewModel = koinInject()) {
         // Show the list of lines
     }
 }
+```
+
+### Realtime feature usage
+
+The realtime feature ships in the same artifact, but takes its simulator coordinates at runtime via `RealtimeConfig`:
+
+```kotlin
+import com.umain.transport.di.initKoin
+import com.umain.transport.realtime.RealtimeConfig
+
+initKoin(
+    realtimeConfig = RealtimeConfig(
+        httpBaseUrl = "http://localhost:3001",
+        wsHost      = "localhost",
+        wsPort      = 3001,
+        wsSecure    = false,
+    ),
+)
+// Now: koinInject<TripSelectionViewModel>() / koinInject<TripViewModel>()
+```
+
+JS / Node consumers go through the wrapper:
+
+```js
+import * as kmp from 'StockholmTransport-stockholm-transport';
+const api = kmp.StockholmTransportApi.getInstance();
+api.initializeWithRealtime('http://localhost:3001', 'localhost', 3001, false);
+const tripPicker = api.getTripSelectionViewModel();
+tripPicker.subscribe(state => { if (!state.isLoading) render(state.activeTrips); });
+tripPicker.loadActiveTrips();
 ```

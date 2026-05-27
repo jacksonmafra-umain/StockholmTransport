@@ -46,6 +46,8 @@ export async function publishAll(repoRoot, { skipIos = false } = {}) {
     }
 
     ok('All packages built. Mobile + web demos can pick up the new artefacts.');
+    dim('  • static demos: GET /modules/lines /sites /departures /stoppoints /authorities');
+    dim('  • realtime:     GET /modules/active-trips  (needs `up` for the simulator)');
     return true;
 }
 

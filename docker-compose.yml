@@ -44,9 +44,18 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      # Realtime simulator coordinates passed to
+      # StockholmTransportApi.initializeWithRealtime(...). Inside the docker
+      # network realtime-api listens on its own port 3000; on the host it's
+      # mapped to 3001 (see realtime-api.ports below).
+      - REALTIME_HTTP_URL=http://realtime-api:3000
+      - REALTIME_WS_HOST=realtime-api
+      - REALTIME_WS_PORT=3000
+      - REALTIME_WS_SECURE=false
     ports:
       - "3000:3000"
-    # No DB dep — the static demo proxies SL directly.
+    depends_on:
+      - realtime-api
 
   realtime-api:
     build:

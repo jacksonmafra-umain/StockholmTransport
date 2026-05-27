@@ -100,7 +100,9 @@ async function cmdStart() {
         ok(`Stack is up. Point any KMP consumer at ${c.bold().green(apiUrl)}.`);
         dim('  • mobile / web: ./gradlew :stockholm-transport:publishToMavenLocal && rebuild apps');
         dim('  • node demo:    already wired (file: dep, picks up changes via nodemon)');
-        dim(`  • public:       ${ngrokUrl}/v1/lines?transport_authority_id=1`);
+        dim(`  • static:       ${ngrokUrl}/modules/lines`);
+        dim(`  • realtime:     ${ngrokUrl}/modules/active-trips   (needs \`up\` first)`);
+        dim(`  • SL passthru:  ${ngrokUrl}/v1/lines?transport_authority_id=1`);
         return 0;
     } catch (e) {
         fail(`start failed: ${e.message}`);
@@ -206,6 +208,17 @@ async function cmdStatus() {
     info('Docker compose stack:');
     const rows = await dockerPs(REPO_ROOT);
     printPsTable(rows);
+
+    // After Option C the realtime feature lives in the library, so the node
+    // demo itself can resolve trips. Surface whether the simulator is reachable
+    // since the library will silently emit NetworkError otherwise.
+    process.stdout.write('\n');
+    const realtimeRow = rows.find((r) => /realtime-api/i.test(r.Service ?? r.Name ?? ''));
+    if (realtimeRow && /running|up/i.test(realtimeRow.State ?? realtimeRow.Status ?? '')) {
+        info(`Realtime simulator: ${c.green('reachable on http://localhost:3001')}  (TripViewModel + TripSelectionViewModel are live)`);
+    } else {
+        info(`Realtime simulator: ${c.dim('not running — `up` to boot mongo + realtime-api before hitting /modules/active-trips')}`);
+    }
     return 0;
 }
 

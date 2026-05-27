@@ -9,6 +9,7 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -42,6 +43,10 @@ fun createHttpClient() = HttpClient {
         connectTimeoutMillis = 15000
         socketTimeoutMillis = 15000
     }
+
+    // Realtime feature opens `/updates/{tripId}` over WS — see
+    // [com.umain.transport.realtime.data.remote.TripUpdateDataSource].
+    install(WebSockets)
 
     defaultRequest {
         url(API_BASE_URL)

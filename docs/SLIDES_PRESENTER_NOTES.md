@@ -2,418 +2,354 @@
 
 **Event:** mDevCamp 2026 — 2026-06-04 · 15:35–16:20 · Cross the rave
 **Total time:** 35 min talk + ~10 min Q&A
-**Deck:** [docs/Slides.pen](Slides.pen)
-**Repo:** [github.com/jacksonfdam](https://github.com/jacksonfdam)
+**Deck:** [docs/Slides.pen](Slides.pen) — 23 slides
+**Repo:** github.com/jacksonfdam
 
-## How to read this doc
+> **This is a full rewrite** for the rebuilt 23-slide deck. Structure: Opening (01–02) → Framing (03–05) → Act 1 The Dream (06–11) → Act 2 The Reality (12–18) → Act 3 The Payoff (19–23). Every entry: **slide title — target time**. Bullets are the *only* things to say (talk-shaped). Demo blocks are **bold** with concrete commands.
 
-Each entry: **slide title — target time on stage**. The bullets are the *only* things to actually say (kept short, talk-shaped). Demo blocks are **bold** with concrete commands. Cues at the bottom are reminders, not script.
+## Pacing budget (35 minutes hard cap)
 
-### Pacing budget (35 minutes hard cap)
+| Section              | Slides | Mins |
+| -------------------- | ------ | ---- |
+| Opening              | 01–02  | 1.5  |
+| Framing — the why    | 03–05  | 4    |
+| Act 1 — The Dream    | 06–11  | 9    |
+| Act 2 — The Reality  | 12–18  | 11   |
+| Act 3 — The Payoff   | 19–23  | 9.5  |
+| **Total**            | 23     | 35   |
 
-| Section            | Slides | Mins |
-| ------------------ | ------ | ---- |
-| Opening            | 01–03  | 4    |
-| Act 1 — The Dream  | 04–08  | 9    |
-| Act 2 — The Reality| 09–14  | 11   |
-| Act 3 — The Payoff | 15–20  | 11   |
-| **Total**          | 20     | 35   |
+The narrative is a single arc: **stop rebuilding the same logic** (framing) → **here's how KMP reaches JS** (Act 1) → **here's where it gets hard** (Act 2) → **here's what shipping really costs** (Act 3). Demos close each act.
 
-Slide 21 (Thesis) lives off the main path — re-show it during Q&A if someone asks "so what's the one-sentence pitch".
+## KotlinConf '26 context — framing only, not on slides
+
+Verified against the official docs; shapes how you *answer*, not what you demo.
+
+- **Compose Multiplatform Web is Beta** (`lp.jetbrains.com/cmp-for-web`, since Sept 2025).
+- **Swift Export → Alpha in Kotlin 2.4** (keynote) — future replacement for the XCFramework + ObjC bridge. We still ship XCFramework. (A14)
+- **AGP 9 disallows `com.android.application` in a KMP module** — the new official structure separates library + app modules; this repo uses bypass props in the demos. (A15)
+- **KMP Stable since Nov 2023; Google endorsed it at I/O 2024.** Production users on kotlinlang.org: Cash App, McDonald's, Netflix, Forbes, 9GAG, Philips. Safe to cite.
+- **klibs.io shows 3,600+ libraries** — citable. Per-library: filter `js`/`native`; Apple targets hide under the "Kotlin/Native" badge.
+- Don't cite as hard fact: "+25% native build perf", "18-month security policy" — keynote-only.
 
 ---
+
+# OPENING
 
 ## Slide 01 — Cover  ·  0:00–0:30
 
-> "TAMING THE WEB / WITH KMP."
+> TAMING THE WEB / WITH KMP.
 
-- Walk on. Don't talk over the title.
-- Wait for the room to settle. Read it slowly: *"Taming the web — with Kotlin Multiplatform."*
-- One sentence: "Today we're taking a perfectly good mobile library and stretching it to the web."
-- **Cue:** advance the moment people start nodding.
-
----
+- Walk on. Don't talk over the title. Read it slowly.
+- One sentence: *"Today we take a perfectly good mobile library and stretch it to the web."*
+- **Cue:** advance when people start nodding.
 
 ## Slide 02 — About Me  ·  0:30–1:30
 
 > WHO_AM_I.log
 
-- *"I'm a mobile engineer at Umain, mostly Android. Lately I've developed a bit of an obsession with breaking things — not just understanding how apps work, but how they fail. I've been diving into mobile security: reading, writing, some pen testing. I'm not an expert — yet. But I've learned a lot along the way, and that's what I want to share with you today."*
-- Point at the GitHub / LinkedIn / Medium block. Tell them: *"All the code is in the repo, link's in the QR. Don't take notes — relax."*
-- **Hard cap: 60 seconds.** Do not over-explain who you are. Let the talk do the work.
+- *"Mobile engineer at Umain, mostly Android. Lately obsessed with how apps work — and how they fail. Some mobile security, some pen testing. Still learning, and that's what I want to share."*
+- Point at the QR: *"All the code, slides, and these notes are in the repo. Don't take notes — relax."*
+- **Hard cap: 60 seconds.** Let the talk do the work.
 
 ---
 
-## Slide 03 — Act 1 / The Dream  ·  1:30–2:00
+# FRAMING — the why
+
+## Slide 03 — Why build it twice?  ·  1:30–3:00
+
+> // A PRODUCT MANAGER, LOOKING AT THE ROADMAP · WHY BUILD IT **TWICE?**
+
+- **The hook — tell it as a story:** *"A product manager looks at the roadmap. The Android team and the iOS team both estimated the same time for the same feature. Same behaviour, two codebases. He asks the question every engineer eventually hears: 'If both apps do exactly the same thing, why are we building the architecture twice?'"*
+- Land the duplication: *"Android in Kotlin, iOS in Swift — the same API integration, caching, validation, offline sync. Written twice. And the bugs? Also twice. Android pagination breaks, then iOS breaks the same way a month later."*
+- The pivot to your thesis: *"Mobile teams mostly have an answer now — Kotlin Multiplatform: share the logic, keep the UI native. This talk is about the rebuild nobody mentions. The web is the third one."*
+- **Footer line:** *"A KMP library is an SDK with multiple front doors."*
+- **Cue:** the room must feel the duplication pain before you offer the cure. ~90s.
+
+## Slide 04 — We don't share the UI  ·  3:00–4:30
+
+> WE DON'T SHARE THE UI. · SHARE WHAT MAKES SENSE, KEEP WHAT MATTERS NATIVE.
+
+- **Kill the Flutter/RN confusion immediately:** *"When I say cross-platform, half of you think Flutter or React Native. This is the opposite. We do NOT share the UI. SwiftUI stays SwiftUI. Compose stays Compose. The phone still feels like the phone."*
+- What IS shared (point at the list): *"networking, repositories, caching, API models, auth, feature flags, offline sync, analytics, pagination, validation. The backend-driven logic — once."*
+- **Why now (the production-ready beat):** *"KMP burned people before — the old memory model, awkward Swift interop, slow builds. That's fixed. New memory manager, no more frozen objects. And Swift interop got clean: a Kotlin `suspend fun fetchProfile()` is called from Swift as `try await repository.fetchProfile()`. iOS engineers stop treating shared code as foreign."*
+- Credibility: *"Stable since 2023, Google-endorsed in 2024. In production at Cash App, Netflix, McDonald's."*
+- **Cue:** this is the slide that converts the skeptic who thinks KMP = Flutter. ~90s.
+
+## Slide 05 — Ship an SDK, not an API  ·  4:30–5:30
+
+> // API vs SDK — THE HONEST PITCH · SHIP AN SDK, NOT AN API.
+
+- The distinction: *"An API is a contract — just URLs. An SDK is a library that wraps those URLs so nobody re-implements them."*
+- Left (API): *"With a raw API, every client rebuilds fetch, parse, error states — and they drift, platform by platform."*
+- Right (SDK) — **the pitch to the frontend dev in the room:** *"TypeScript types for free — the compiler emits the `.d.mts`. Zero fetch/parse boilerplate. And you don't learn Kotlin. For you, it's an `npm install`."*
+- **The honesty beat (do not skip — it earns the rest of the talk):** *"The cost is real: about 800 KB. On a static landing page that's dead weight — just `fetch()`. On a real app already shipping Android and iOS, sharing the logic pays for itself."*
+- **Cue:** ~60s. Land the cost honestly. (Full bundle-cost detail in A3.)
+
+---
+
+# ACT 1 — THE DREAM (how it works)
+
+## Slide 06 — Act 1 Divider  ·  5:30–6:00
 
 > 01 · ACT · THE DREAM · ONE SOURCE OF TRUTH FOR EVERY PLATFORM
 
-- Beat. Read the act title.
-- "Act 1: the dream we all started with."
-- Move on — don't read the subtitle out loud, just let it land.
+- Beat. *"Act 1: the dream we all started with."* Let the subtitle land; don't read it.
 
----
+## Slide 07 — How .kt becomes .js  ·  6:00–7:00
 
-## Slide 04 — Q1: Why ship as JavaScript?  ·  2:00–4:00
+> // THE COMPILE PIPELINE · HOW .KT BECOMES .JS.
 
-> Why ship my mobile library as JavaScript? · Android (OkHttp) / iOS (Darwin) / JVM (CIO) / WEB (Ktor JS)
+- *"Thirty seconds on the machine — skip it and the demos look like magic."*
+- Walk the four panels: **`.kt` source** (commonMain + jsMain) → **IR compiler** (the `js(IR)` backend) → **`.js` + `.d.mts`** (bundle + types) → **V8** (browser or Node).
+- Point at the colour: *"Amber is the Kotlin world, neon is the JS world. The handoff happens at the compiler. One frontend, one JS backend."*
+- Hand off: *"And the seam that lets the same source hit four different HTTP engines? That's next."*
+- **Cue:** ~60s. Don't rabbit-hole on the IR backend.
 
-- "Why would I — a mobile engineer — care about a JavaScript build of my library? Because I already wrote the hard part once."
-- Point at the right-side panel: *"Same call, four engines. Android speaks OkHttp, iOS speaks Darwin, JVM speaks CIO, the web speaks Ktor JS. KMP picks the engine; my code never knows."*
-- "If I don't ship JavaScript, I have to write a Node backend that re-implements the same domain. Twice the bugs."
-- **Likely follow-up from the floor:** *"Why not just `fetch()` the API directly?"* — see the **Q&A** appendix, question **A1**. Short answer to deflect on stage: *"The library isn't `httpClient.get` — that's the easy line. The library is the 200 lines around it: DTO mapping, error categorisation, retry policy, the `subscribe`/`onCleared` lifecycle contract. Without KMP, every web client reinvents that badly."*
+## Slide 08 — One expect, four actuals  ·  7:00–8:00
 
----
+> // THE PLATFORM SEAM · ONE expect, FOUR actuals.
 
-## Slide 05 — One HTTP call, every platform  ·  4:00–6:00
+- *"This is `expect`/`actual` — the seam that makes one source multiplatform. One `expect fun createHttpClient()` in commonMain. Four `actual`s, one per target."*
+- Walk the engine table: *"Android speaks OkHttp, iOS speaks Darwin, JVM speaks CIO, the web speaks Ktor JS. The compiler picks the actual; my code never knows."*
+- *"This is the repo's real HttpClient — not a slide diagram."*
+- **Cue:** ~60s.
 
-> `httpClient.get("v1/lines")` from `LinesRepositoryImpl.kt`
+## Slide 09 — Four lines open the browser  ·  8:00–9:30
 
-- Read the green line aloud: *"`httpClient.get('v1/lines')` — that's the entire HTTP layer."*
-- "Above and below: error mapping, DTO parsing, domain mapping. Same on Android, same on iOS, same in Node, same in your browser tab."
-- "K2 compiler, Kotlin 2.3.21. Same module ships to all four targets unchanged."
+> // WHAT DOES js(IR) ACTUALLY DO? · FOUR LINES OPEN THE BROWSER.
 
----
+- "Four lines in the Gradle file. Read them."
+  01 — `browser()`: *"compiles JS that runs in any browser — and Node, with a webpack rewrite."*
+  02 — `useEsModules()`: *"modern ESM imports, tree-shakeable."*
+  03 — `generateTypeScriptDefinitions()`: *"auto-emitted `.d.mts`. TS users get types for free."*
+  04 — `binaries.executable()`: *"a runnable bundle webpack picks up."*
+- Footer: *"In Kotlin 2.2 you needed `-Xes-long-as-bigint`. In 2.3 it's the default."*
 
-## Slide 06 — Q2: What does `js(IR)` actually do?  ·  6:00–7:30
+## Slide 10 — Export the behavior, hide the machinery  ·  9:30–11:00
 
-> 4 lines open the browser
-
-- "Four lines in your gradle file. Let's read them."
-- 01 — `browser()`: "Compiles JS that runs in any browser — and in Node, with a tiny webpack rewrite."
-- 02 — `useEsModules()`: "Modern ESM `import` instead of UMD glue. Tree-shakeable."
-- 03 — `generateTypeScriptDefinitions()`: "Auto-emitted `.d.mts`. Your TypeScript users get types for free."
-- 04 — `binaries.executable()`: "Emits a runnable bundle webpack can pick up."
-- "Bonus: in Kotlin 2.2 you needed `-Xes-long-as-bigint`. In 2.3 it's the default."
-
----
-
-## Slide 07 — Q3: Just `@JsExport` everything?  ·  7:30–9:30
-
-> Export the BEHAVIOR. Hide the MACHINERY. · 13 @JsExport.Ignore annotations
+> EXPORT THE BEHAVIOR. HIDE THE MACHINERY. · 13 @JsExport.Ignore
 
 - Read it: *"Export the behavior. Hide the machinery."*
-- "If you `@JsExport` everything, your TypeScript types blow up. `StateFlow` becomes `unknown`. `CoroutineScope` leaks into your IDE. Repository constructors expose Koin internals."
-- "In this repo: 13 `@JsExport.Ignore` annotations. Each one is a small no — `you don't need to see this from the JS side`."
-- "What stays exported is the **behavior**: load, subscribe, onCleared. Not the machinery."
+- *"`@JsExport` everything and your TS types blow up. `StateFlow` becomes `unknown`, `CoroutineScope` leaks, repository constructors expose Koin internals."*
+- *"In this repo: 13 `@JsExport.Ignore` annotations. Each is a small 'you don't need to see this from JS'. What stays exported is the behavior — load, subscribe, onCleared."*
 
----
-
-## Slide 08 — DEMO 01: Node  ·  9:30–11:00  ⚠ LIVE
+## Slide 11 — DEMO Node  ·  11:00–12:30  ⚠ LIVE
 
 > KOTLIN CODE, NODE ENGINE.
 
 **Demo steps:**
-1. Switch to terminal: `cd demo/node-api && node server.js`
-2. Wait for "✅ KMP Library Initialized successfully."
-3. Second terminal: `curl localhost:3000/modules/lines | head -c 400`
-4. Real Stockholm metro lines come back: *"Blå linjen 10, 11 — pulled from sl.se via Kotlin code running in V8."*
-
-- **Talk over the demo:** "There is no Express middleware that knows about transport. There is no second domain model. The Node side is **fifty lines** of glue around the same `LinesViewModel` the Android app uses."
-- **Cue:** if the API is slow, skip to the curl JSON pre-recorded in `docs/demo-fallback/lines.json`.
+1. Terminal: `cd demo/node-api && node server.js` → wait for "✅ KMP Library Initialized".
+2. `curl localhost:3000/modules/lines | head -c 400` → real Stockholm metro lines.
+- **Talk over it:** *"No Express middleware knows about transport. No second domain model. The Node side is fifty lines of glue around the same `LinesViewModel` the Android app uses."*
+- **Plan B:** pre-recorded JSON in `docs/demo-fallback/lines.json` if the API is slow.
 
 ---
 
-## Slide 09 — Act 2 / The Reality  ·  11:00–11:30
+# ACT 2 — THE REALITY (where it gets hard)
+
+## Slide 12 — Act 2 Divider  ·  12:30–13:00
 
 > 02 · ACT · THE REALITY · WHERE COROUTINES MEET REACT
 
-- Beat.
-- "Act 2: where it stops being a dream."
+- Beat. *"Act 2: where it stops being a dream."*
 
----
+## Slide 13 — Room can't. SQLDelight can.  ·  13:00–14:15
 
-## Slide 10 — Q4: StateFlow → callback  ·  11:30–13:30
+> // CHECK THE TARGET BEFORE YOU COMMIT · ROOM CAN'T. SQLDELIGHT CAN.
 
-> `subscribe(onStateUpdate)` — pure Kotlin, zero JS-specific code
+- *"The moment you add the JS target, your library choices change."*
+- Contrast (architectural, not 'Google is slow'): *"Room is annotation-first and assumes a native SQLite engine — JVM and Native only, no JS. SQLDelight is SQL-first with a pluggable driver per platform; the Web Worker driver runs SQLite compiled to Wasm. It works on JS."*
+- **The rule (they write this down):** *"Before any dependency, check klibs.io for the JS or Wasm badge. And read it carefully — all the Apple targets hide under one 'Kotlin/Native' badge. Don't misread that as 'iOS not supported'."*
+- Volatility: *"This moves monthly — DataStore just added JS and Wasm in an alpha."*
+- **Cue:** ~75s. This is what makes you sound like you've shipped it, not just demoed it.
 
-- "JavaScript can't see `StateFlow`. Mark it `@JsExport.Ignore`."
-- Walk the code: *"`subscribe` takes a callback, launches a coroutine in `viewModelScope`, collects the `StateFlow`, and pushes each emission into the callback."*
-- "JavaScript gets a callback. Kotlin keeps the flow. Everybody wins."
-- "This is the entire bridge from Kotlin's side. **One method.**"
-- **Likely follow-up:** *"Why callback? Why not expose StateFlow directly?"* (A5), *"Does subscribe work with Vue / Svelte / vanilla JS too?"* (A6).
+## Slide 14 — StateFlow → a callback  ·  14:15–15:45
 
----
+> // THE BRIDGE · subscribe(onStateUpdate)
 
-## Slide 11 — Q5: Where do coroutines actually run?  ·  13:30–15:00
+- *"JavaScript can't see `StateFlow`. Mark it `@JsExport.Ignore`."*
+- Walk it: *"`subscribe` takes a callback, launches a coroutine in `viewModelScope`, collects the `StateFlow`, pushes each emission into the callback."*
+- *"JS gets a callback. Kotlin keeps the flow. One method — the whole bridge from Kotlin's side."*
 
-> Dispatchers.Main IS the microtask queue.
+## Slide 15 — Where do coroutines run?  ·  15:45–17:00
 
-- "On Android, `Dispatchers.Main` is the UI thread. On iOS, it's the main run loop. On Node and in the browser…"
-- Walk the diagram: *"`emit()` on the StateFlow → `queueMicrotask()` in V8 → your `setState`."*
-- **Bottom caveat — say it aloud:** "If you mix coroutine flows with raw Promises, ordering is not guaranteed. Don't. Pick one."
+> Dispatchers.Main IS THE MICROTASK QUEUE.
 
----
+- *"On Android, `Dispatchers.Main` is the UI thread. On iOS, the main run loop. On Node and the browser…"*
+- Walk it: *"`emit()` on the StateFlow → `queueMicrotask()` in V8 → your `setState`."*
+- **Caveat (say it aloud):** *"Mix coroutine flows with raw Promises and ordering is not guaranteed. Pick one."*
 
-## Slide 12 — Q6: useStockholmTransport hook  ·  15:00–17:00
+## Slide 16 — 12 lines of TypeScript  ·  17:00–18:30
 
-> `subscribe + onCleared` in a `useEffect`
+> // THE REACT HOOK · subscribe + onCleared IN A useEffect
 
-- "Now we plug it into React. Twelve lines of TypeScript."
-- Read the code top to bottom slowly. The audience needs to **see** it.
-- Highlight the green line: *"`vm.subscribe(setState)` — that's the whole bridge."*
-- Highlight the amber line: *"`return () => vm.onCleared()` — that's the lifecycle contract. Skip it and React leaks subscriptions."*
-- "Same pattern works for Vue, Solid, Svelte — anything with a mount/unmount story."
+- **Pre-empt the confusion FIRST:** *"This is a Compose Multiplatform talk — why am I in React? On purpose. If I showed Compose Web here, you'd think 'Kotlin calling Kotlin, of course it works.' React is the proof: the bridge is a plain JavaScript callback. The SDK doesn't leak Kotlin."*
+- The rule, one breath: *"Compose Web is for shared UI; React is for web-native — SEO, accessibility, the web ecosystem. The SDK feeds both identically."* (Matrix in A12 if pushed.)
+- Read the hook: *"`useState` for the snapshot, `useEffect` to `subscribe` on mount and `onCleared` on cleanup. Twelve lines."*
+- Highlight: green line `vm.subscribe(setState)` = the whole bridge; amber line `return () => vm.onCleared()` = the lifecycle contract.
 
----
-
-## Slide 13 — DEMO 02: React  ·  17:00–19:00  ⚠ LIVE
+## Slide 17 — DEMO React  ·  18:30–20:00  ⚠ LIVE
 
 > SAME SDK, BROWSER UI.
 
 **Demo steps:**
-1. `cd demo/web && npm run dev`
-2. Open `http://localhost:5173/lines`. Show real Stockholm metro lines rendering.
-3. Open browser devtools → Network tab → point at the request: *"That's coming from Kotlin code running in your browser. No proxy, no backend."*
-4. Open `useStockholmTransport.ts` in the editor — the file from slide 12, alive.
+1. `cd demo/web && npm run dev` → open the dev URL, show real metro lines.
+2. DevTools → Network → *"that's coming from Kotlin code in your browser. No proxy, no backend."*
+- **Talk over it:** *"Same `LinesViewModel` the Android emulator subscribed to two minutes ago. The browser has zero business logic. It can't drift."*
+- **Optional aside:** *"CMP Web hit Beta in Sept 2025 — I could swap React for Kotlin-rendered Compose on the same `subscribe`. Same SDK, different UI engine."*
+- **Cue:** if HMR hiccups, refresh; don't restart the dev server.
 
-- **Talk over it:** "Same `LinesViewModel` the Android emulator subscribes to two minutes ago. The browser doesn't have its own business logic. It can't drift."
-- **Cue:** if HMR hiccups, refresh the page; don't restart the dev server on stage.
+## Slide 18 — One line between a library and a leak  ·  20:00–22:00  ⚠ LIVE · SCREENSHOT MOMENT
 
----
-
-## Slide 14 — Q7: Forget `onCleared()`, watch it leak  ·  19:00–21:00  ⚠ LIVE
-
-> One line between a library and a leak.
+> ONE LINE BETWEEN A LIBRARY AND A LEAK.
 
 **Demo steps:**
 1. **Before:** comment out the cleanup return in `useStockholmTransport.ts`. Reload.
-2. Open devtools → Console. Navigate `/lines → /sites → /lines → /sites` ten times fast. Show the subscription counter climbing: 1 → 2 → 4 → 12.
-3. **After:** uncomment the cleanup. Reload. Repeat the navigation.
-4. Counter stays at 1.
-
-- **Talk over it:** "Coroutine scope is a lifecycle contract. Break the contract, you leak. Honor it, you don't. **One line.**"
-- **This is the slide everyone screenshots.** Hold for a beat after the second counter stays flat.
-- **Hard cap: 90 seconds.** Move on the moment the leak/clean contrast lands.
-- **Likely follow-up from a React-savvy attendee:** *"What about StrictMode double-mounting in dev?"* — see A7. Soundbite: *"The cleanup return fires correctly between the StrictMode mount/unmount/mount cycle. The first subscription is cancelled before the second starts. You'll see two subscriptions in the network tab — one survives. That's correct behaviour, not a leak."*
+2. DevTools → Console. Navigate `/lines → /sites` ten times fast. Subscription counter climbs: 1 → 2 → 4 → 12.
+3. **After:** uncomment cleanup. Reload. Repeat. Counter stays at 1.
+- **Talk over it:** *"Coroutine scope is a lifecycle contract. Break it, you leak. Honor it, you don't. One line."*
+- **This is the slide everyone screenshots.** Hold a beat after the counter stays flat. **90 seconds max.** (StrictMode question → A6.)
 
 ---
 
-## Slide 15 — Act 3 / The Payoff  ·  21:00–21:30
+# ACT 3 — THE PAYOFF (shipping)
 
-> 03 · ACT · THE PAYOFF · SHIPPING IT AS AN NPM PACKAGE
+## Slide 19 — Act 3 Divider  ·  22:00–22:30
 
-- Beat.
-- "Act 3: but can we actually ship it?"
+> 03 · ACT · THE PAYOFF · SHIPPING IT
 
----
+- Beat. *"Act 3: but can we actually ship it?"*
 
-## Slide 16 — Q8: Can I `npm install` this?  ·  21:30–24:00
+## Slide 20 — Can I npm install this? Not yet.  ·  22:30–25:00
 
-> NOT YET. And here's exactly why.
+> NOT YET. And here's exactly why. → What real distribution looks like.
 
-- "Honest answer: not yet. Here's the receipt."
-- Walk the gap list:
-  01 — *"Kotlin/JS doesn't auto-generate a publishable `package.json`."*
-  02 — *"Webpack writes `stockholm-transport.js`. The package name is `StockholmTransport-stockholm-transport`. Mismatch."*
-  03 — *"No `main`, no `module`, no `exports`, no `types` field."*
-  04 — *"No `peerDependencies`. Ktor JS, Koin, kotlinx-coroutines all bundle into your app twice."*
-  05 — *"The `npm-publish` gradle plugin is sitting in our `libs.versions.toml`, never applied."*
-- "Each gap closes in roughly a day of pipeline work. None are research problems. They're just *work*."
-- **Likely follow-ups from the floor:** *"Browser ESM vs npm — when do I use which?"* (A4), *"What about TypeScript types?"* (A2), *"What's the bundle size cost?"* (A3). Soundbite to redirect: *"Anywhere you'd `npm install` something, this is an npm package. The browser ESM falls out of that — drop it in via a `<script type='module'>` tag and you give up the lockfile and the types."*
+- *"Honest answer: not yet. Here's the receipt."* Walk the gaps (fast — don't linger):
+  *"No auto-generated `package.json`. Package-name mismatch. No `main`/`module`/`exports`/`types`. No `peerDependencies`. The `npm-publish` plugin sits unwired."*
+- *"Each closes in ~a day of pipeline work. Not research — just work."*
+- Pivot to what real looks like: *"Scope it `@umain/stockholm-transport`. ESM for browser, commonjs2 for Node. Hoist the heavies — Ktor JS, Koin, coroutines — into `peerDependencies`."*
+- One build → four registries: *"Maven for Android/JVM, SPM for iOS, npm for web/Node. Flutter would need a thin Dart wrapper — Firebase ships exactly that pattern."*
+- **Cue:** ~2.5 min. This is the trimmable slide if you're running long — collapse the gap walk.
 
----
+## Slide 21 — Who's using your SDK?  ·  25:00–26:30
 
-## Slide 17 — Q9: Scope. Format. Peers.  ·  24:00–26:00
+> // IDENTIFYING CONSUMERS · THE TOKEN PATTERN
 
-> What a real npm package looks like
+- *"If you publish an SDK, how do you know who's using it? The token pattern — same as Firebase, Stripe, Sentry."*
+- The flow: *"Consumer passes a key at init → the SDK holds it in memory → injects it on every request as a header → the backend validates and attributes the traffic."*
+- **The critical caveat:** *"A token identifies the consuming *app*, not the human — that's not user auth. And you never ship a raw API key in a JS bundle; anyone can read it in the browser. Backend proxy, or a runtime-injected token via Koin."*
+- **Cue:** ~90s. Conceptual — don't implement on stage.
 
-- "What does *real* look like?"
-- Card 1 — SCOPE: *"`@umain/stockholm-transport`. Drop the ugly `StockholmTransport-stockholm-transport` mouthful that Kotlin/JS hands you by default."*
-- Card 2 — FORMAT: *"ESM for the browser, commonjs2 for Node. Both come from one bundle if you wire webpack right."*
-- Card 3 — PEERDEPS: *"Hoist the heavies — Ktor JS, koin-core, kotlinx-coroutines. Bundle stays small, consumers stay sane."*
-- "And the `npm-publish` gradle plugin handles all three — once we turn it on."
+## Slide 22 — DEMO: fix one line, three platforms  ·  26:30–29:30  ⚠ LIVE · MIC DROP
 
----
+> FIX. RELOAD. DROP MIC.
 
-## Slide 18 — Q10: One line, three platforms  ·  26:00–27:00
-
-> The setup for the payoff demo
-
-- "Setup. One file: `LinesRepositoryImpl.kt`, line 25. CommonMain. The arrow points at three platforms."
-- "Watch what happens when I break it."
-- Don't linger — this is the run-up to the live demo.
-
----
-
-## Slide 19 — DEMO 03: Three platforms, one fix  ·  27:00–30:00  ⚠ LIVE  · MIC DROP
-
-> FIX. COMMIT. RELOAD. DROP MIC.
-
-**Demo steps (rehearsed under 90 seconds):**
-1. **Break:** `LinesRepositoryImpl.kt` line 25 — change `parameter("transport_authority_id", 1)` to `… 99`. Save.
+**Demo steps (rehearsed < 90s):**
+1. **Break:** `LinesRepositoryImpl.kt` — wrong query-param value. Save.
 2. `./gradlew :stockholm-transport:publishToMavenLocal :stockholm-transport:jsBrowserDistribution`
-3. Switch through the three apps: Android emulator (empty list), iOS simulator (empty list), browser (empty list). Beat.
-4. **Fix:** undo the line. Save.
-5. `./gradlew :stockholm-transport:publishToMavenLocal :stockholm-transport:jsBrowserDistribution`
-6. All three apps reload. Lines come back. Hold for the applause.
+3. Three apps empty: Android, iOS, browser. Beat.
+4. **Fix:** undo. Re-publish. All three reload. Hold for applause.
+- **Talk over it:** *"One line. Three platforms. Zero divergence."*
+- **Plan B:** `docs/demo-fallback/three-platforms.mp4`. Don't troubleshoot live.
 
-- **Talk over it:** "One line. Three platforms. Zero divergence."
-- **Cue:** stopwatch this in rehearsal. If the gradle re-publish takes >40s, pre-build a delta and demo the file watcher.
-- **Plan B:** pre-recorded `docs/demo-fallback/three-platforms.mp4` if anything misbehaves on stage. Don't troubleshoot live.
-
----
-
-## Slide 20 — Closing: three rules  ·  30:00–34:00
+## Slide 23 — Closing  ·  29:30–33:00
 
 > 01 · Export the BEHAVIOR. Hide the MACHINERY.
 > 02 · Coroutine SCOPE = lifecycle CONTRACT.
 > 03 · The SDK boundary is the SAME on every platform.
 
 - Read each rule. Pause between them.
-- "If you remember nothing else: those three."
-- Point at the QR: *"All the code, all the slides, all these notes — repo's there. Find me on LinkedIn or Medium if you want to talk shop."*
-- "Thank you." — beat — open Q&A.
+- **Callback to the opening (lands the arc):** *"Remember the PM's question — why build it twice? The 2026 answer isn't 'never build twice.' It's: share what makes sense, keep what matters native. Mobile figured that out. The web is just the next front door."*
+- QR: *"All the code, slides, notes — in the repo. Find me on LinkedIn or Medium."*
+- *"Thank you."* — beat — open Q&A.
 
 ---
 
-## Slide 21 — Thesis (off-path)
+# Q&A — questions the audience will ask
 
-> A KMP library is an SDK with multiple front doors.
+Pick two or three to answer fully; keep the rest as backup. Slide references use the new numbering.
 
-- Use this in Q&A if someone asks for the one-sentence pitch.
-- Otherwise, leave it unaddressed. The talk's narrative carries the thesis.
+### A1. *"Why not just `fetch()` the API? Why a library at all?"*
+The library isn't `httpClient.get("v1/lines")` — that's one line. It's the 200 lines around it: DTO→domain mapping, `NetworkError` categorisation, `DataResult` contract, the `subscribe`/`onCleared` lifecycle, the 13 `@JsExport.Ignore` decisions, the JSON/timeout/key config. Without it, every client rebuilds that — badly, differently. And the mic-drop demo (slide 22) only works because the same Kotlin runs in V8, the JVM, and iOS; "just `fetch()`" would fix two platforms and leave the third broken.
 
----
+### A2. *"Do I hand-roll TypeScript types?"*
+No — Kotlin/JS auto-emits `.d.mts` (one of the four `js(IR)` lines). TS consumers get typed `Line`, `LinesUiState`, `DataResult`, `NetworkError` — the same types the Compose code binds to.
 
-## Q&A — questions the audience will ask
+### A3. *"Bundle size? Doesn't the Kotlin runtime bloat the web app?"*
+Yes — ~80 KiB runtime, ~800 KiB production bundle. Pays off when you already maintain Android+iOS, have non-trivial domain logic, and the productivity of shared contracts dominates the bytes. Doesn't pay off for a single simple web client or hard size limits (Cloudflare Workers' 1 MiB) — there, "just `fetch()`" is right.
 
-A curated set with short, defensible answers. The first three are near-certain (every KMP-curious mobile-dev audience asks them); the rest cluster around npm, lifecycle, and edge cases. **Pick a max of two or three to answer fully on stage** — keep the rest as backup.
+### A4. *"Browser ESM vs npm — which when?"*
+Anywhere you'd `npm install`, this is an npm package. The browser ESM falls out of it — `<script type="module">` works but you give up the lockfile and types. Vite/Next/Node → npm install. Static HTML → ESM script. Edge runtimes → watch the size.
 
-### A1. *"Why not just consume the API directly with `fetch()`? Why ship a library at all?"*
+### A5. *"Why a callback bridge, not expose `StateFlow`?"*
+`StateFlow` is a coroutines type — JS has no suspending functions or `Flow`. Exposing it would leak Kotlin internals or lose the lifecycle contract. `subscribe(onState)` + `onCleared()` — two methods, framework-agnostic.
 
-The single most-asked question. Defensible answer:
+### A6. *"React StrictMode double-mount in dev?"*
+The hook returns `() => vm.onCleared()`. StrictMode mounts → unmounts → mounts; cleanup fires between, the first subscription is cancelled before the second starts. Two in the network panel, one survives — correct, not a leak. Slide 18 shows the opposite (no cleanup), where every mount leaks.
 
-The library isn't `httpClient.get("v1/lines")` — that's one line. The library is the **200 lines around it**:
+### A7. *"Node 22 / Bun / Deno?"*
+Node 22 is what we test (built-in fetch, native ESM). Bun should work (Node-compatible), not in CI. Deno needs validation — the Kotlin/JS runtime pokes at Node globals. Treat as untested.
 
-| In the library | Without it, every client builds | And |
-|---|---|---|
-| DTO → domain mapping with normalisation | Its own parser | They drift, subtly differently |
-| `NetworkError.NoInternet / Timeout / NotFound / ServerError / Unknown` | Its own error model | Android says "Connection failed", iOS says "Network unavailable", web shows a stack trace |
-| `DataResult<T> = Success \| Error` contract | Its own error-handling style | UI layers grow ad-hoc mappings |
-| `BaseViewModel.subscribe(callback)` + `onCleared` | Its own state machine per framework | React, Compose, SwiftUI all bind differently |
-| 13 deliberate `@JsExport.Ignore` decisions | Either nothing hidden or each consumer guesses | DX suffers |
-| `ignoreUnknownKeys = true`, 15 s timeout, default `key=` query param | Configures these three different ways | Three teams, three behaviours |
+### A8. *"Does `subscribe` work outside React?"*
+It's a callback API. React (`useState`+`useEffect`), Vue (`ref`+`onUnmounted`), Svelte (store + cleanup), Solid (`createSignal`+`onCleanup`), vanilla, Web Components (`connectedCallback`/`disconnectedCallback`). Always: subscribe on mount, capture cleanup, `onCleared` on unmount.
 
-And — closing argument — **the talk's mic-drop demo only works because of the library**. *"Fix one line, three platforms reload"* requires the same Kotlin code to run in V8, the JVM, and on iOS. If the web client were "just `fetch()`", that bug fix would land on two platforms; the third would stay broken until someone manually patched its separate code path.
+### A9. *"Perf cost of the Kotlin↔JS boundary?"*
+Effectively nothing at the call site — `vm.subscribe(cb)` is a normal JS call. Overhead is the ~80 KiB parse-on-load plus a small per-allocation constant. No FFI, no marshalling, no stringify at the boundary.
 
-### A2. *"What about TypeScript? Do I have to hand-roll types?"*
+### A10. *"Debugging Kotlin in the browser?"*
+Source maps — Chrome devtools shows the `.kt` source, breakpoints land on Kotlin lines. `console.*` via the `AppLogger` JS actual — same logger as Android.
 
-No — Kotlin/JS auto-emits `kotlin/StockholmTransport-stockholm-transport.d.mts` alongside the bundle (one of the four lines in `js(IR) { generateTypeScriptDefinitions() }`). TS consumers get autocompleted, typed access to `Line`, `LinesUiState`, `DataResult`, `NetworkError` — the same types the Android Compose code binds to. Hand-rolling types around `fetch()` gives you `unknown` until they drift.
+### A11. *"Can I use Compose Multiplatform for Web?"*
+Yes — CMP Web is Beta (Sept 2025). Different layer, same SDK underneath: CMP Web targets the UI, this library is the data/state layer. A CMP Web app `koinInject<LinesViewModel>()` and binds `subscribe` to Compose state. We used React in the demo to prove the boundary is clean (A12).
 
-### A3. *"What's the bundle size cost? Doesn't the Kotlin runtime bloat the web app?"*
+### A12. *"CMP Web vs React — when?"*
+SDK is UI-agnostic; this is a UI choice. **CMP Web** when: team lives in Compose, want pixel-identical UI, internal tool (no SEO), one UI codebase. **React/Vue/Svelte** when: web is the product, you need SSR/SEO/a11y, web designers, the web ecosystem, edge size limits, or existing React expertise. One-liner: *CMP Web is UI shared; React is web-native; the SDK runs on both.* Real split: public web → React/Next; internal dashboard → CMP Web; mobile → CMP. Same library under all three.
 
-Yes — the Kotlin/JS runtime is ~80 KiB and the production webpack bundle for this library is ~800 KiB. That's heavy compared to a hand-rolled fetch wrapper. **When does it stop paying off?**
+### A13. *"Authentication? API keys?"*
+SL key is baked into `BuildConfig.API_KEY` and sent as a query param. For a real product the key shouldn't ship in the JS bundle. Two patterns: (1) backend proxy adds it server-side (what `./sl start` + ngrok does); (2) per-user OAuth tokens injected via Koin — same `subscribe` API. Token identifies the app, not the user (slide 21).
 
-- **It pays off when:** you already maintain Android + iOS, you have non-trivial domain logic, the library is one of many things in the SPA bundle, and the productivity win of shared types/contracts dominates the byte count.
-- **It doesn't pay off when:** you have a single web client and the API is so simple that `fetch().then(r => r.json())` is the entire SDK; or when you're shipping to a runtime with hard size limits (Cloudflare Workers' 1 MiB compressed cap, for example). In those cases, "just `fetch()`" is genuinely the right call.
+### A14. *"iOS — SPM or CocoaPods?"*
+SPM, via `Package.swift` pointing at an XCFramework zip on GitHub Releases. No CocoaPods. **Looking ahead:** KotlinConf '26 announced Swift Export → Alpha in Kotlin 2.4 — native idiomatic Swift bindings, no ObjC bridge. Not production yet; we stay on XCFramework.
 
-### A4. *"Browser ESM vs npm package — when do I use which?"*
+### A15. *"AGP 9 — doesn't it break `com.android.application` + KMP?"*
+Yes — AGP 9 no longer supports that combo in one module. The new official structure separates library and app modules. The library here already follows it; the demo apps still use the combo with bypass props (`android.builtInKotlin=false`, `android.newDsl=false`) — officially temporary, migration on the roadmap.
 
-Soundbite: *"Anywhere you'd `npm install` something, this is an npm package. The browser ESM file is what falls out of that — drop it in via `<script type=\"module\">` if you want, but you give up the lockfile and the `.d.mts` types."* Concrete cases:
+### A16. *"Is this production-ready? KMP burned people before."*
+It did — say why it's different. Old pain: frozen-object memory model, awkward Swift interop, slow builds. What changed: new memory manager (no freezing), clean interop (`suspend fun` → Swift `try await`). Proof: Stable 2023, Google I/O 2024, Cash App/Netflix/McDonald's. The honest framing: *KMP stopped promising "one codebase forever" and started saying "share what makes sense, keep what matters native" — that realism is why engineers trust it now.* Caveat: animation/graphics-heavy apps with little logic won't benefit; KMP pays off when business complexity ≫ UI complexity.
 
-| Consumption | When to use |
-|---|---|
-| `npm install @umain/stockholm-transport` in a Vite/Webpack/Next.js app | The default for any framework-based web client. Tree-shakes if your bundler can. |
-| `npm install` from Node | SSR, BFFs, GraphQL gateways, webhook handlers, scheduled jobs that need SL data |
-| `<script type="module">` from unpkg/jsdelivr | Static HTML pages with vanilla JS, no build pipeline, types not required |
-| Cloudflare Workers / Vercel Edge | Watch the bundle size — this is where "just `fetch()`" is defensible |
-| CLI tool (a CI script, an ETL job) | npm install + invoke ViewModels directly |
+### A17. *"Versioning across four registries?"*
+Single `libBaseVersion` in `gradle.properties`; Maven, npm `package.json`, and `Package.swift` all read from it. SemVer — minor for new ViewModels, major for breaking API changes.
 
-### A5. *"Why a callback bridge? Why not expose `StateFlow` directly?"*
+### A18. *"What if the SL API changes?"*
+Fix one Kotlin file (`LinesRepositoryImpl` / `LineDto`), bump minor, ship. Consumers migrate at their pace. Not centralising costs you N clients × M changes.
 
-Because `StateFlow` is a Kotlin-coroutines type. There's no idiomatic JS equivalent — JS doesn't have suspending functions, structured concurrency, or `Flow`. Exposing `StateFlow` to JS would either leak Kotlin internals (`uiState.collect_0`, `_state_field`) or lose the lifecycle contract.
+### A19. *"Does it scale to a team of 20?"*
+Healthier with KMP: one library team owns the boundary (a contract everyone reads); platform teams are consumers. Without it, three drifting clients and duplicated reviews. Org cost: someone owns and versions the library — a real, visible role.
 
-The contract we *do* want to expose is *"give me a callback I'll fire on every state change, and a way to stop"* — that's `subscribe(onState)` + `onCleared()`. Two methods. Framework-agnostic. The React hook on Slide 12 is one line wrapping each.
-
-### A6. *"Does `subscribe` work with anything other than React?"*
-
-Yes — it's a callback API. It plugs into:
-
-- **React** → `useState` + `useEffect` (Slide 12, our hook)
-- **Vue 3** → `ref` + `onUnmounted`
-- **Svelte** → a custom store (`writable()` + the cleanup return)
-- **SolidJS** → `createSignal` + `onCleanup`
-- **Vanilla JS** → just call it
-- **Web Components** → `connectedCallback` / `disconnectedCallback`
-
-The pattern is always the same: subscribe on mount, capture the cleanup, call `onCleared` on unmount.
-
-### A7. *"What about React's StrictMode double-mounting in dev?"*
-
-The hook returns `() => vm.onCleared()` from `useEffect`. React's strict mode mounts → unmounts → mounts again; the cleanup fires correctly between, so the first subscription is cancelled before the second starts. You'll see two subscriptions in the dev-tools network panel and one survives — that's correct behaviour, not a leak. Slide 14's leak demo shows the *opposite* case (no cleanup return), where every mount permanently leaks.
-
-### A8. *"Can I run this on Node 22 / Bun / Deno?"*
-
-- **Node 22** — what we test (the `demo/node-api` Dockerfile). Built-in `fetch`, native ESM. ✓
-- **Bun** — should work; Bun is largely Node-compatible. Not in our CI yet.
-- **Deno** — needs validation. Deno's npm shim handles most things but the Kotlin/JS runtime occasionally pokes at Node-specific globals. Treat as untested.
-
-### A9. *"How do you handle authentication? API keys?"*
-
-In this repo, the SL API key is baked into `BuildConfig.API_KEY` from `gradle.properties` and appended as a query param. **For a real product**, the key shouldn't ship in the JS bundle — anyone can read it. Two patterns:
-
-1. **Backend proxy** (what we already do for the talk) — the Node API at `:3000` adds the key server-side; the JS bundle calls the proxy with no key. This is also why `./sl start` rewrites `serverHostURL` to the ngrok URL.
-2. **Per-user OAuth tokens** passed in via Koin — same `subscribe` API works; `BuildConfig.API_KEY` becomes a runtime-injected dependency.
-
-### A10. *"Can I use this with Compose Multiplatform for Web?"*
-
-Different layer, different question. CMP/Web targets the **UI** — it compiles Compose composables to web canvas/DOM. This library is the **SDK underneath** any UI — the data, state, and error model. They compose: a CMP/Web app can `koinInject<LinesViewModel>()` and bind its `subscribe` to Compose state, exactly like the Android demo does today. Worth a slide on its own — out of scope for this 35-min talk.
-
-### A11. *"What's the perf cost of crossing the Kotlin↔JS boundary?"*
-
-Effectively nothing at the call site. Kotlin/JS compiles to plain JS — `vm.subscribe(cb)` is a normal JS function call. The runtime overhead is the ~80 KiB shipping cost (one-time, parse-on-load), plus a small constant per allocation because Kotlin classes are JS classes with a few extra fields. There's no FFI, no marshalling, no JSON-stringify-at-the-boundary. If your hot path is "subscribe once, render many times", the cost is identical to a hand-written JS API.
-
-### A12. *"How do you debug Kotlin running in the browser?"*
-
-Source maps. Kotlin/JS emits `.js.map` files alongside the bundle; Chrome devtools shows the original `.kt` source in the Sources panel and breakpoints land on Kotlin lines. `console.log` works through the `AppLogger.kt` JS actual we ship in [`shared/core/src/jsMain/.../AppLogger.kt`](../shared/core/src/jsMain/kotlin/com/umain/transport/core/logging/AppLogger.kt) — same logger the Android version uses, just routed to `console.*` on the JS side.
-
-### A13. *"How do you version a library that publishes to four different package registries?"*
-
-Single `libBaseVersion=1.0.0` in `gradle.properties`. The Maven publication, the JS package.json, and the iOS Package.swift all read from it. The `npm-publish` Gradle plugin (currently unwired — see Slide 17) propagates this into the npm `package.json` automatically. SemVer rules; minor bumps for new ViewModels, major for breaking changes to the public API.
-
-### A14. *"What if the SL API changes?"*
-
-You fix the boundary in one Kotlin file (`LinesRepositoryImpl` / `LineDto`), bump the library minor version, and ship. Consumers pin and migrate at their own pace. The cost of NOT centralising is a quadratic mess — N clients × M API changes = N×M change requests instead of M.
-
-### A15. *"Does this scale to a team of 20?"*
-
-The shape is healthier with KMP than without:
-
-- **Without** — each platform team owns its own SL client. Three clients drift. PR reviewers are duplicated. New API fields have to be plumbed through three codebases.
-- **With** — one library team owns the boundary; three platform teams are consumers. The boundary is a contract everyone reads. New fields land once, propagate everywhere.
-
-The org cost: someone has to own and version the library. That's a real role, not a hidden one.
-
-### A16. *"Why not just write a hand-rolled JS SDK that mirrors the Kotlin one?"*
-
-Same reason you don't hand-roll a TypeScript SDK that mirrors a Java back-end: **drift**. Two SDKs is two surfaces, two test suites, two changelogs, and inevitably one of them gets out of sync within a sprint. KMP makes the JS SDK a build artefact of the Kotlin one — drift is structurally impossible.
-
-### A17. *"What about iOS — Swift Package Manager, or CocoaPods?"*
-
-SPM, via [Package.swift](../Package.swift) at the repo root pointing at a binary `XCFramework.zip` on GitHub Releases. CocoaPods is **not** supported and not on the roadmap. See `PUBLISHING.md` § 4.3 for the release flow (`assembleStockholmTransportXCFramework` → zip → upload → bump checksum).
+### A20. *"Why not hand-roll a parallel JS SDK?"*
+Drift. Two SDKs = two surfaces, two test suites, two changelogs — out of sync within a sprint. KMP makes the JS SDK a build artefact of the Kotlin one; drift is structurally impossible.
 
 ---
 
 ## Pre-flight checklist (morning of)
 
-- [ ] Charge: laptop, phone (slide remote), backup phone (timer).
-- [ ] Verify `~/.m2/repository/com/umain/transport/stockholm-transport/1.0.0/` exists locally.
-- [ ] Verify `demo/web/node_modules/StockholmTransport-stockholm-transport/` resolves.
-- [ ] Verify Android emulator + iOS simulator both boot in under 60 seconds cold.
-- [ ] Open the four required terminals in the right order: gradle / node-api / web dev / git status.
-- [ ] Plug into projector 30 minutes early. Test green/black contrast on the venue projector — neon green at #4DFFA8 reads differently on cheap projectors.
-- [ ] Conference Wi-Fi: fail-fast. If `curl sl.se` is slow in green-room test, switch to phone hotspot before going on.
-- [ ] `docs/demo-fallback/` videos queued in QuickTime, hidden behind `⌘\``.
+- [ ] Charge: laptop, slide remote, backup timer.
+- [ ] `~/.m2/.../stockholm-transport/1.0.0/` exists locally.
+- [ ] `demo/web/node_modules/StockholmTransport-stockholm-transport/` resolves.
+- [ ] Android emulator + iOS simulator boot cold in < 60s.
+- [ ] Four terminals open in order: gradle / node-api / web dev / git status.
+- [ ] Projector 30 min early — test neon `#4DFFA8` contrast on the venue projector.
+- [ ] Wi-Fi fail-fast: if `curl sl.se` is slow in green-room, switch to phone hotspot.
+- [ ] `docs/demo-fallback/` videos queued in QuickTime behind `⌘\``.
 
 ## Anti-goals
 
-- Don't apologize for things being beta. *"Beta but works on stage"* > *"sorry, beta."*
+- Don't apologise for beta. *"Beta but works on stage"* > *"sorry, beta."*
 - Don't read code letter-for-letter. Read the **shape**, point at the **green** lines.
-- Don't run `npm install` live. Anything that pulls from the network mid-demo dies.
-- Don't say "Claude" or "AI" in the talk. The work is yours; the credits are yours.
+- Don't run `npm install` live. Network mid-demo dies.
+- Don't say "Claude" or "AI" in the talk. The work is yours.
 
 ## After the talk
 
-- Tweet the screenshot from Slide 14 (memory-leak before/after) within an hour. That's the screenshot people remember.
-- Push slides + presenter notes to the repo BEFORE Q&A starts so the audience can grab the URL on the way out.
+- Tweet the slide-18 screenshot (memory-leak before/after) within an hour — the one people remember.
+- Push slides + notes to the repo before Q&A ends so the audience grabs the URL on the way out.

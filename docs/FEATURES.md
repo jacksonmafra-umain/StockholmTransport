@@ -5,12 +5,13 @@ A single, code-anchored map of everything the repo ships. Each section answers: 
 ```
 StockholmTransport/
 ├── shared/                       # KMP library — published as :stockholm-transport
-│   ├── core/                     # cross-cutting: Ktor, Koin, logging, BaseViewModel, DataResult
+│   ├── core/                     # cross-cutting: Ktor (+ WebSockets), Koin, logging, BaseViewModel, DataResult
 │   ├── lines/                    # /v1/lines feature
 │   ├── sites/                    # /v1/sites feature
 │   ├── stoppoints/               # /v1/stop-points feature
 │   ├── departures/               # /v1/sites/{id}/departures feature
-│   └── authorities/              # /v1/transport-authorities feature
+│   ├── authorities/              # /v1/transport-authorities feature
+│   └── realtime/                 # /api/trips/active (HTTP) + /updates/{tripId} (WS) — Option C lift
 │
 ├── demo/
 │   ├── mobile/                   # Compose Multiplatform demo of the static SDK (talk Act 1/2)
@@ -34,7 +35,7 @@ StockholmTransport/
 
 ## 1. The KMP library — `:stockholm-transport`
 
-Single Maven artefact `com.umain.transport:stockholm-transport:1.0.0` shipping Android (AAR), JVM, JS (NPM-shaped), and iOS (XCFramework + SPM). Built from one Gradle module that staples five feature folders together via `kotlin.srcDirs(...)` in [shared/build.gradle.kts](../shared/build.gradle.kts).
+Single Maven artefact `com.umain.transport:stockholm-transport:1.0.0` shipping Android (AAR), JVM, JS (NPM-shaped), and iOS (XCFramework + SPM). Built from one Gradle module that staples six feature folders together via `kotlin.srcDirs(...)` in [shared/build.gradle.kts](../shared/build.gradle.kts).
 
 **Per-feature stack.** Each folder follows Clean Architecture identically:
 
@@ -64,8 +65,11 @@ Single Maven artefact `com.umain.transport:stockholm-transport:1.0.0` shipping A
 | `stoppoints`  | `GET /v1/stop-points`                               | `StopPoint(id, name, ...)`                                       | `loadStopPoints()`   |
 | `departures`  | `GET /v1/sites/{siteId}/departures`                 | `Departure(line, destination, displayTime, ...)`                 | `loadDepartures(siteId)` |
 | `authorities` | `GET /v1/transport-authorities`                     | `Authority(id, name)`                                            | `loadAuthorities()`  |
+| `realtime`    | `GET /api/trips/active` + `WS /updates/{tripId}`    | `Trip`, `Vehicle`, `ActiveTrip`, `TripDisplayInfo`, `Station`, `RealtimeConfig` | `loadActiveTrips()` (selection) / `startObservingTrip(tripId)` (display) |
 
 Every state is a JS-friendly shape — flat lists where possible, strings instead of Kotlin enums on the boundary (so `JSON.stringify` produces clean output for Node/browser consumers).
+
+The `realtime` module is the only feature whose backend is **runtime-configured**: it takes a [RealtimeConfig](../shared/realtime/src/commonMain/kotlin/com/umain/transport/realtime/RealtimeConfig.kt) instead of `BuildConfig`-baked URLs. Pass it into `initKoin(realtimeConfig = …)` (Kotlin) or `StockholmTransportApi.initializeWithRealtime(httpBaseUrl, wsHost, wsPort, wsSecure)` (JS). The simulator URL changes per environment (`localhost:3001` in dev, `realtime-api:3000` inside docker, an ngrok URL on talk day) so it can't be a compile-time constant.
 
 ### 1.3 JS export contract
 
@@ -73,9 +77,9 @@ Two lines summarise the discipline:
 
 > **Export the behavior. Hide the machinery.**
 
-- `BaseViewModel.uiState` is `@JsExport.Ignore` — JS consumers go through `subscribe(callback)`.
+- `BaseViewModel.uiState` is `@JsExport.Ignore` — JS consumers go through `subscribe(callback)`. Visibility is `public` (not `protected`) so Kotlin/Compose/SwiftUI consumers can still `collectAsState()` directly.
 - Every `XxxViewModel` constructor that takes a repository is `@JsExport.Ignore` (Koin still uses it from Kotlin).
-- The single JS entrypoint is the `StockholmTransportApi` object in [JsApi.kt](../shared/src/commonMain/kotlin/com/umain/transport/js/JsApi.kt). JS callers do `kmp.StockholmTransportApi.getInstance()`, then `.getLinesViewModel()`, etc.
+- The single JS entrypoint is the `StockholmTransportApi` object in [JsApi.kt](../shared/src/commonMain/kotlin/com/umain/transport/js/JsApi.kt). JS callers do `kmp.StockholmTransportApi.getInstance()`, then `.initialize()` (static SDK only) or `.initializeWithRealtime(httpBaseUrl, wsHost, wsPort, wsSecure)` (also wires the realtime feature), then `.getLinesViewModel()`, `.getTripSelectionViewModel()`, etc.
 - TypeScript `.d.mts` is auto-generated.
 
 ### 1.4 Build and publish
@@ -96,9 +100,10 @@ Express server wrapping the `:stockholm-transport` JS bundle.
 
 | Surface                                | Use                                                   |
 |----------------------------------------|-------------------------------------------------------|
-| `GET /modules`                         | List the five feature ViewModels.                     |
+| `GET /modules`                         | List the six feature ViewModels (five static + realtime). |
 | `GET /modules/lines`                   | Drives the `LinesViewModel`, returns its UiState.     |
-| `GET /modules/{lines\|sites\|departures\|stoppoints\|authorities}` | Same pattern for every feature.                       |
+| `GET /modules/{lines\|sites\|departures\|stoppoints\|authorities}` | Same pattern for every static feature.                |
+| `GET /modules/active-trips`            | Drives the realtime `TripSelectionViewModel`. Needs `./sl up` so `realtime-api` is reachable. |
 | `ALL  /v1/*`                           | Passthrough proxy onto `https://transport.integration.sl.se/v1/*`. The library's `httpClient.get("v1/lines")` lands here when `serverHostURL` points at this server (the sl-cli wires that automatically). |
 
 Run: `cd demo/node-api && npm run dev` (nodemon) or `npm start` (plain `node`). Boots in a few seconds, prints `🚀 Demo API server listening on http://localhost:3000`.
@@ -145,14 +150,20 @@ Force a re-seed: `docker compose down -v && docker compose up`.
 
 ### 2.4 `demo/realtime-mobile/` — Compose Multiplatform realtime app
 
+After **Option C** this app stopped carrying its own data / domain / repository / ViewModel duplicates. It depends on `:stockholm-transport` and pulls everything from the library:
+
+- `TripViewModel`, `TripSelectionViewModel`, `RealtimeConfig` from `com.umain.transport.realtime.{presentation,*}`.
+- Domain types `Trip`, `Vehicle`, `ActiveTrip`, `TripDisplayInfo`, `Station` from `com.umain.transport.realtime.domain.model`.
+- The Ktor `HttpClient` with `WebSockets` installed comes from `coreModule` — no `ktor-client-*` deps in this app's `build.gradle.kts`.
+
 Two screens (Material 3, no map yet — cards only):
 
-1. `TripSelectionScreen` — `GET /api/trips/active` → list of `ActiveTrip(tripId, lineId, lineNumber, transportMode)`. Tap one.
-2. `TripScreen` — `WS /updates/{tripId}` → renders `TripDisplayInfo(currentStation, nextStations[3], finalDestination)`. Updates roll in every simulator tick.
+1. `TripSelectionScreen` — `koinInject<TripSelectionViewModel>()`, calls `loadActiveTrips()` on first composition, renders the resulting `state.activeTrips`.
+2. `TripScreen` — `koinInject<TripViewModel>()`, calls `startObservingTrip(tripId)` on first composition, renders `state.displayInfo` (`Station` typed, station names accessed via `.name`).
 
-Stack mirrors the library's catalog: Kotlin 2.3.21, AGP 9.1.1, Compose 1.10.3, Ktor 3.4.3 (with `ktor-client-websockets`), Koin 4.2.1 + Koin Compiler Plugin 1.0.0-RC2. Targets Android (minSdk 30, compileSdk 36) and iOS (arm64 / sim arm64 / x64).
+DI bootstrap delegates to the library: [AppModule.kt](../demo/realtime-mobile/composeApp/src/commonMain/kotlin/com/umain/transport/realtime/di/AppModule.kt) builds a `RealtimeConfig` from `BuildConfig.SERVER_HOST_URL` / `SERVER_HOST` / `SERVER_PORT` and passes it into `com.umain.transport.di.initKoin(realtimeConfig = …)`.
 
-The `serverHostURL` / `serverHost` / `serverPort` keys in [demo/realtime-mobile/gradle.properties](../demo/realtime-mobile/gradle.properties) get baked into a `BuildConfig` at compile time. Override locally (or let `./sl start` rewrite them via ngrok) to swap backends without touching code.
+Stack: Kotlin 2.3.21, AGP 9.1.1, Compose 1.10.3, Koin 4.2.1 + Koin Compiler Plugin 1.0.0-RC2, JDK 21. Targets Android (minSdk 30, compileSdk 36) and iOS (arm64 / sim arm64 / x64). AGP 9 needs `android.builtInKotlin=false` + `android.newDsl=false` to coexist with `com.android.application` + the KMP plugin — set in [demo/realtime-mobile/gradle.properties](../demo/realtime-mobile/gradle.properties).
 
 ---
 
@@ -231,7 +242,7 @@ For the mDevCamp 2026 conference talk (2026-06-04, 35 min):
 
 Tracked in the repo's todo list (and called out in [PUBLISHING.md](../PUBLISHING.md) where they're publish-related):
 
-- `shared/realtime/` library module — promote the train-positions data layer from `demo/realtime-mobile/` into the library proper (the realtime app would then consume the library's types instead of duplicating them).
+- ~~`shared/realtime/` library module — promote the train-positions data layer from `demo/realtime-mobile/` into the library proper.~~ **Done (Option C):** `Trip`, `Vehicle`, `ActiveTrip`, `TripDisplayInfo`, `Station`, `RealtimeConfig`, `TripUpdateDataSource`, `TripRepository(Impl)`, `TripViewModel`, `TripSelectionViewModel` now live in `:stockholm-transport`. Realtime mobile + node-api both bind to library types.
 - `demo/web/` React + Vite app — the talk's Act 2 centerpiece (`useStockholmTransport` hook + memory-leak before/after route).
 - `npm-publish` Gradle plugin — actually publish a scoped `@umain/stockholm-transport` to npm with `peerDependencies` for Ktor/Koin/coroutines.
 - Auth on `/api/admin/import-trafiklab` in the realtime API.

@@ -193,10 +193,12 @@ The `package.json` metadata is configured in `shared/build.gradle.kts`.
 
 2.  **Build and publish:**
     ```bash
-    ./gradlew :stockholm-transport:jsPublicPackageJson
-    cd shared/build/packages/js/
+    ./gradlew :stockholm-transport:jsBrowserDistribution
+    cd build/js/packages/StockholmTransport-stockholm-transport
     npm publish --access public
     ```
+
+    The `jsPublicPackageJson` task is **not** registered today (the `npm-publish` Gradle plugin is declared in [`gradle/libs.versions.toml`](gradle/libs.versions.toml) but not yet applied in [`shared/build.gradle.kts`](shared/build.gradle.kts)). What ships today is the webpack output of `jsBrowserDistribution`, mounted at `build/js/packages/StockholmTransport-stockholm-transport/` (matches `demo/node-api/package.json`'s `file:` dep). For an actual `@umain/stockholm-transport` publication with `peerDependencies`, wire the plugin first.
 
 ### 4.3. iOS (via Swift Package Manager)
 
@@ -289,11 +291,11 @@ This process publishes your JavaScript package to the GitHub Packages NPM regist
     The process is the same as for the public registry. The `.npmrc` file will automatically redirect the `publish` command to GitHub.
 
     ```bash
-    # Step 1: Build the package
-    ./gradlew jsPublicPackageJson
+    # Step 1: Build the package (webpack output dir matches Maven artifactId)
+    ./gradlew :stockholm-transport:jsBrowserDistribution
 
     # Step 2: Navigate to the output directory
-    cd build/js/packages/shared/
+    cd build/js/packages/StockholmTransport-stockholm-transport/
 
     # Step 3: Publish to GitHub Packages
     npm publish

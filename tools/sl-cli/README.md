@@ -105,9 +105,10 @@ Grouped the way `sl help` prints them.
 
 When `start` finishes, `gradle.properties` reads `serverHostURL="https://<random>.ngrok-free.app/v1"`. Any subsequent `./gradlew :stockholm-transport:publishToMavenLocal` bakes that URL into `BuildConfig.API_BASE_URL`, so the rebuilt mobile/web apps issue requests against the ngrok tunnel.
 
-The Node API exposes two surfaces:
+The Node API exposes three surfaces:
 
-- `/modules` — the ViewModel-driven routes that the talk's Act 1 demo uses (`curl /modules/lines`)
+- `/modules/{lines,sites,departures,stoppoints,authorities}` — ViewModel-driven static-SDK routes the talk's Act 1 demo uses (`curl /modules/lines`).
+- `/modules/active-trips` — drives the library's realtime `TripSelectionViewModel` (added in the Option C lift-realtime-into-the-library refactor). Needs the docker stack up so `realtime-api` is reachable; otherwise the call returns a `NetworkError`.
 - `/v1/*` — passthrough proxy to `https://transport.integration.sl.se/v1/*`. The library's own `httpClient.get("v1/lines")` lands here, gets forwarded to SL, and the response flows back through the tunnel.
 
 Net effect: a single command turns your laptop into the network endpoint for every platform in the demo.

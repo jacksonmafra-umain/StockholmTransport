@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose)
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.buildconfig)
 }
@@ -49,26 +48,16 @@ kotlin {
             implementation(compose.materialIconsExtended)
 
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kotlinx.serialization.json)
-            implementation(libs.kotlinx.serialization.core)
-            implementation(libs.kotlinx.datetime)
 
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.cio)
-            implementation(libs.ktor.client.websockets)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.json)
-            implementation(libs.ktor.client.logging)
+            // Stockholm Transport library — owns Ktor/Serialization/Datetime
+            // transitively, plus the realtime feature's TripRepository,
+            // TripViewModel, TripSelectionViewModel, RealtimeConfig, and the
+            // platform HttpClient `actual`s. After Option C the demo only
+            // depends on the SDK contract; no networking code lives here.
+            implementation(libs.stockholm.transport)
 
-            api(libs.koin.core)
-            implementation(libs.koin.annotations)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.koin.compose.viewmodel.navigation)
-
-            // Domain types (Station, TripDisplayInfo, etc.) flow from the
-            // stockholm-transport library so the realtime UI binds to the
-            // same SDK shapes the static demos use.
-            implementation(libs.stockholm.transport)
         }
 
         commonTest.dependencies {
@@ -82,13 +71,14 @@ kotlin {
             implementation(compose.uiTooling)
             implementation(libs.androidx.activityCompose)
             implementation(libs.kotlinx.coroutines.android)
-            implementation(libs.ktor.client.okhttp)
             implementation(libs.koin.android)
             implementation(libs.koin.compose)
         }
 
         iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
+            // Realtime networking is provided by the library's iOS source
+            // set (Ktor Darwin engine ships transitively from
+            // :stockholm-transport).
         }
     }
 }

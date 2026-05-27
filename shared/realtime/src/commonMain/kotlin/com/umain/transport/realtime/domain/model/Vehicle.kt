@@ -27,5 +27,12 @@ data class Vehicle(
     val direction: Int,
     val longitude: Double,
     val latitude: Double,
-    val lastUpdateMillis: Long,
+    /**
+     * Epoch ms as Double — Kotlin/JS in 2.3 can't @JsExport `Long` without
+     * BigInt support, and BigInt breaks `JSON.stringify` for the same
+     * reason `Line.transportMode` is a String instead of a Kotlin enum.
+     * Double has 53 bits of integer precision, so timestamps stay accurate
+     * past the year 287,000.
+     */
+    val lastUpdateMillis: Double,
 )
