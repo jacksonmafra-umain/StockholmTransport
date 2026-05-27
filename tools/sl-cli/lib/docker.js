@@ -44,18 +44,63 @@ function runExec(repoRoot, service, cmd) {
     });
 }
 
-/** `docker compose up -d [--build] [services…]` */
+// Fixed container_names from docker-compose.yml. Used only as a last-resort
+// force-remove target — removing a container never touches named volumes, so
+// the seeded mongo_data survives.
+const CONTAINER_NAMES = ['stockholm-mongo', 'stockholm-node-api', 'stockholm-realtime-api'];
+
+/** `docker rm -f <names>` — force-remove containers, ignoring "no such container". */
+function forceRemoveContainers(names) {
+    return new Promise((resolve) => {
+        const proc = spawn('docker', ['rm', '-f', ...names], { stdio: ['ignore', 'pipe', 'pipe'] });
+        proc.stdout.on('data', () => {});
+        proc.stderr.on('data', () => {}); // swallow "No such container"
+        proc.on('exit', () => resolve());
+        proc.on('error', () => resolve());
+    });
+}
+
+/**
+ * `docker compose up -d --force-recreate --remove-orphans [--build] [services…]`.
+ *
+ * Always recreates containers — even ones that already exist — so a stale,
+ * fixed `container_name` left over from a previous run can't block the boot
+ * with a "name is already in use" conflict.
+ *
+ * Volume-safe: `--force-recreate` and `down` (without `-v`) only ever touch
+ * containers, never named volumes, so the seeded `mongo_data` is preserved.
+ * Use `clear` / `wipe` (down -v) if you actually want to drop the data.
+ *
+ * Recovery ladder if a lingering container still holds a name:
+ *   1. up --force-recreate --remove-orphans
+ *   2. down --remove-orphans (volume kept) → retry up
+ *   3. docker rm -f <named containers> (volume kept) → retry up
+ */
 export async function dockerUp(repoRoot, { build = true, services = [] } = {}) {
-    info(`Starting Docker stack in background${build ? ' (with --build)' : ''}…`);
-    const args = ['up', '-d'];
+    info(`Starting Docker stack in background${build ? ' (with --build)' : ''}, force-recreating containers…`);
+    const args = ['up', '-d', '--force-recreate', '--remove-orphans'];
     if (build) args.push('--build');
     if (services.length) args.push(...services);
-    const { code } = await runCompose(repoRoot, args);
+
+    let { code } = await runCompose(repoRoot, args);
+
+    if (code !== 0) {
+        warn('up hit a container conflict — tearing the stack down (mongo_data volume preserved) and retrying…');
+        await runCompose(repoRoot, ['down', '--remove-orphans']); // no -v → data kept
+        ({ code } = await runCompose(repoRoot, args));
+    }
+
+    if (code !== 0) {
+        warn('still conflicting — force-removing lingering containers (volume preserved) and retrying once more…');
+        await forceRemoveContainers(CONTAINER_NAMES);
+        ({ code } = await runCompose(repoRoot, args));
+    }
+
     if (code !== 0) {
         fail(`docker compose up failed (exit ${code}).`);
         return false;
     }
-    ok('Stack is up. Run `ps` to check container states or `logs <service>` to tail output.');
+    ok('Stack is up (containers recreated, mongo_data preserved). Run `ps` to check states or `logs <service>` to tail.');
     return true;
 }
 
