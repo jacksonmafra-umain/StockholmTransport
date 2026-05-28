@@ -2,7 +2,7 @@
 
 # Toolchain
 kotlin = "2.3.20"
-agp = "9.1.0-alpha08"
+agp = "9.1.1"
 jdk = "21"
 
 # Compose Multiplatform (NOT the Android Compose BOM — JetBrains build)
@@ -12,7 +12,7 @@ compose = "1.9.0-rc01"
 androidx-activityCompose = "1.13.0"
 androidx-uiTest = "1.9.0"
 androidx-lifecycle = "2.10.0"
-androidx-navigation = "2.10.0-alpha02"
+androidx-navigation = "2.10.0-alpha01"
 
 # Android SDK levels
 android-compileSdk = "36"

@@ -18,8 +18,11 @@ kotlin {
         instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
     }
 
+    // iosX64() is intentionally dropped — navigation-compose 2.10.0-alpha01
+    // (and most current Compose Multiplatform libs) ship only the Apple Silicon
+    // artefacts (iosArm64 + iosSimulatorArm64). Intel-Mac dev for iOS is dead
+    // in practice; keeping the target here just breaks dependency resolution.
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach {
