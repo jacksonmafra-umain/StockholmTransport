@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--prefix", "demo/spa-bootstrap"],
       "port": 5173
+    },
+    {
+      "name": "lp",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "lp"],
+      "port": 5174
     }
   ]
 }
