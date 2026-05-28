@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react'
 import { QA } from './data/qa'
 
 const REPO_URL = 'https://github.com/jacksonmafra-umain/StockholmTransport'
@@ -36,6 +37,10 @@ export default function App() {
           <Foot />
         </div>
       </footer>
+
+      {/* Vercel Analytics — invisible; only sends pageview events when the
+          app is deployed on Vercel with Analytics enabled. No-op locally. */}
+      <Analytics />
     </>
   )
 }
