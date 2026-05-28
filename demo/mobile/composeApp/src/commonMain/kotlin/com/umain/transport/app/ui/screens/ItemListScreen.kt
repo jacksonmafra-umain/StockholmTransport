@@ -85,10 +85,12 @@ private fun LinesList(
         state.isLoading -> CircularProgressIndicator()
         state.error != null -> Text("Error: ${state.error}", color = MaterialTheme.colorScheme.error)
         else -> {
+            // LinesUiState exposes a flat List<Line> (transportMode is a String, not an enum)
+            // so the shape survives the Kotlin → JS boundary. Consumers regroup as needed.
             LazyColumn(contentPadding = PaddingValues(16.dp)) {
-                state.linesByMode.forEach { (mode, lines) ->
+                state.lines.groupBy { it.transportMode }.forEach { (mode, lines) ->
                     item {
-                        Text(mode.name, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(vertical = 8.dp))
+                        Text(mode, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(vertical = 8.dp))
                     }
                     items(lines, key = { it.id }) { line ->
                         ListItem(title = "Line ${line.designation}", subtitle = line.name, onClick = { onItemSelected(line.id.toString()) })

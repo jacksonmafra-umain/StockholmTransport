@@ -75,15 +75,13 @@ private fun LineDetail(
     viewModel: LinesViewModel = koinInject(),
 ) {
     val state by viewModel.uiState.collectAsState()
-    val line =
-        state.linesByMode.values
-            .flatten()
-            .find { it.id.toString() == itemId }
+    // LinesUiState is a flat List<Line> with transportMode as String (see LinesViewModel).
+    val line = state.lines.find { it.id.toString() == itemId }
 
     if (line != null) {
         DetailText("Designation:", line.designation)
         DetailText("Name:", line.name)
-        DetailText("Transport Mode:", line.transportMode.name)
+        DetailText("Transport Mode:", line.transportMode)
         DetailText("Authority:", line.authority)
     } else {
         Text("Line with ID $itemId not found.")
