@@ -321,7 +321,14 @@ tasks.register("enhanceNpmPackageMetadata") {
         //   - Transitive deps live next to it as relative `.mjs` files.
         // We keep peerDependencies empty (see comment above) but document
         // the scoped name + modern exports map.
-        val newName = "@umain/stockholm-transport"
+        //
+        // The scope matches the GitHub user/org so the same artefact can
+        // be published to GitHub Packages (`@jacksonmafra-umain` scope =
+        // github.com/jacksonmafra-umain/*). `publishConfig.registry`
+        // routes `npm publish` to npm.pkg.github.com by default; consumers
+        // need the matching `@jacksonmafra-umain:registry=…` line in their
+        // .npmrc to `npm install` from there.
+        val newName = "@jacksonmafra-umain/stockholm-transport"
         val entry = "kotlin/StockholmTransport-stockholm-transport.mjs"
         val types = "kotlin/StockholmTransport-stockholm-transport.d.mts"
 
@@ -351,6 +358,10 @@ tasks.register("enhanceNpmPackageMetadata") {
             appendLine("  \"repository\": {")
             appendLine("    \"type\": \"git\",")
             appendLine("    \"url\": \"$libGitUrl\"")
+            appendLine("  },")
+            appendLine("  \"publishConfig\": {")
+            appendLine("    \"registry\": \"https://npm.pkg.github.com\",")
+            appendLine("    \"access\": \"public\"")
             appendLine("  },")
             appendLine("  \"peerDependencies\": {},")
             appendLine("  \"dependencies\": {")
