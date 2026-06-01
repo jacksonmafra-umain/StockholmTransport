@@ -7,14 +7,25 @@ import { c, dim, fail, info, ok, prefixStream, warn } from './ui.js';
 // XCFramework was renamed to "StockholmTransport" — Gradle now sees it
 // alongside the legacy auto-derived task name. Use the fully qualified
 // `assembleStockholmTransportXCFramework` to disambiguate.
+//
+// `packTalkTgz` is the talk's npm-publish-equivalent: it rewrites the
+// auto-generated package.json with the scoped @umain/stockholm-transport
+// name + modern ESM exports + types, then runs `npm pack` to produce a
+// real installable tarball under build/distributions/npm/. The mobile
+// demos don't consume the tgz directly (they still use the file: dep
+// pointing at the package dir), but the npmPack output is what would
+// land on a registry — closes 4 of the 5 gaps from slide 21 locally.
 const GRADLE_TASKS = [
     [':stockholm-transport:publishToMavenLocal', 'Publishing library to mavenLocal (Android / JVM / iOS klibs)'],
     [':stockholm-transport:jsBrowserDistribution', 'Building JS bundle (browser + Node consumers)'],
+    [':stockholm-transport:packTalkTgz', 'Packaging npm tarball (@umain/stockholm-transport-x.y.z.tgz)'],
     [':stockholm-transport:assembleStockholmTransportXCFramework', 'Assembling iOS XCFramework (Swift consumers via SPM)'],
 ];
 
 export async function publishAll(repoRoot, { skipIos = false } = {}) {
-    const tasks = skipIos ? GRADLE_TASKS.slice(0, 2) : GRADLE_TASKS;
+    // skipIos drops the final XCFramework step; the npm tgz is part of the
+    // core flow either way (Node + browser demos consume the same artefact).
+    const tasks = skipIos ? GRADLE_TASKS.slice(0, 3) : GRADLE_TASKS;
 
     const { env, android, java } = buildGradleEnv();
 
