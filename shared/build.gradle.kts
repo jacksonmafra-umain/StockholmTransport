@@ -337,7 +337,16 @@ tasks.register("enhanceNpmPackageMetadata") {
             appendLine("  \"name\": \"$newName\",")
             appendLine("  \"version\": \"$artefactVersion\",")
             appendLine("  \"description\": \"Kotlin Multiplatform SDK for SL (Stockholms Lokaltrafik) — Android · iOS · JVM · Node · Browser.\",")
-            appendLine("  \"type\": \"module\",")
+            // INTENTIONALLY no `"type": "module"`. The Kotlin/JS pipeline
+            // emits a CommonJS `webpack.config.js` alongside this file; if we
+            // declared the directory as ESM, Node would try to import-parse
+            // the webpack config as ESM on the next jsBrowserProductionWebpack
+            // run and fail with "treating as ES module … rename to .cjs".
+            // Consumers don't need `type` because:
+            //   - entry files have the `.mjs` extension (always ESM in Node)
+            //   - the `exports` map below routes imports explicitly
+            //   - bundlers (Vite, webpack 5+, Rollup) honour `module` and
+            //     `exports` regardless of `type`.
             appendLine("  \"main\": \"$entry\",")
             appendLine("  \"module\": \"$entry\",")
             appendLine("  \"types\": \"$types\",")
