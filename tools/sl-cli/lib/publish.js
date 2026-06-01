@@ -9,7 +9,7 @@ import { c, dim, fail, info, ok, prefixStream, warn } from './ui.js';
 // `assembleStockholmTransportXCFramework` to disambiguate.
 //
 // `packTalkTgz` is the talk's npm-publish-equivalent: it rewrites the
-// auto-generated package.json with the scoped @umain/stockholm-transport
+// auto-generated package.json with the scoped @jacksonmafra-umain/stockholm-transport
 // name + modern ESM exports + types, then runs `npm pack` to produce a
 // real installable tarball under build/distributions/npm/. The mobile
 // demos don't consume the tgz directly (they still use the file: dep
@@ -18,7 +18,7 @@ import { c, dim, fail, info, ok, prefixStream, warn } from './ui.js';
 const GRADLE_TASKS = [
     [':stockholm-transport:publishToMavenLocal', 'Publishing library to mavenLocal (Android / JVM / iOS klibs)'],
     [':stockholm-transport:jsBrowserDistribution', 'Building JS bundle (browser + Node consumers)'],
-    [':stockholm-transport:packTalkTgz', 'Packaging npm tarball (@umain/stockholm-transport-x.y.z.tgz)'],
+    [':stockholm-transport:packTalkTgz', 'Packaging npm tarball (@jacksonmafra-umain/stockholm-transport-x.y.z.tgz)'],
     [':stockholm-transport:assembleStockholmTransportXCFramework', 'Assembling iOS XCFramework (Swift consumers via SPM)'],
 ];
 

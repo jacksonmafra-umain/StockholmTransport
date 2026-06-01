@@ -194,19 +194,19 @@ The `package.json` metadata is configured in `shared/build.gradle.kts`.
 2.  **Build the polished package and inspect the tarball:**
     ```bash
     ./gradlew :stockholm-transport:packTalkTgz
-    ls build/distributions/npm/   # → umain-stockholm-transport-<version>.tgz
+    ls build/distributions/npm/   # → jacksonmafra-umain-stockholm-transport-<version>.tgz
     ```
 
-    `packTalkTgz` wraps two steps: `enhanceNpmPackageMetadata` rewrites the Kotlin/JS auto-generated `package.json` with the scoped `@umain/stockholm-transport` name plus modern `module` / `exports` / `types` / `files` fields, then `npm pack` produces an installable tarball.
+    `packTalkTgz` wraps two steps: `enhanceNpmPackageMetadata` rewrites the Kotlin/JS auto-generated `package.json` with the scoped `@jacksonmafra-umain/stockholm-transport` name plus modern `module` / `exports` / `types` / `files` fields, then `npm pack` produces an installable tarball.
 
 3.  **(Optional) Publish to npmjs.org:**
     ```bash
-    npm publish build/distributions/npm/umain-stockholm-transport-<version>.tgz --access public
+    npm publish build/distributions/npm/jacksonmafra-umain-stockholm-transport-<version>.tgz --access public
     ```
 
     The `org.danilopianini.npm.publish` Gradle plugin is now applied in [`shared/build.gradle.kts`](../shared/build.gradle.kts) and registers its own `npmPublish` task chain — but it requires `binaries.library()`, while this module uses `binaries.executable()` (which it needs for the Node demo's webpack bundle). The pragmatic path is the `packTalkTgz` + `npm publish` flow above; the plugin sits applied to satisfy the talk's "wire the plugin" gesture and to surface registry-config DSL if a future split to a library target lands.
 
-    Consumers `npm install @umain/stockholm-transport` and `import * as kmp from '@umain/stockholm-transport'`; the package is type-safe thanks to the auto-emitted `.d.mts`.
+    Consumers `npm install @jacksonmafra-umain/stockholm-transport` and `import * as kmp from '@jacksonmafra-umain/stockholm-transport'`; the package is type-safe thanks to the auto-emitted `.d.mts`.
 
 ### 4.3. iOS (via Swift Package Manager)
 
@@ -276,37 +276,77 @@ This process publishes your `.aar` and other Maven artifacts directly to your Gi
 
 ### JavaScript
 
-This process publishes your JavaScript package to the GitHub Packages NPM registry, scoped to your user or organization.
+The build pipeline is already configured to target GitHub Packages: the polished `package.json` declares `name: "@jacksonmafra-umain/stockholm-transport"` and a `publishConfig.registry` of `https://npm.pkg.github.com`, so any `npm publish` from the tarball lands on GitHub.
 
-1.  **Configure `.npmrc`:**
-    Create a file named `.npmrc` in the root of your project. This file tells NPM that any package under the `@jacksonmafra-umain` scope should be published to and installed from the GitHub registry.
+There are two paths to publish: **automatic on tag push (recommended)** and **manual from a laptop**.
 
-    ```
-    @jacksonmafra-umain:registry=https://npm.pkg.github.com/
-    ```
+#### Automatic — push a tag
 
-2.  **Authenticate with GitHub Packages:**
-    You need to log in to the GitHub NPM registry. This is a separate login from the public NPM registry.
+A workflow at [`.github/workflows/publish-npm.yml`](../.github/workflows/publish-npm.yml) fires on any tag matching `v*`. It:
+
+1. Validates the tag matches `libBaseVersion` in `gradle.properties`.
+2. Runs `./gradlew :stockholm-transport:packTalkTgz` (produces the tarball at `build/distributions/npm/jacksonmafra-umain-stockholm-transport-<version>.tgz`).
+3. `npm publish`es to GitHub Packages using the per-job `GITHUB_TOKEN` — no PAT to manage.
+4. Attaches the tarball to the matching GitHub Release.
+
+To cut a release:
+
+```bash
+# 1. bump the version
+sed -i '' 's|^libBaseVersion=.*|libBaseVersion=1.0.1|' gradle.properties
+git add gradle.properties && git commit -m "chore(release): bump to 1.0.1"
+
+# 2. tag + push
+git tag v1.0.1
+git push origin main --tags
+```
+
+The workflow log shows a notice with the URL of the published package. Consumers `npm install @jacksonmafra-umain/stockholm-transport@1.0.1` (with the `.npmrc` line below in their project).
+
+#### Manual — from a laptop
+
+For one-off publishes outside the workflow:
+
+1.  **Authenticate** once per machine, using a [GitHub PAT (classic)](https://github.com/settings/tokens) with the `write:packages` and `read:packages` scopes:
 
     ```bash
-    npm login --registry=https://npm.pkg.github.com
+    npm login --registry=https://npm.pkg.github.com --scope=@jacksonmafra-umain
+    # Username: jacksonmafra-umain
+    # Password: <your PAT — NOT your GitHub password>
+    # Email: jackson.mafra@umain.com
     ```
-    -   **Username:** Enter your GitHub username (`jacksonmafra-umain`).
-    -   **Password:** Enter your Personal Access Token (PAT) that you created with `write:packages` scope. **Do not use your GitHub password.**
-    -   **Email:** Enter your public GitHub email address.
 
-3.  **Build and Publish:**
-    The process is the same as for the public registry. The `.npmrc` file will automatically redirect the `publish` command to GitHub.
+2.  **Build and publish:**
 
     ```bash
-    # Step 1: Build the package (webpack output dir matches Maven artifactId)
-    ./gradlew :stockholm-transport:jsBrowserDistribution
-
-    # Step 2: Navigate to the output directory
-    cd build/js/packages/StockholmTransport-stockholm-transport/
-
-    # Step 3: Publish to GitHub Packages
-    npm publish
+    ./gradlew :stockholm-transport:packTalkTgz
+    npm publish build/distributions/npm/jacksonmafra-umain-stockholm-transport-*.tgz
     ```
 
-Your package will now be available on your GitHub repository's "Packages" page.
+    The `publishConfig` baked into the package.json routes `npm publish` to `npm.pkg.github.com` automatically, so no `--registry` flag is needed.
+
+#### Consuming from another project
+
+Add to that project's `.npmrc`:
+
+```
+@jacksonmafra-umain:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+(`${GITHUB_TOKEN}` resolves at install time from the environment; set it to a PAT with `read:packages`.) Then:
+
+```bash
+npm install @jacksonmafra-umain/stockholm-transport
+```
+
+```js
+import * as kmp from '@jacksonmafra-umain/stockholm-transport'
+const api = kmp.StockholmTransportApi.getInstance()
+api.initialize()
+const lines = api.getLinesViewModel()
+lines.subscribe(state => { if (!state.isLoading) console.log(state.lines) })
+lines.loadLines()
+```
+
+The package will appear on the repository's [Packages tab](https://github.com/jacksonmafra-umain/StockholmTransport/packages).

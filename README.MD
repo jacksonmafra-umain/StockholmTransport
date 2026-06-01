@@ -122,7 +122,7 @@ The project includes a demo application (`demo/mobile`) that consumes the librar
 
 ### Web demo (browser SPA)
 
-[`demo/spa-bootstrap`](demo/spa-bootstrap/) is a Vite + React + TypeScript app that consumes the **same** `@umain/stockholm-transport` JS package the Node demo does — via the same `file:` dependency. It carries no business logic: five routes each call `useStockholmTransport(factory, loader)`, which wraps the library's `subscribe`/`onCleared` verbatim. The `/leak` route is the memory-leak teaching demo (a live subscription counter that climbs without `onCleared()` and stays flat with it).
+[`demo/spa-bootstrap`](demo/spa-bootstrap/) is a Vite + React + TypeScript app that consumes the **same** `@jacksonmafra-umain/stockholm-transport` JS package the Node demo does — via the same `file:` dependency. It carries no business logic: five routes each call `useStockholmTransport(factory, loader)`, which wraps the library's `subscribe`/`onCleared` verbatim. The `/leak` route is the memory-leak teaching demo (a live subscription counter that climbs without `onCleared()` and stays flat with it).
 
 ```bash
 ./sl publish                 # build the JS package the app depends on
@@ -221,7 +221,7 @@ initKoin(
 JS / Node consumers go through the wrapper:
 
 ```js
-import * as kmp from '@umain/stockholm-transport';
+import * as kmp from '@jacksonmafra-umain/stockholm-transport';
 const api = kmp.StockholmTransportApi.getInstance();
 api.initializeWithRealtime('http://localhost:3001', 'localhost', 3001, false);
 const tripPicker = api.getTripSelectionViewModel();

@@ -1,7 +1,7 @@
 # `demo/spa-bootstrap` — the KMP library in a browser tab
 
 A Vite + React + TypeScript single-page app that consumes the **exact same**
-`@umain/stockholm-transport` JS package the Node demo imports — and the same
+`@jacksonmafra-umain/stockholm-transport` JS package the Node demo imports — and the same
 ViewModels Android and iOS bind to. There is **no business logic in this app**:
 it subscribes to the library's ViewModels and renders their state.
 
@@ -24,14 +24,14 @@ and the web third of the Act 3 "fix one line, three platforms" finale.
 The app depends on the built JS package via a `file:` path
 (`../../build/js/packages/StockholmTransport-stockholm-transport` — the
 directory the Kotlin/JS pipeline writes; the package metadata inside it
-advertises the scoped npm name `@umain/stockholm-transport`), exactly like
+advertises the scoped npm name `@jacksonmafra-umain/stockholm-transport`), exactly like
 the Node demo. So build the library first, from the repo root:
 
 ```bash
 ./sl start      # boot Node API + ngrok, bake the public URL into BuildConfig
 ./sl publish    # builds the JS bundle + polishes package.json + packs the .tgz
                 #   → build/js/packages/StockholmTransport-stockholm-transport/
-                #   → build/distributions/npm/umain-stockholm-transport-<v>.tgz
+                #   → build/distributions/npm/jacksonmafra-umain-stockholm-transport-<v>.tgz
 ```
 
 `./sl start` also runs the Node API, which is the `/v1` passthrough this app

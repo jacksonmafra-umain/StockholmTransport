@@ -110,7 +110,7 @@ Run: `cd demo/node-api && npm run dev` (nodemon) or `npm start` (plain `node`). 
 
 ### 2.1b `demo/spa-bootstrap/` — browser SPA (talk Act 2/3)
 
-Vite + React + TypeScript app consuming the **same** `@umain/stockholm-transport` JS package via the same `file:` dependency as the Node demo — zero business logic in the browser. Five routes (`/lines`, `/sites`, `/departures`, `/stoppoints`, `/authorities`) each call `useStockholmTransport(factory, loader)` ([src/hooks/useStockholmTransport.ts](../demo/spa-bootstrap/src/hooks/useStockholmTransport.ts)), which wraps the library's `subscribe`/`onCleared` verbatim. The `/leak` route is the slide-19 memory-leak demo: a live subscription counter that climbs when a widget mounts without `onCleared()` and stays flat with it. Run: `./sl publish` then `cd demo/spa-bootstrap && npm install && npm run dev` → `http://localhost:5173`.
+Vite + React + TypeScript app consuming the **same** `@jacksonmafra-umain/stockholm-transport` JS package via the same `file:` dependency as the Node demo — zero business logic in the browser. Five routes (`/lines`, `/sites`, `/departures`, `/stoppoints`, `/authorities`) each call `useStockholmTransport(factory, loader)` ([src/hooks/useStockholmTransport.ts](../demo/spa-bootstrap/src/hooks/useStockholmTransport.ts)), which wraps the library's `subscribe`/`onCleared` verbatim. The `/leak` route is the slide-19 memory-leak demo: a live subscription counter that climbs when a widget mounts without `onCleared()` and stays flat with it. Run: `./sl publish` then `cd demo/spa-bootstrap && npm install && npm run dev` → `http://localhost:5173`.
 
 ### 2.2 `demo/mobile/` — Compose Multiplatform static-SDK demo
 
@@ -229,7 +229,7 @@ cd "$SRCROOT/../../"
 
 ### 5.3 JavaScript (npm)
 
-Kotlin/JS emits an auto-generated `package.json` under `build/js/packages/StockholmTransport-stockholm-transport/`. The `:stockholm-transport:enhanceNpmPackageMetadata` Gradle task then polishes that file to advertise the scoped npm name `@umain/stockholm-transport` plus modern `module` / `exports` / `types` / `files` fields. `./sl publish` chains `packTalkTgz` after every build, producing `build/distributions/npm/umain-stockholm-transport-<version>.tgz` — the installable tarball a registry would receive. The `org.danilopianini.npm.publish` plugin is wired (its `npmPublish` task is available for registry pushes), but the current `binaries.executable()` target emits a warning ("Kotlin/JS executable binaries are not valid npm package targets"); publishing to npmjs.org or GitHub Packages goes through the manual `npm publish path/to/.tgz` flow documented in [PUBLISHING.md](PUBLISHING.md).
+Kotlin/JS emits an auto-generated `package.json` under `build/js/packages/StockholmTransport-stockholm-transport/`. The `:stockholm-transport:enhanceNpmPackageMetadata` Gradle task then polishes that file to advertise the scoped npm name `@jacksonmafra-umain/stockholm-transport` plus modern `module` / `exports` / `types` / `files` fields. `./sl publish` chains `packTalkTgz` after every build, producing `build/distributions/npm/umain-stockholm-transport-<version>.tgz` — the installable tarball a registry would receive. The `org.danilopianini.npm.publish` plugin is wired (its `npmPublish` task is available for registry pushes), but the current `binaries.executable()` target emits a warning ("Kotlin/JS executable binaries are not valid npm package targets"); publishing to npmjs.org or GitHub Packages goes through the manual `npm publish path/to/.tgz` flow documented in [PUBLISHING.md](PUBLISHING.md).
 
 ---
 
@@ -239,6 +239,6 @@ Tracked in the repo's todo list (and called out in [PUBLISHING.md](PUBLISHING.md
 
 - ~~`shared/realtime/` library module — promote the train-positions data layer from `demo/realtime-mobile/` into the library proper.~~ **Done (Option C):** `Trip`, `Vehicle`, `ActiveTrip`, `TripDisplayInfo`, `Station`, `RealtimeConfig`, `TripUpdateDataSource`, `TripRepository(Impl)`, `TripViewModel`, `TripSelectionViewModel` now live in `:stockholm-transport`. Realtime mobile + node-api both bind to library types.
 - ~~`demo/web/` React + Vite app — the talk's Act 2 centerpiece (`useStockholmTransport` hook + memory-leak before/after route).~~ **Done:** lives at `demo/spa-bootstrap/` (Vite + React + TS), five feature routes + the `/leak` route, consuming the same JS package as the Node demo.
-- `npm-publish` Gradle plugin — actually publish a scoped `@umain/stockholm-transport` to npm with `peerDependencies` for Ktor/Koin/coroutines.
+- `npm-publish` Gradle plugin — actually publish a scoped `@jacksonmafra-umain/stockholm-transport` to npm with `peerDependencies` for Ktor/Koin/coroutines.
 - Auth on `/api/admin/import-trafiklab` in the realtime API.
 - Map rendering inside `realtime-mobile/TripScreen` (currently stops at Material3 cards).
