@@ -10,6 +10,21 @@ export interface QAItem {
 
 export const QA: QAItem[] = [
   {
+    q: 'I have not used KMP. What is it, in one paragraph?',
+    a: (
+      <>
+        <strong>Kotlin Multiplatform</strong> lets you write Kotlin code once and compile it to
+        Android (JVM bytecode), iOS (native via LLVM), the JVM, and JavaScript. The UI stays
+        native on each platform — Compose on Android, SwiftUI on iOS, React/Vue/Svelte on the web
+        — but the data, networking, business logic, and state-management layer is one shared
+        codebase. The talk's library is exactly that shared layer for the SL public-transport API:
+        five REST features plus a realtime WebSocket trip feed, consumed identically from a phone
+        and a browser. KMP has been Stable since November 2023 and is in production at Cash App,
+        McDonald's, Netflix, Forbes, and others.
+      </>
+    ),
+  },
+  {
     q: 'Why a library at all? Why not just fetch() the API?',
     a: (
       <>
@@ -22,13 +37,16 @@ export const QA: QAItem[] = [
     ),
   },
   {
-    q: 'What is the bundle size?',
+    q: 'What is the bundle size? Is 800 KB a lot?',
     a: (
       <>
-        About 80 KiB runtime plus ~800 KiB production bundle. It pays off when you already maintain
-        Android + iOS and have non-trivial domain logic — the productivity of shared contracts beats
-        the bytes. It does <em>not</em> pay off for a static landing page or a 1 MiB edge runtime;
-        there, plain <code>fetch()</code> is the right call. The talk is explicit about both cases.
+        The full production bundle is about <strong>800 KB raw, ~200 KB gzipped</strong>. For a
+        reference point: that is roughly the size of Firebase's JavaScript SDK, or about one third
+        of a typical React dashboard bundle. Not free, not catastrophic. It pays off when you
+        already maintain Android + iOS and have non-trivial domain logic — the productivity of
+        shared contracts beats the bytes. It does <em>not</em> pay off for a static landing page
+        or a 1 MiB edge runtime; there, plain <code>fetch()</code> is the right call. The talk is
+        explicit about both cases.
       </>
     ),
   },
@@ -79,6 +97,44 @@ export const QA: QAItem[] = [
         can't serialize BigInt, so use <code>String</code> for IDs that cross the wire. And a
         Kotlin <code>List&lt;T&gt;</code> exported to JS is <em>not</em> a JS Array — call{' '}
         <code>.asJsReadonlyArrayView()</code> to convert (the React demo does this in one helper).
+      </>
+    ),
+  },
+  {
+    q: 'How does one Kotlin source hit four HTTP libraries? What is expect / actual?',
+    a: (
+      <>
+        KMP's mechanism for "shared API, platform-specific implementation" has a name:{' '}
+        <strong><code>expect</code> / <code>actual</code></strong>. In{' '}
+        <code>commonMain</code> you declare <code>expect fun createHttpClient(): HttpClient</code>{' '}
+        — just the shape, no body. Then in each platform source set you supply the{' '}
+        <code>actual</code> implementation. The compiler links the right one per target. In this
+        library that wires four HTTP engines: <strong>OkHttp</strong> on Android (Square's library,
+        the Android default), <strong>Darwin</strong> on iOS (URLSession under the hood),{' '}
+        <strong>CIO</strong> on the JVM (Ktor's pure-Kotlin engine), and <strong>Ktor JS</strong>{' '}
+        in the browser/Node (wraps the platform's native <code>fetch</code>). Above all four, the
+        calling code is identical: <code>httpClient.get("v1/lines")</code>.
+      </>
+    ),
+  },
+  {
+    q: 'Why a callback and not async / await for the ViewModel?',
+    a: (
+      <>
+        For one-shot suspend functions, <code>async</code>/<code>await</code> IS available — the{' '}
+        <code>kotlinx-coroutines-core-js</code> library ships a <code>promise {'{ }'}</code>{' '}
+        builder. You'd write{' '}
+        <code>{`fun fetchProfileAsync(): Promise<Profile> = GlobalScope.promise { fetchProfile() }`}</code>{' '}
+        and JS calls <code>await api.fetchProfileAsync()</code> like any other Promise — type-safe
+        via the generated <code>.d.mts</code>.
+        <br />
+        <br />
+        The library exposes a <em>callback</em> instead because the primary contract is a{' '}
+        <strong>stream</strong>, not a one-shot. A <code>StateFlow</code> keeps emitting —{' '}
+        loading → success → error → reload → success — and a Promise resolves once. You'd have to
+        poll, which fights the underlying Flow's lifecycle. The callback walks the flow once and{' '}
+        <code>onCleared()</code> tears it down — the contract Flow wants. Both primitives can
+        coexist: callback for streams, <code>promise {'{ }'}</code> for single results.
       </>
     ),
   },
