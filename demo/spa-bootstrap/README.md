@@ -1,9 +1,9 @@
 # `demo/spa-bootstrap` — the KMP library in a browser tab
 
 A Vite + React + TypeScript single-page app that consumes the **exact same**
-`StockholmTransport-stockholm-transport` JS package the Node demo imports — and
-the same ViewModels Android and iOS bind to. There is **no business logic in
-this app**: it subscribes to the library's ViewModels and renders their state.
+`@umain/stockholm-transport` JS package the Node demo imports — and the same
+ViewModels Android and iOS bind to. There is **no business logic in this app**:
+it subscribes to the library's ViewModels and renders their state.
 
 This is the app behind the talk's Act 2 (the React hook + the memory-leak demo)
 and the web third of the Act 3 "fix one line, three platforms" finale.
@@ -22,12 +22,16 @@ and the web third of the Act 3 "fix one line, three platforms" finale.
 ## Prerequisites
 
 The app depends on the built JS package via a `file:` path
-(`../../build/js/packages/StockholmTransport-stockholm-transport`), exactly like
+(`../../build/js/packages/StockholmTransport-stockholm-transport` — the
+directory the Kotlin/JS pipeline writes; the package metadata inside it
+advertises the scoped npm name `@umain/stockholm-transport`), exactly like
 the Node demo. So build the library first, from the repo root:
 
 ```bash
 ./sl start      # boot Node API + ngrok, bake the public URL into BuildConfig
-./sl publish    # produces build/js/packages/StockholmTransport-stockholm-transport
+./sl publish    # builds the JS bundle + polishes package.json + packs the .tgz
+                #   → build/js/packages/StockholmTransport-stockholm-transport/
+                #   → build/distributions/npm/umain-stockholm-transport-<v>.tgz
 ```
 
 `./sl start` also runs the Node API, which is the `/v1` passthrough this app
@@ -81,7 +85,9 @@ npm run dev        # http://localhost:5173
   tunnel. To keep the browser on the public URL instead, disable the interstitial
   (paid domain / ngrok traffic policy) or send `ngrok-skip-browser-warning`.
 - **Types:** [src/types/kmp.d.ts](src/types/kmp.d.ts) hand-declares the package's
-  surface because the generated `package.json` has no `types` field yet (the
-  `npm-publish` gap — slide 20). When that lands, delete the shim.
+  surface as a TypeScript module fallback. The generated `package.json` now
+  includes a `types` field (after `enhanceNpmPackageMetadata`), so once the
+  consuming code is fully type-checked against the auto-generated `.d.mts` the
+  shim can be deleted.
 - **CORS:** handled by the Node demo's `/v1` proxy. If you point the library at a
   different upstream, make sure it sends `Access-Control-Allow-Origin`.

@@ -110,7 +110,7 @@ Run: `cd demo/node-api && npm run dev` (nodemon) or `npm start` (plain `node`). 
 
 ### 2.1b `demo/spa-bootstrap/` — browser SPA (talk Act 2/3)
 
-Vite + React + TypeScript app consuming the **same** `StockholmTransport-stockholm-transport` JS package via the same `file:` dependency as the Node demo — zero business logic in the browser. Five routes (`/lines`, `/sites`, `/departures`, `/stoppoints`, `/authorities`) each call `useStockholmTransport(factory, loader)` ([src/hooks/useStockholmTransport.ts](../demo/spa-bootstrap/src/hooks/useStockholmTransport.ts)), which wraps the library's `subscribe`/`onCleared` verbatim. The `/leak` route is the slide-18 demo: a live subscription counter that climbs when a widget mounts without `onCleared()` and stays flat with it. Run: `./sl publish` then `cd demo/spa-bootstrap && npm install && npm run dev` → `http://localhost:5173`.
+Vite + React + TypeScript app consuming the **same** `@umain/stockholm-transport` JS package via the same `file:` dependency as the Node demo — zero business logic in the browser. Five routes (`/lines`, `/sites`, `/departures`, `/stoppoints`, `/authorities`) each call `useStockholmTransport(factory, loader)` ([src/hooks/useStockholmTransport.ts](../demo/spa-bootstrap/src/hooks/useStockholmTransport.ts)), which wraps the library's `subscribe`/`onCleared` verbatim. The `/leak` route is the slide-19 memory-leak demo: a live subscription counter that climbs when a widget mounts without `onCleared()` and stays flat with it. Run: `./sl publish` then `cd demo/spa-bootstrap && npm install && npm run dev` → `http://localhost:5173`.
 
 ### 2.2 `demo/mobile/` — Compose Multiplatform static-SDK demo
 
@@ -229,7 +229,7 @@ cd "$SRCROOT/../../"
 
 ### 5.3 JavaScript (npm)
 
-Kotlin/JS emits a generated `package.json` under `build/js/packages/StockholmTransport-stockholm-transport/`, with `main`, `module`, and `types: kotlin/StockholmTransport-stockholm-transport.d.mts`. The Node demo consumes it via `file:` dep; full publishing to a scoped name like `@umain/stockholm-transport` is the next step (deferred — needs the `npm-publish` Gradle plugin wired in).
+Kotlin/JS emits an auto-generated `package.json` under `build/js/packages/StockholmTransport-stockholm-transport/`. The `:stockholm-transport:enhanceNpmPackageMetadata` Gradle task then polishes that file to advertise the scoped npm name `@umain/stockholm-transport` plus modern `module` / `exports` / `types` / `files` fields. `./sl publish` chains `packTalkTgz` after every build, producing `build/distributions/npm/umain-stockholm-transport-<version>.tgz` — the installable tarball a registry would receive. The `org.danilopianini.npm.publish` plugin is wired (its `npmPublish` task is available for registry pushes), but the current `binaries.executable()` target emits a warning ("Kotlin/JS executable binaries are not valid npm package targets"); publishing to npmjs.org or GitHub Packages goes through the manual `npm publish path/to/.tgz` flow documented in [PUBLISHING.md](PUBLISHING.md).
 
 ---
 

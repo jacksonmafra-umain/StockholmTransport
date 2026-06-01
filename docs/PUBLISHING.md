@@ -191,14 +191,22 @@ The `package.json` metadata is configured in `shared/build.gradle.kts`.
     npm login
     ```
 
-2.  **Build and publish:**
+2.  **Build the polished package and inspect the tarball:**
     ```bash
-    ./gradlew :stockholm-transport:jsBrowserDistribution
-    cd build/js/packages/StockholmTransport-stockholm-transport
-    npm publish --access public
+    ./gradlew :stockholm-transport:packTalkTgz
+    ls build/distributions/npm/   # → umain-stockholm-transport-<version>.tgz
     ```
 
-    The `jsPublicPackageJson` task is **not** registered today (the `npm-publish` Gradle plugin is declared in [`gradle/libs.versions.toml`](gradle/libs.versions.toml) but not yet applied in [`shared/build.gradle.kts`](shared/build.gradle.kts)). What ships today is the webpack output of `jsBrowserDistribution`, mounted at `build/js/packages/StockholmTransport-stockholm-transport/` (matches `demo/node-api/package.json`'s `file:` dep). For an actual `@umain/stockholm-transport` publication with `peerDependencies`, wire the plugin first.
+    `packTalkTgz` wraps two steps: `enhanceNpmPackageMetadata` rewrites the Kotlin/JS auto-generated `package.json` with the scoped `@umain/stockholm-transport` name plus modern `module` / `exports` / `types` / `files` fields, then `npm pack` produces an installable tarball.
+
+3.  **(Optional) Publish to npmjs.org:**
+    ```bash
+    npm publish build/distributions/npm/umain-stockholm-transport-<version>.tgz --access public
+    ```
+
+    The `org.danilopianini.npm.publish` Gradle plugin is now applied in [`shared/build.gradle.kts`](../shared/build.gradle.kts) and registers its own `npmPublish` task chain — but it requires `binaries.library()`, while this module uses `binaries.executable()` (which it needs for the Node demo's webpack bundle). The pragmatic path is the `packTalkTgz` + `npm publish` flow above; the plugin sits applied to satisfy the talk's "wire the plugin" gesture and to surface registry-config DSL if a future split to a library target lands.
+
+    Consumers `npm install @umain/stockholm-transport` and `import * as kmp from '@umain/stockholm-transport'`; the package is type-safe thanks to the auto-emitted `.d.mts`.
 
 ### 4.3. iOS (via Swift Package Manager)
 

@@ -1,4 +1,4 @@
-import type { KtList } from 'StockholmTransport-stockholm-transport'
+import type { KtList } from '@umain/stockholm-transport'
 
 // Kotlin List<T> → JS array.
 //
