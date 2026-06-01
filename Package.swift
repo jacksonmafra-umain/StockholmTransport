@@ -5,7 +5,7 @@
 // Consumers add this package in Xcode (File → Add Package Dependencies…)
 // using the repository URL:
 //
-//     https://github.com/eidra-umain/stockholm-transport
+//     https://github.com/jacksonmafra-umain/StockholmTransport
 //
 // At release time, the values of `libraryVersion` and `libraryChecksum`
 // below are rewritten by the release pipeline (see PUBLISHING.md →
@@ -20,7 +20,7 @@ import PackageDescription
 
 let libraryVersion = "1.0.0"
 let libraryChecksum = "0000000000000000000000000000000000000000000000000000000000000000"
-let libraryURL = "https://github.com/eidra-umain/stockholm-transport/releases/download/\(libraryVersion)/StockholmTransport.xcframework.zip"
+let libraryURL = "https://github.com/jacksonmafra-umain/StockholmTransport/releases/download/\(libraryVersion)/StockholmTransport.xcframework.zip"
 
 let package = Package(
     name: "StockholmTransport",
