@@ -1,6 +1,6 @@
 import express from 'express';
 // Use 'import * as kmp from ...' to import the entire module namespace.
-import * as kmp from '@umain/stockholm-transport';
+import * as kmp from '@jacksonmafra-umain/stockholm-transport';
 
 // The library is published with the public ngrok URL baked into BuildConfig (so
 // phones can reach it). Server-side we don't need the tunnel — and it's often

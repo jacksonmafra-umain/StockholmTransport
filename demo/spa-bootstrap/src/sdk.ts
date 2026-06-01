@@ -1,4 +1,4 @@
-import * as kmp from '@umain/stockholm-transport'
+import * as kmp from '@jacksonmafra-umain/stockholm-transport'
 
 // One singleton for the whole app. Kotlin/JS exports the `object` as a class
 // with a static getInstance(); initialize() is called exactly once — the same

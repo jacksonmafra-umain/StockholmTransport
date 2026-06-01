@@ -13,7 +13,7 @@
 //   - shared/src/.../js/JsApi.kt                  (StockholmTransportApi)
 //
 // When the `types` field lands in the published package, delete this file.
-declare module '@umain/stockholm-transport' {
+declare module '@jacksonmafra-umain/stockholm-transport' {
   // ----- Domain models -----
   export interface Line {
     readonly id: number

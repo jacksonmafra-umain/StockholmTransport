@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // The KMP library is consumed as the SAME `file:` package the Node demo imports.
 // The directory it lives in is still build/js/packages/StockholmTransport-
 // stockholm-transport (Kotlin/JS pipeline output), but its package.json now
-// advertises the scoped npm name `@umain/stockholm-transport` (after the
+// advertises the scoped npm name `@jacksonmafra-umain/stockholm-transport` (after the
 // :stockholm-transport:enhanceNpmPackageMetadata Gradle task polishes the
 // auto-generated file). Vite imports by that scoped name.
 //
@@ -18,7 +18,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
-    include: ['@umain/stockholm-transport'],
+    include: ['@jacksonmafra-umain/stockholm-transport'],
   },
   server: {
     port: 5173,

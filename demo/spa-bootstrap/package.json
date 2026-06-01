@@ -14,7 +14,7 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.1",
-    "@umain/stockholm-transport": "file:../../build/js/packages/StockholmTransport-stockholm-transport"
+    "@jacksonmafra-umain/stockholm-transport": "file:../../build/js/packages/StockholmTransport-stockholm-transport"
   },
   "devDependencies": {
     "@types/react": "^19.2.15",

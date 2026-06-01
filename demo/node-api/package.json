@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "express": "5.2.1",
-    "@umain/stockholm-transport": "file:../../build/js/packages/StockholmTransport-stockholm-transport"
+    "@jacksonmafra-umain/stockholm-transport": "file:../../build/js/packages/StockholmTransport-stockholm-transport"
   },
   "devDependencies": {
     "nodemon": "3.1.14"

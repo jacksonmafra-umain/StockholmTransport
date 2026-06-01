@@ -1,4 +1,4 @@
-import type { StopPointsUiState, StopPointsViewModel } from '@umain/stockholm-transport'
+import type { StopPointsUiState, StopPointsViewModel } from '@jacksonmafra-umain/stockholm-transport'
 import { getApi } from '../sdk'
 import { ktArray } from '../kt'
 import { useStockholmTransport } from '../hooks/useStockholmTransport'
