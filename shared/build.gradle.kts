@@ -2,7 +2,6 @@
 
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 import java.time.ZonedDateTime
@@ -228,28 +227,6 @@ publishing {
 tasks.named("jsDevelopmentExecutableCompileSync") {
     dependsOn("jsNodeProductionRun")
     mustRunAfter("jsNodeProductionRun")
-}
-
-tasks.withType<KotlinWebpack>().configureEach {
-    // We configure only the tasks related to the nodejs target
-    if (name.startsWith("js") && name.endsWith("Webpack") && !name.contains("Browser")) {
-        mainOutputFileName = "$libMavenPublish.js"
-        output.libraryTarget = "commonjs2"
-        outputDirectory =
-            layout.buildDirectory
-                .dir("js/packages/$libMavenPublish")
-                .get()
-                .asFile
-
-        // Explicitly declare the dependency to fix validation errors
-        val syncTaskName =
-            if (name.contains("Production")) {
-                "jsProductionLibraryCompileSync"
-            } else {
-                "jsDevelopmentLibraryCompileSync"
-            }
-        dependsOn(tasks.named(syncTaskName))
-    }
 }
 
 // -------------------------------------------------------------------------
