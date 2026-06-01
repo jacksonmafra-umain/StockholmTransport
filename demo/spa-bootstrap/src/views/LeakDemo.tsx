@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { LinesUiState, LinesViewModel } from 'StockholmTransport-stockholm-transport'
+import type { LinesUiState, LinesViewModel } from '@umain/stockholm-transport'
 import { getApi } from '../sdk'
 import { ktArray } from '../kt'
 import { useFixedTransport, useLeakyTransport } from '../hooks/useLeakDemo'

@@ -6,15 +6,17 @@ WORKDIR /usr/src/app
 RUN chown -R node:node /usr/src/app
 
 # The Kotlin/JS bundle the demo depends on lives outside this Dockerfile's
-# context (../../build/js/packages/StockholmTransport-stockholm-transport).
-# When building from the unified compose at the repo root, the build context
-# is the repo root and that path resolves; when building from this directory,
-# run `./sl publish` first so the bundle exists, then `docker build .`.
+# context (../../build/js/packages/StockholmTransport-stockholm-transport —
+# the directory the Kotlin/JS pipeline emits). The package metadata inside it
+# now advertises the scoped npm name `@umain/stockholm-transport`, so we COPY
+# the directory into node_modules under that scoped path. When building from
+# the unified compose at the repo root the build context resolves; from this
+# directory, run `./sl publish` first so the bundle exists, then `docker build .`.
 COPY --chown=node:node demo/node-api/package*.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 
 COPY --chown=node:node demo/node-api/ ./
-COPY --chown=node:node build/js/packages/StockholmTransport-stockholm-transport ./node_modules/StockholmTransport-stockholm-transport
+COPY --chown=node:node build/js/packages/StockholmTransport-stockholm-transport ./node_modules/@umain/stockholm-transport
 
 USER node
 

@@ -1,4 +1,4 @@
-import type { SitesUiState, SitesViewModel } from 'StockholmTransport-stockholm-transport'
+import type { SitesUiState, SitesViewModel } from '@umain/stockholm-transport'
 import { getApi } from '../sdk'
 import { ktArray } from '../kt'
 import { useStockholmTransport } from '../hooks/useStockholmTransport'
