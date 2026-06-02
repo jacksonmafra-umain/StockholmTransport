@@ -92,10 +92,27 @@ export const QA: QAItem[] = [
     q: 'Why a callback bridge, not expose StateFlow?',
     a: (
       <>
-        <code>StateFlow</code> is a coroutines type — JavaScript has no suspending functions or{' '}
-        <code>Flow</code>. Exposing it would either leak Kotlin internals into JS or lose the
-        lifecycle contract. <code>subscribe(callback)</code> + <code>onCleared()</code> — two
-        methods, framework-agnostic, works in React, Vue, Svelte, vanilla, or Node.
+        <code>StateFlow</code> is a Kotlin Coroutines type. Kotlin/JS <em>can</em> technically
+        export it, but JavaScript has no native concept of Coroutines or <code>Flow</code> — so
+        two things go wrong:
+        <ul>
+          <li>
+            <strong>The generated TypeScript definitions explode.</strong> The auto-emitted{' '}
+            <code>.d.mts</code> drags in <code>kotlin.coroutines.flow.StateFlow</code> and its
+            many internal tag types. The JS consumer ends up dealing with Kotlin standard-library
+            internals instead of clean primitives.
+          </li>
+          <li>
+            <strong>The lifecycle becomes the consumer's problem.</strong> Consuming a StateFlow
+            from JS forces the caller to manage <code>CoroutineScope</code> and{' '}
+            <code>Dispatcher</code> teardown — a recipe for memory leaks inside a React component
+            or a Node request handler (and exactly what slide 19 demos live).
+          </li>
+        </ul>
+        A two-method bridge — <code>subscribe(callback)</code> + <code>onCleared()</code> — hides
+        every Kotlin internal and gives every framework the same primitive: a function call when
+        state changes, a function call to tear down. Works flawlessly in React, Vue, Svelte,
+        vanilla JS, or Node.
       </>
     ),
   },
