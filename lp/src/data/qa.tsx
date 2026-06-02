@@ -51,6 +51,44 @@ export const QA: QAItem[] = [
     ),
   },
   {
+    q: 'Is there a separate package for Node and the browser?',
+    a: (
+      <>
+        No — <strong>one single npm package serves both</strong>. <code>./sl publish</code> emits
+        one tarball, <code>jacksonmafra-umain-stockholm-transport-1.0.0.tgz</code>, containing pure
+        ESM <code>.mjs</code> files plus <code>.d.mts</code> types. The same{' '}
+        <code>{`import * as kmp from '@jacksonmafra-umain/stockholm-transport'`}</code> works in
+        Node 18+, in Vite/webpack/Rollup/esbuild, and in raw browser modules.
+        <br />
+        <br />
+        Three reasons it works:
+        <ul>
+          <li>
+            <strong>The library has zero DOM coupling.</strong> No <code>window</code>,{' '}
+            <code>localStorage</code>, <code>fs</code>, or <code>http</code> calls in the public
+            API — it's a pure data-layer, so the same code runs server-side and client-side.
+          </li>
+          <li>
+            <strong>Ktor JS uses <code>fetch</code> uniformly.</strong> In the browser that's{' '}
+            <code>window.fetch</code>; on Node 18+ it's the native global <code>fetch</code>.
+            Identical contract.
+          </li>
+          <li>
+            <strong>ESM is universal in 2026.</strong> Node natively loads <code>.mjs</code> as
+            ESM; every modern bundler honours <code>module</code> + <code>exports</code> regardless
+            of environment.
+          </li>
+        </ul>
+        Framework adapters are ~10 lines each: React's <code>useStockholmTransport</code> hook
+        wraps <code>subscribe</code>/<code>onCleared</code> with <code>useState</code> +{' '}
+        <code>useEffect</code>; Vue would wrap them in <code>onMounted</code>/{' '}
+        <code>onUnmounted</code>; Svelte in <code>onMount</code>/<code>onDestroy</code>. The
+        library has no UI component layer at all — just the data subscription contract that every
+        UI framework can wire to.
+      </>
+    ),
+  },
+  {
     q: 'Why a callback bridge, not expose StateFlow?',
     a: (
       <>
@@ -97,6 +135,35 @@ export const QA: QAItem[] = [
         can't serialize BigInt, so use <code>String</code> for IDs that cross the wire. And a
         Kotlin <code>List&lt;T&gt;</code> exported to JS is <em>not</em> a JS Array — call{' '}
         <code>.asJsReadonlyArrayView()</code> to convert (the React demo does this in one helper).
+      </>
+    ),
+  },
+  {
+    q: 'Why does the build emit two package.json files?',
+    a: (
+      <>
+        Inside <code>build/js/</code> you'll find:
+        <ul>
+          <li>
+            <code>build/js/package.json</code> — <strong>workspace root manifest</strong>. It is
+            marked <code>{`"private": true`}</code> and only lists{' '}
+            <code>workspaces</code>, pointing at every transitive Kotlin/JS library the toolchain
+            unpacked (Ktor, kotlinx-datetime, kotlinx-serialization, Koin, …). This is internal
+            build scaffolding — the Kotlin/JS plugin uses Yarn workspaces to resolve the
+            dependency graph during compilation. It is <em>never</em> published.
+          </li>
+          <li>
+            <code>build/js/packages/StockholmTransport-stockholm-transport/package.json</code> —
+            the <strong>real publishable package</strong>. The auto-generated file is rewritten
+            by a Gradle task (<code>enhanceNpmPackageMetadata</code>) to advertise the scoped
+            name <code>@jacksonmafra-umain/stockholm-transport</code>, modern{' '}
+            <code>main</code> / <code>module</code> / <code>exports</code> / <code>types</code>{' '}
+            fields, plus <code>publishConfig.registry</code> routing to GitHub Packages. This is
+            what consumers see and what <code>npm pack</code> bundles into the tarball.
+          </li>
+        </ul>
+        Think of it as a Yarn monorepo where one root manages many sub-packages — except the only
+        sub-package you care about is the library itself; the rest is internal coordination.
       </>
     ),
   },
