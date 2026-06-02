@@ -10,6 +10,91 @@ export interface QAItem {
 
 export const QA: QAItem[] = [
   {
+    q: 'Who is this talk for? Am I in the room?',
+    a: (
+      <>
+        Two audiences, both welcome — different jobs in the room.
+        <ul>
+          <li>
+            <strong>Primary: the mobile engineer.</strong> Kotlin-fluent, already shipping
+            Android, often shipping iOS, maybe already using KMP for shared mobile logic. This
+            talk is the path from <em>"shared logic for Android + iOS"</em> to{' '}
+            <em>"shared logic for Android + iOS + web"</em>. You write the build; you own the
+            SDK contract.
+          </li>
+          <li>
+            <strong>Secondary: the web engineer</strong> alongside that mobile team — React,
+            Vue, Svelte, Node. You don't write Kotlin. You receive an npm package, you{' '}
+            <code>npm install</code> it, you wire ~12 lines of framework adapter. The React
+            demo on slide 18 is shaped for you.
+          </li>
+        </ul>
+        If you ship only one platform, only one client, or your value lives in pixels rather
+        than backend-driven logic — KMP-on-the-web is interesting, not urgent. The talk says
+        so explicitly on slide 06.
+      </>
+    ),
+  },
+  {
+    q: 'What does adoption actually look like, step by step?',
+    a: (
+      <>
+        Depends on which side of the SDK boundary you're standing on.
+        <br />
+        <br />
+        <strong>Mobile-side — three steps if you already have a KMP module:</strong>
+        <ol>
+          <li>
+            <strong>Add the JS target</strong> — four Gradle lines in{' '}
+            <code>shared/build.gradle.kts</code>:{' '}
+            <code>js(IR) {'{'} browser(); useEsModules(); generateTypeScriptDefinitions();
+            binaries.executable() {'}'}</code>. Re-run the build, get a{' '}
+            <code>build/js/packages/</code> directory.
+          </li>
+          <li>
+            <strong>Apply the <code>@JsExport.Ignore</code> discipline.</strong> Audit every
+            public ViewModel and repository. Mark internals — <code>StateFlow</code>,{' '}
+            <code>CoroutineScope</code>, Koin wiring — with <code>@JsExport.Ignore</code>;
+            export only the verbs (<code>load</code>, <code>subscribe</code>,{' '}
+            <code>onCleared</code>). Thirteen annotations in this repo.
+          </li>
+          <li>
+            <strong>Wire <code>subscribe(callback)</code> + <code>onCleared()</code></strong>{' '}
+            on each ViewModel as the bridge from <code>StateFlow</code> to JS. Then{' '}
+            <code>./sl publish</code> builds the <code>.tgz</code> and pushes it to your
+            registry (npmjs.org or GitHub Packages).
+          </li>
+        </ol>
+        If you don't have a KMP module yet, <em>that</em> is the prior step — extracting shared
+        logic into a Kotlin Multiplatform library is its own project (covered in plenty of
+        Android-focused talks). This talk assumes you've done that for Android + iOS already;
+        the JS target is the increment.
+        <br />
+        <br />
+        <strong>Web-side — two steps:</strong>
+        <ol>
+          <li>
+            <code>npm install @yourorg/library</code> from your registry. If it's GitHub
+            Packages, add the <code>@yourorg:registry</code> line to <code>.npmrc</code>. The
+            auto-generated <code>.d.mts</code> gives you typed everything for free.
+          </li>
+          <li>
+            Write a ~12-line framework adapter. React:{' '}
+            <code>useStockholmTransport(factory, loader)</code> with <code>useState</code> +{' '}
+            <code>useEffect</code>. Vue: composable with <code>ref</code> +{' '}
+            <code>onUnmounted</code>. Svelte: <code>onMount</code> + <code>onDestroy</code> +
+            a writable store. Same <code>subscribe</code>/<code>onCleared</code> contract; the
+            wrapper shape changes per framework.
+          </li>
+        </ol>
+        <strong>The payoff:</strong> a bug fixed in one Kotlin file republishes everywhere.
+        Android picks it up on next launch, iOS on next sync, web on next deploy. That's the
+        day-200 dividend — and what the "fix one line, three platforms" demo at the end of the
+        talk lives.
+      </>
+    ),
+  },
+  {
     q: 'I have not used KMP. What is it, in one paragraph?',
     a: (
       <>
