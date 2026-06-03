@@ -10,6 +10,31 @@ export interface QAItem {
 
 export const QA: QAItem[] = [
   {
+    q: 'Who built this? Who is Umain?',
+    a: (
+      <>
+        <strong>Umain</strong> is a digital product studio founded in Stockholm in 2001, part of
+        the <a href="https://eidra.com" target="_blank" rel="noreferrer">Eidra collective</a> —
+        a Nasdaq-listed Swedish consultancy group. Around 100 engineers, designers and product
+        folks across Stockholm, London, Malmö, Chicago, and Oslo, with about 50&nbsp;million
+        monthly active users on shipped products.
+        <br />
+        <br />
+        Featured work includes the McDonald's mobile app, Scania, Biamp, KA-YO, and Nymans Ur —
+        which is what makes this talk's case study a fair one: <em>Umain ships the kind of
+        Android+iOS-at-scale apps where the SDK pattern in this talk pays off</em>. The Stockholm
+        SL example wasn't picked for the postcards — it's a real public API, and Umain has
+        always been a Stockholm company.
+        <br />
+        <br />
+        The talk and library here are by <strong>Jackson Mafra</strong>, mobile engineer at
+        Umain. Get in touch: <a href="mailto:jackson.mafra@umain.com">
+        jackson.mafra@umain.com</a>. Umain business: <a href="mailto:hi@umain.com">hi@umain.com
+        </a> · <a href="https://www.umain.com" target="_blank" rel="noreferrer">umain.com</a>.
+      </>
+    ),
+  },
+  {
     q: 'Who is this talk for? Am I in the room?',
     a: (
       <>

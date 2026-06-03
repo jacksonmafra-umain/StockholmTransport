@@ -4,7 +4,7 @@ import com.umain.transport.di.initKoin as libraryInitKoin
 import com.umain.transport.realtime.RealtimeConfig
 import com.umain.transport.realtime.config.BuildConfig
 import org.koin.dsl.KoinAppDeclaration
-
+ 
 /**
  * Bootstraps the realtime-mobile demo by delegating to the
  * `:stockholm-transport` library's [com.umain.transport.di.initKoin]. Every
