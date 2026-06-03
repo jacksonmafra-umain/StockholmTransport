@@ -10,6 +10,37 @@ export interface QAItem {
 
 export const QA: QAItem[] = [
   {
+    q: 'Why Stockholm data? Is it SL-only — or does this cover all of Sweden?',
+    a: (
+      <>
+        The talk's case study uses <strong>SL</strong> — Stockholms Lokaltrafik — but SL is just
+        one of 20+ regional transport authorities in Sweden. The data ecosystem they all sit in is{' '}
+        <a href="https://www.trafiklab.se" target="_blank" rel="noreferrer">
+          <strong>Trafiklab</strong>
+        </a>{' '}
+        — the official open-data hub for Swedish public transport, run by Samtrafiken in
+        cooperation with the national Transport Administration (Trafikverket). Trafiklab publishes
+        feeds (GTFS Sweden 3, Realtime, Journey Planner) for SL, Västtrafik, Skånetrafiken, SJ,
+        Östgötatrafiken, and the rest.
+        <br />
+        <br />
+        <strong>What this library does today:</strong> wraps the SL endpoints (the
+        <code>com.umain.transport:stockholm-transport</code> artefact is Stockholm-scoped).
+        <br />
+        <br />
+        <strong>What the architecture is built for:</strong> the same five-feature shape (lines,
+        sites, departures, stop points, authorities) plus the realtime trip stream applies to{' '}
+        <em>every</em> Swedish regional authority Trafiklab covers. The path from "this is SL"
+        to "this is Sweden" is largely Gradle plumbing and feature-module copies — not a rewrite.
+        <br />
+        <br />
+        So the talk's framing is: <em>one library, one country's transport — starting with the
+        capital</em>. The KMP-on-the-web pattern doesn't care whether the data wraps one city
+        or twenty.
+      </>
+    ),
+  },
+  {
     q: 'Who built this? Who is Umain?',
     a: (
       <>
