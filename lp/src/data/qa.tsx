@@ -188,6 +188,11 @@ export const QA: QAItem[] = [
         shared contracts beats the bytes. It does <em>not</em> pay off for a static landing page
         or a 1 MiB edge runtime; there, plain <code>fetch()</code> is the right call. The talk is
         explicit about both cases.
+        <br />
+        <br />
+        <strong>JetBrains signal (June 2026):</strong> the team is actively working on bundle-size
+        reduction. The framing "you have to think about bundle size" should fade in upcoming
+        releases — expect this answer to shorten over the next year.
       </>
     ),
   },
@@ -254,6 +259,17 @@ export const QA: QAItem[] = [
         every Kotlin internal and gives every framework the same primitive: a function call when
         state changes, a function call to tear down. Works flawlessly in React, Vue, Svelte,
         vanilla JS, or Node.
+        <br />
+        <br />
+        <strong>Forward note (JetBrains preview, June 2026):</strong> the upcoming{' '}
+        <code>kotlinx.coroutines</code> release adds <code>Flow.asAsyncIterable()</code> —
+        converts a Kotlin <code>Flow&lt;T&gt;</code> into a JavaScript{' '}
+        <code>AsyncIterable&lt;T&gt;</code>. Consumers will be able to iterate with{' '}
+        <code>for await (const state of viewModel.uiState.asAsyncIterable())</code>. The callback
+        contract still wins for frameworks that bind to a setter (React's{' '}
+        <code>setState</code>), but <code>AsyncIterable</code> becomes the native-feeling path
+        for vanilla JS and Node. By the next Kotlin major, "StateFlow doesn't translate" will
+        be a historical framing.
       </>
     ),
   },
@@ -284,10 +300,18 @@ export const QA: QAItem[] = [
     browser()                       // or nodejs()
     useEsModules()                  // emit .mjs, not legacy UMD
     generateTypeScriptDefinitions() // free .d.mts
-    binaries.executable()           // produce a runnable artefact
+    binaries.executable()           // a webpack-consumable bundle (use binaries.library() for a publishable npm artefact — see note below)
   }
 }`}</code>
         </pre>
+        <strong>Note on <code>binaries.executable()</code> vs <code>binaries.library()</code></strong>{' '}
+        (per JetBrains feedback): for a publishable npm artefact, the canonical value is{' '}
+        <code>binaries.library()</code>. This repo uses <code>binaries.executable()</code> because
+        the Node and SPA demos consume the webpack output directly via a <code>file:</code>{' '}
+        dependency — different ergonomic trade-off. The <code>npm-publish</code> plugin emits a
+        warning when run against an executable target.
+        <br />
+        <br />
         Honest gotchas the talk hits head-on: Kotlin 2.3 made <code>Long → BigInt</code> the default
         (was opt-in via <code>-Xes-long-as-bigint</code> in 2.2) — <code>JSON.stringify</code>{' '}
         can't serialize BigInt, so use <code>String</code> for IDs that cross the wire. And a
