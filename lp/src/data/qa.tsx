@@ -400,6 +400,33 @@ export const QA: QAItem[] = [
     ),
   },
   {
+    q: 'What about persistence — Room, SQLDelight, DataStore?',
+    a: (
+      <>
+        Short version: <strong>check{' '}
+        <a href="https://klibs.io" target="_blank" rel="noreferrer">klibs.io</a>{' '}
+        per dependency.</strong> The ecosystem is uneven, and the badges shift fast.
+        <br />
+        <br />
+        <strong>What changed recently:</strong> Google's <strong>Room</strong> recently added
+        Kotlin/JS and Wasm support. Until very recently, Room assumed a native SQLite engine that
+        doesn't exist in the browser — so an earlier version of this talk used "Room can't,
+        SQLDelight can" as the canonical example of ecosystem unevenness. That's no longer the
+        correct shorthand. <strong>SQLDelight</strong> still works on JS too, via a Web Worker driver
+        that runs SQLite compiled to WebAssembly — so today both work; pick the API ergonomics you
+        prefer. <strong>DataStore</strong> added JS+Wasm in alpha.
+        <br />
+        <br />
+        <strong>The rule that survives:</strong> when you add a JS or Wasm target, every dependency
+        you transitively pull becomes a question. Annotation-processor-driven libraries that assume
+        a specific platform engine (native SQLite, Android <code>Context</code>, JVM
+        <code>java.nio</code>) are the usual sticking points. <code>klibs.io</code> has the badge
+        matrix — iOS hides under "Kotlin/Native"; don't misread an empty JS column as "not yet
+        looked at."
+      </>
+    ),
+  },
+  {
     q: 'What if the SL API changes?',
     a: (
       <>

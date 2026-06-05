@@ -99,8 +99,8 @@ function Briefing() {
 
       <p>
         The talk is honest. It names the cost (~800&nbsp;KB), the gaps ("not <code>npm install</code>-able
-        yet"), the ecosystem unevenness (Room can't, SQLDelight can), and the team this is — and
-        isn't — for.
+        yet"), the ecosystem unevenness (check <a href="https://klibs.io" target="_blank" rel="noreferrer">klibs.io</a> before
+        you commit a dependency), and the team this is — and isn't — for.
       </p>
 
       <div className="acts">
