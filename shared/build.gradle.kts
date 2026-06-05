@@ -71,7 +71,72 @@ kotlin {
         browser()
         useEsModules()
         generateTypeScriptDefinitions()
+        // `binaries.executable()` is what the Node + SPA demos consume directly
+        // via `file:` deps on the webpack output. Per JetBrains (Artem Kobzar,
+        // mDevCamp 2026), for a *pure* publishable library the canonical value
+        // is `binaries.library()`. Switch post-talk when the demo consumption
+        // path is refactored — the `npm-publish` plugin emits a warning about
+        // this when run against an executable target.
         binaries.executable()
+
+        // Polish the auto-generated public package.json via the official
+        // Kotlin/JS DSL — Artem Kobzar (JetBrains) flagged this as the
+        // canonical approach. The `jsPublicPackageJson` task (default in the
+        // multiplatform plugin) reads these customField entries and merges
+        // them into the file the publish flow consumes. This replaces an
+        // earlier custom `enhanceNpmPackageMetadata` task that rewrote the
+        // file by hand; the DSL keeps us inside the Gradle dependency graph
+        // without implicit_dependency validation errors.
+        //
+        // Reference: kotlinlang.org/docs/js-project-setup.html#package-json-customization
+        // Reference: kotlinlang.org/docs/multiplatform/multiplatform-publish-libraries-to-npm.html
+        //
+        // INTENTIONALLY no `customField("type", "module")` — the Kotlin/JS
+        // pipeline emits a CommonJS `webpack.config.js` alongside the package.
+        // Declaring "type":"module" would force Node to import-parse that
+        // config as ESM on the next jsBrowserProductionWebpack run and fail.
+        // Consumers don't need it: `.mjs` extension is always ESM in Node,
+        // and the `exports` map below routes imports explicitly.
+        compilations["main"].packageJson {
+            val entry = "kotlin/StockholmTransport-stockholm-transport.mjs"
+            val types = "kotlin/StockholmTransport-stockholm-transport.d.mts"
+            customField("name", "@jacksonmafra-umain/stockholm-transport")
+            customField(
+                "description",
+                "Kotlin Multiplatform SDK for SL (Stockholms Lokaltrafik) — Android · iOS · JVM · Node · Browser.",
+            )
+            customField("main", entry)
+            customField("module", entry)
+            customField("types", types)
+            customField(
+                "exports",
+                mapOf(
+                    "." to mapOf(
+                        "types" to "./$types",
+                        "import" to "./$entry",
+                        "default" to "./$entry",
+                    ),
+                    "./package.json" to "./package.json",
+                ),
+            )
+            customField("files", listOf("kotlin/", "README.md"))
+            customField(
+                "keywords",
+                listOf("kotlin", "multiplatform", "kmp", "sl", "stockholm", "transport", "sdk"),
+            )
+            customField("license", "Apache-2.0")
+            customField(
+                "repository",
+                mapOf("type" to "git", "url" to libGitUrl),
+            )
+            customField(
+                "publishConfig",
+                mapOf(
+                    "registry" to "https://npm.pkg.github.com",
+                    "access" to "public",
+                ),
+            )
+        }
     }
     
     iosX64()
@@ -229,164 +294,25 @@ tasks.named("jsDevelopmentExecutableCompileSync") {
     mustRunAfter("jsNodeProductionRun")
 }
 
-// -------------------------------------------------------------------------
-// npm package polish — closes the 5 gaps from the talk's slide 21.
+// Tarball the polished package so `./sl publish` produces a real installable
+// `.tgz` — what consumers would `npm install` from a registry. The polish
+// itself lives in the `compilations["main"].packageJson { customField(...) }`
+// DSL inside `kotlin { js(IR) { ... } }` above; it merges into the file the
+// `jsPublicPackageJson` task emits, so by the time we npm-pack it, the file
+// is already correct.
 //
-// Kotlin/JS auto-emits a `package.json` in build/js/packages/.../, but the
-// generated file ships with three known shortcomings for a real npm consumer:
-//
-//   1. `name` mirrors the gradle output dir (StockholmTransport-stockholm-
-//      transport) instead of a scoped npm name.
-//   2. No `module` field — modern bundlers (Vite, webpack 5, Rollup) prefer
-//      it over `main` for ESM resolution.
-//   3. No `exports` map — Node 20+ requires it for proper ESM/CJS routing
-//      and prevents deep-path access into the bundle.
-//
-// This task rewrites the auto-generated file in-place with the proper
-// fields. `peerDependencies` stays empty because the bundle ships every
-// Kotlin runtime + Ktor + Koin transitively — splitting them would require
-// changing the webpack output, which is a separate decision. (See the
-// `enhanceNpmPackageMetadata` comment block for the trade-off.)
-//
-// Triggered automatically after `jsProductionLibraryCompileSync` so any
-// build that produces JS artefacts also produces a consumable npm package.
-tasks.register("enhanceNpmPackageMetadata") {
-    description = "Rewrites the auto-generated package.json with scoped name + ESM exports map."
-    group = "build"
-
-    // The Kotlin/JS pipeline emits the package directory at the ROOT
-    // project's build/js/packages/ — not the shared module's build dir.
-    // (Root-level because the JS toolchain shares Node/Yarn across modules.)
-    val packageDir = rootProject.layout.buildDirectory
-        .dir("js/packages/StockholmTransport-stockholm-transport")
-        .map { it.asFile }
-    val artefactVersion = project.version.toString()
-
-    // Intentionally no `inputs`/`outputs` declarations. The Kotlin/JS
-    // toolchain has multiple tasks that read this same package.json
-    // (:rootPackageJson, :kotlinNpmInstall, :jsPackageJson, …) — declaring
-    // ourselves as the producer would force Gradle to wire dependencies
-    // back into all of them and trigger "implicit_dependency" validation
-    // errors. The task is fast (a regex-free string build + a writeText)
-    // so always re-running it via `finalizedBy` is cheap; we accept the
-    // loss of up-to-date caching.
-    notCompatibleWithConfigurationCache("rewrites a file produced by the JS toolchain")
-
-    // Run AFTER every task in the JS pipeline that touches the package.
-    // `mustRunAfter` is advisory ordering only — it doesn't pull the
-    // referenced tasks into the graph, so the build still runs cleanly
-    // when those tasks aren't selected.
-    mustRunAfter(rootProject.tasks.matching { it.name == "rootPackageJson" })
-    mustRunAfter(rootProject.tasks.matching { it.name == "kotlinNpmInstall" })
-    mustRunAfter(tasks.matching { it.name == "jsPackageJson" })
-    mustRunAfter(tasks.matching { it.name == "jsPublicPackageJson" })
-
-    doLast {
-        val pkgFile = File(packageDir.get(), "package.json")
-        if (!pkgFile.exists()) {
-            logger.warn("enhanceNpmPackageMetadata: package.json not found at ${pkgFile.absolutePath} — skipping.")
-            return@doLast
-        }
-
-        // The auto-generated file is small; a regex-driven rewrite would be
-        // brittle. Parse → mutate → re-emit with Gradle's built-in JSON
-        // handling via groovy.json (kept inline to avoid adding a dep).
-        val original = pkgFile.readText()
-
-        // Module names follow Kotlin/JS conventions:
-        //   - The library itself is `StockholmTransport-stockholm-transport`.
-        //   - Transitive deps live next to it as relative `.mjs` files.
-        // We keep peerDependencies empty (see comment above) but document
-        // the scoped name + modern exports map.
-        //
-        // The scope matches the GitHub user/org so the same artefact can
-        // be published to GitHub Packages (`@jacksonmafra-umain` scope =
-        // github.com/jacksonmafra-umain/*). `publishConfig.registry`
-        // routes `npm publish` to npm.pkg.github.com by default; consumers
-        // need the matching `@jacksonmafra-umain:registry=…` line in their
-        // .npmrc to `npm install` from there.
-        val newName = "@jacksonmafra-umain/stockholm-transport"
-        val entry = "kotlin/StockholmTransport-stockholm-transport.mjs"
-        val types = "kotlin/StockholmTransport-stockholm-transport.d.mts"
-
-        val rewritten = buildString {
-            appendLine("{")
-            appendLine("  \"name\": \"$newName\",")
-            appendLine("  \"version\": \"$artefactVersion\",")
-            appendLine("  \"description\": \"Kotlin Multiplatform SDK for SL (Stockholms Lokaltrafik) — Android · iOS · JVM · Node · Browser.\",")
-            // INTENTIONALLY no `"type": "module"`. The Kotlin/JS pipeline
-            // emits a CommonJS `webpack.config.js` alongside this file; if we
-            // declared the directory as ESM, Node would try to import-parse
-            // the webpack config as ESM on the next jsBrowserProductionWebpack
-            // run and fail with "treating as ES module … rename to .cjs".
-            // Consumers don't need `type` because:
-            //   - entry files have the `.mjs` extension (always ESM in Node)
-            //   - the `exports` map below routes imports explicitly
-            //   - bundlers (Vite, webpack 5+, Rollup) honour `module` and
-            //     `exports` regardless of `type`.
-            appendLine("  \"main\": \"$entry\",")
-            appendLine("  \"module\": \"$entry\",")
-            appendLine("  \"types\": \"$types\",")
-            appendLine("  \"exports\": {")
-            appendLine("    \".\": {")
-            appendLine("      \"types\": \"./$types\",")
-            appendLine("      \"import\": \"./$entry\",")
-            appendLine("      \"default\": \"./$entry\"")
-            appendLine("    },")
-            appendLine("    \"./package.json\": \"./package.json\"")
-            appendLine("  },")
-            appendLine("  \"files\": [")
-            appendLine("    \"kotlin/\",")
-            appendLine("    \"README.md\"")
-            appendLine("  ],")
-            appendLine("  \"keywords\": [\"kotlin\", \"multiplatform\", \"kmp\", \"sl\", \"stockholm\", \"transport\", \"sdk\"],")
-            appendLine("  \"license\": \"Apache-2.0\",")
-            appendLine("  \"repository\": {")
-            appendLine("    \"type\": \"git\",")
-            appendLine("    \"url\": \"$libGitUrl\"")
-            appendLine("  },")
-            appendLine("  \"publishConfig\": {")
-            appendLine("    \"registry\": \"https://npm.pkg.github.com\",")
-            appendLine("    \"access\": \"public\"")
-            appendLine("  },")
-            appendLine("  \"peerDependencies\": {},")
-            appendLine("  \"dependencies\": {")
-            // Preserve runtime deps Kotlin/JS pulled in (these come from the
-            // generated file's `dependencies` block). They're small npm
-            // packages the bundle expects at runtime, e.g. `@js-joda/core`
-            // for kotlinx-datetime and `ws` for ktor-websockets on Node.
-            appendLine("    \"@js-joda/core\": \"3.2.0\",")
-            appendLine("    \"ws\": \"8.18.3\"")
-            appendLine("  }")
-            append("}")
-            append(System.lineSeparator())
-        }
-
-        pkgFile.writeText(rewritten)
-        logger.lifecycle("✓ enhanced npm package.json → $newName@$artefactVersion at ${pkgFile.absolutePath}")
-    }
-}
-
-// Run the enhancement after every JS executable sync — keeps the auto-gen
-// and our overrides in lockstep. We hook the *Executable* tasks because
-// this module uses `binaries.executable()` (a webpack-driven distribution),
-// not `binaries.library()`.
-listOf("jsProductionExecutableCompileSync", "jsDevelopmentExecutableCompileSync").forEach { taskName ->
-    tasks.matching { it.name == taskName }.configureEach {
-        finalizedBy("enhanceNpmPackageMetadata")
-    }
-}
-
-// Tarball the polished package so `./sl publish` produces a real
-// installable `.tgz` — what consumers would `npm install` from a registry.
 // Named `packTalkTgz` to avoid colliding with the `packJsPackage` task the
 // org.danilopianini.npm.publish plugin registers (which would publish to a
 // configured registry; we only want a local tarball for the demos).
 tasks.register<Exec>("packTalkTgz") {
-    description = "Creates an installable .tgz from the polished JS package (the npmPack equivalent)."
+    description = "Creates an installable .tgz from the public JS package (the npmPack equivalent)."
     group = "build"
 
-    dependsOn("enhanceNpmPackageMetadata")
+    // `jsPublicPackageJson` is the canonical Gradle task that emits the
+    // public package.json with our customField entries applied. Depending on
+    // it guarantees the file is current before we tarball.
+    dependsOn("jsPublicPackageJson")
+    dependsOn("jsProductionExecutableCompileSync")
 
     val packageDir = rootProject.layout.buildDirectory
         .dir("js/packages/StockholmTransport-stockholm-transport")
