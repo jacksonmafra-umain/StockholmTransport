@@ -6,11 +6,11 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon --quiet --watch server.js --watch ../../build/js/packages/StockholmTransport-stockholm-transport server.js"
+    "dev": "nodemon --quiet --watch server.js --watch ../../build/js/packages/stockholm-transport server.js"
   },
   "dependencies": {
     "express": "5.2.1",
-    "@jacksonmafra-umain/stockholm-transport": "file:../../build/js/packages/StockholmTransport-stockholm-transport"
+    "@jacksonmafra-umain/stockholm-transport": "file:../../build/js/packages/stockholm-transport"
   },
   "devDependencies": {
     "nodemon": "3.1.14"

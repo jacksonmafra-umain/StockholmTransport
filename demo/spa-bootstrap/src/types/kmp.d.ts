@@ -87,8 +87,13 @@ declare module '@jacksonmafra-umain/stockholm-transport' {
 
   // ----- BaseViewModel<T> JS surface -----
   // StateFlow is @JsExport.Ignore'd; subscribe(callback) + onCleared() bridge it.
+  // subscribe() returns a Subscription handle the caller can cancel individually
+  // — onCleared() still cancels every running subscription via the scope.
+  export interface Subscription {
+    cancel(): void
+  }
   export interface ViewModel<TState> {
-    subscribe(onStateUpdate: (state: TState) => void): void
+    subscribe(onStateUpdate: (state: TState) => void): Subscription
     onCleared(): void
   }
   export interface LinesViewModel extends ViewModel<LinesUiState> {
@@ -108,21 +113,24 @@ declare module '@jacksonmafra-umain/stockholm-transport' {
   }
 
   // ----- The single JS entry point -----
-  // Kotlin/JS exports `object` declarations as a class with a static
-  // getInstance(). Call initialize() (or initializeWithRealtime) exactly once.
-  export class StockholmTransportApi {
-    static getInstance(): StockholmTransportApi
-    initialize(): void
-    initializeWithRealtime(
+  // Kotlin 2.3+ marks the class `@JsExport.Default`, so the module exposes
+  // it as the *default* export only — `import api from '...'` is the
+  // canonical form. JS callers use it as a namespace directly (`@JsStatic`
+  // companion members); no `.getInstance()` ceremony. Call initialize()
+  // (or initializeWithRealtime) exactly once.
+  class StockholmTransportApi {
+    static initialize(): void
+    static initializeWithRealtime(
       httpBaseUrl: string,
       wsHost: string,
       wsPort: number,
       wsSecure: boolean,
     ): void
-    getLinesViewModel(): LinesViewModel
-    getSitesViewModel(): SitesViewModel
-    getDeparturesViewModel(): DeparturesViewModel
-    getStopPointsViewModel(): StopPointsViewModel
-    getAuthoritiesViewModel(): AuthoritiesViewModel
+    static getLinesViewModel(): LinesViewModel
+    static getSitesViewModel(): SitesViewModel
+    static getDeparturesViewModel(): DeparturesViewModel
+    static getStopPointsViewModel(): StopPointsViewModel
+    static getAuthoritiesViewModel(): AuthoritiesViewModel
   }
+  export default StockholmTransportApi
 }

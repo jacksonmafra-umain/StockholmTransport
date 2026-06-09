@@ -203,8 +203,8 @@ export const QA: QAItem[] = [
         No — <strong>one single npm package serves both</strong>. <code>./sl publish</code> emits
         one tarball, <code>jacksonmafra-umain-stockholm-transport-1.0.0.tgz</code>, containing pure
         ESM <code>.mjs</code> files plus <code>.d.mts</code> types. The same{' '}
-        <code>{`import * as kmp from '@jacksonmafra-umain/stockholm-transport'`}</code> works in
-        Node 18+, in Vite/webpack/Rollup/esbuild, and in raw browser modules.
+        <code>{`import StockholmTransportApi from '@jacksonmafra-umain/stockholm-transport'`}</code>{' '}
+        works in Node 18+, in Vite/webpack/Rollup/esbuild, and in raw browser modules.
         <br />
         <br />
         Three reasons it works:
@@ -335,10 +335,11 @@ export const QA: QAItem[] = [
             dependency graph during compilation. It is <em>never</em> published.
           </li>
           <li>
-            <code>build/js/packages/StockholmTransport-stockholm-transport/package.json</code> —
-            the <strong>real publishable package</strong>. The auto-generated file is rewritten
-            by a Gradle task (<code>enhanceNpmPackageMetadata</code>) to advertise the scoped
-            name <code>@jacksonmafra-umain/stockholm-transport</code>, modern{' '}
+            <code>build/js/packages/stockholm-transport/package.json</code> —
+            the <strong>real publishable package</strong>. The auto-generated file is enriched via
+            the official Kotlin/JS{' '}
+            <code>{`compilations["main"].packageJson { customField(...) }`}</code> DSL to advertise
+            the scoped name <code>@jacksonmafra-umain/stockholm-transport</code>, modern{' '}
             <code>main</code> / <code>module</code> / <code>exports</code> / <code>types</code>{' '}
             fields, plus <code>publishConfig.registry</code> routing to GitHub Packages. This is
             what consumers see and what <code>npm pack</code> bundles into the tarball.

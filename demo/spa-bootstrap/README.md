@@ -22,7 +22,7 @@ and the web third of the Act 3 "fix one line, three platforms" finale.
 ## Prerequisites
 
 The app depends on the built JS package via a `file:` path
-(`../../build/js/packages/StockholmTransport-stockholm-transport` — the
+(`../../build/js/packages/stockholm-transport` — the
 directory the Kotlin/JS pipeline writes; the package metadata inside it
 advertises the scoped npm name `@jacksonmafra-umain/stockholm-transport`), exactly like
 the Node demo. So build the library first, from the repo root:
@@ -30,7 +30,7 @@ the Node demo. So build the library first, from the repo root:
 ```bash
 ./sl start      # boot Node API + ngrok, bake the public URL into BuildConfig
 ./sl publish    # builds the JS bundle + polishes package.json + packs the .tgz
-                #   → build/js/packages/StockholmTransport-stockholm-transport/
+                #   → build/js/packages/stockholm-transport/
                 #   → build/distributions/npm/jacksonmafra-umain-stockholm-transport-<v>.tgz
 ```
 

@@ -1,6 +1,9 @@
 import express from 'express';
-// Use 'import * as kmp from ...' to import the entire module namespace.
-import * as kmp from '@jacksonmafra-umain/stockholm-transport';
+// Default import — Kotlin's `@JsExport.Default` makes `StockholmTransportApi`
+// the module's default export. Named imports (e.g. for type-only references
+// to ViewModel classes / interfaces) are still available via
+// `import { LinesViewModel } from '@jacksonmafra-umain/stockholm-transport'`.
+import StockholmTransportApi from '@jacksonmafra-umain/stockholm-transport';
 
 // The library is published with the public ngrok URL baked into BuildConfig (so
 // phones can reach it). Server-side we don't need the tunnel — and it's often
@@ -19,13 +22,14 @@ globalThis.fetch = (input, init) => {
     return _nativeFetch(input, init);
 };
 
-// --- 1. Get a handle to our public JS API and initialize it ---
-// Kotlin/JS exports `object` declarations as a class with a static
-// getInstance() — call it once to unwrap the singleton, then drive it
-// like any normal JS object. Use `initializeWithRealtime` so the realtime
-// module points at the docker-compose simulator (mongo + ws) running on
-// :3001 — without it, /modules/active-trips can only return errors.
-const transportApi = kmp.StockholmTransportApi.getInstance();
+// --- 1. Initialize the public JS API ---
+// Kotlin 2.3+ exports `StockholmTransportApi` as the module's default
+// export (via `@JsExport.Default`) with `@JsStatic` companion members,
+// so JS callers use it as a namespace directly — no `.getInstance()`
+// ceremony. Use `initializeWithRealtime` so the realtime module points
+// at the docker-compose simulator (mongo + ws) running on :3001 —
+// without it, /modules/active-trips can only return errors.
+const transportApi = StockholmTransportApi;
 // Defaults assume `npm start` from a host shell — the realtime-api Docker
 // service maps 3001 → 3000, so localhost:3001 is the right host-side URL.
 // Inside docker compose the node-api container should set
