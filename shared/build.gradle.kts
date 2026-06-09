@@ -77,7 +77,30 @@ kotlin {
         // Reference: kotlinlang.org/docs/js-project-setup.html (outputModuleName)
         outputModuleName.set("stockholm-transport")
 
+        // Target-level compiler options — preferred over per-source-set
+        // `compilerOptions` for flags the IR compiler reads (opt-ins,
+        // -X flags, target ECMAScript). `kotlin.js.ExperimentalJsExport` is
+        // already declared globally via `languageSettings.optIn(...)` so it's
+        // not repeated here.
+        // Reference: kotlinlang.org/docs/js-ir-compiler.html (compiler options)
+        compilerOptions {
+            // Target modern ECMAScript so the emitted output uses native
+            // `class`, arrow functions, let/const — smaller and more
+            // idiomatic than the old es5 fallback. Fine for Node 18+,
+            // modern browsers, and every bundler we care about.
+            target = "es2015"
+            freeCompilerArgs.addAll(
+                "-Xexpect-actual-classes",
+                "-opt-in=kotlin.time.ExperimentalTime",
+            )
+        }
+
         browser()
+        // Adding `nodejs()` as a sibling sub-target unlocks `jsNodeTest` (the
+        // lightest path to add JS tests — no Karma, no headless browser). The
+        // emitted library is identical for both runtimes; `nodejs()` only
+        // affects test-task wiring with `binaries.library()`.
+        nodejs()
         useEsModules()
         generateTypeScriptDefinitions()
         // `binaries.library()` is the canonical value for a publishable
@@ -244,16 +267,11 @@ kotlin {
         }
         val jsMain by getting {
             kotlin.srcDirs("core/src/jsMain/kotlin")
-            compilerOptions {
-                freeCompilerArgs.add("-Xexpect-actual-classes")
-                freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
-                freeCompilerArgs.add("-opt-in=kotlin.js.ExperimentalJsExport")
-                // -Xes-long-as-bigint was Kotlin 2.2's flag for mapping
-                // Kotlin Long -> JS BigInt; Kotlin 2.3 dropped it (the
-                // mapping is the default), so keeping it would emit
-                // "Flag is not supported by this version of the compiler"
-                // on every native link.
-            }
+            // Compiler flags moved to the `js(IR) { compilerOptions { ... } }`
+            // target block above — that's the documented entry point per
+            // kotlinlang.org/docs/js-ir-compiler.html. -Xes-long-as-bigint was
+            // Kotlin 2.2's flag for mapping Kotlin Long -> JS BigInt; Kotlin 2.3
+            // dropped it (the mapping is the default), so it's not in the list.
             dependencies {
                 implementation(libs.ktor.client.js)
             }
