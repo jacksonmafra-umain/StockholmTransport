@@ -68,16 +68,24 @@ kotlin {
     jvm()
 
     js(IR) {
+        // Override the default module name (which would otherwise concatenate
+        // the XCFramework name and `base.archivesName` into the awkward
+        // `StockholmTransport-stockholm-transport`). With this, output paths
+        // become `build/js/packages/stockholm-transport/kotlin/stockholm-transport.mjs`
+        // and the .d.mts emits as `stockholm-transport.d.mts`. Cleaner stack
+        // traces, cleaner imports, cleaner Dockerfile / dev-server paths.
+        // Reference: kotlinlang.org/docs/js-project-setup.html (outputModuleName)
+        outputModuleName.set("stockholm-transport")
+
         browser()
         useEsModules()
         generateTypeScriptDefinitions()
-        // `binaries.executable()` is what the Node + SPA demos consume directly
-        // via `file:` deps on the webpack output. Per JetBrains (Artem Kobzar,
-        // mDevCamp 2026), for a *pure* publishable library the canonical value
-        // is `binaries.library()`. Switch post-talk when the demo consumption
-        // path is refactored — the `npm-publish` plugin emits a warning about
-        // this when run against an executable target.
-        binaries.executable()
+        // `binaries.library()` is the canonical value for a publishable
+        // library (per JetBrains, Artem Kobzar): skips webpack bundling, gives
+        // faster builds, emits a clean library-shaped package. Consumers go
+        // through the polished `exports` map below — they never see the
+        // webpack-bundled CJS path the old `binaries.executable()` produced.
+        binaries.library()
 
         // Polish the auto-generated public package.json via the official
         // Kotlin/JS DSL — Artem Kobzar (JetBrains) flagged this as the
@@ -98,8 +106,8 @@ kotlin {
         // Consumers don't need it: `.mjs` extension is always ESM in Node,
         // and the `exports` map below routes imports explicitly.
         compilations["main"].packageJson {
-            val entry = "kotlin/StockholmTransport-stockholm-transport.mjs"
-            val types = "kotlin/StockholmTransport-stockholm-transport.d.mts"
+            val entry = "kotlin/stockholm-transport.mjs"
+            val types = "kotlin/stockholm-transport.d.mts"
             customField("name", "@jacksonmafra-umain/stockholm-transport")
             customField(
                 "description",
@@ -257,6 +265,15 @@ buildConfig {
     packageName("com.umain.transport.config")
     buildConfigField("String", "API_BASE_URL", "${project.property("serverHostURL")}")
     buildConfigField("String", "API_KEY", "${project.property("apiKey")}")
+    // DEBUG gates verbose Ktor logging (and any future debug-only branch).
+    // Toggled via `-PdebugBuild=true` on the gradle command; defaults to false
+    // so published artefacts ship with logging disabled (smaller bundles, no
+    // request/response noise on the consumer's console).
+    buildConfigField(
+        "Boolean",
+        "DEBUG",
+        (project.findProperty("debugBuild") as String?)?.toBoolean()?.toString() ?: "false",
+    )
 }
 
 publishing {
@@ -289,7 +306,10 @@ publishing {
     }
 }
 
-tasks.named("jsDevelopmentExecutableCompileSync") {
+// With `binaries.library()` the dev/prod sync tasks are renamed *LibraryCompileSync.
+// `tasks.matching` keeps this resilient if the task isn't always present
+// (e.g. some configurations don't include the dev compilation).
+tasks.matching { it.name == "jsDevelopmentLibraryCompileSync" }.configureEach {
     dependsOn("jsNodeProductionRun")
     mustRunAfter("jsNodeProductionRun")
 }
@@ -312,10 +332,12 @@ tasks.register<Exec>("packTalkTgz") {
     // public package.json with our customField entries applied. Depending on
     // it guarantees the file is current before we tarball.
     dependsOn("jsPublicPackageJson")
-    dependsOn("jsProductionExecutableCompileSync")
+    // `binaries.library()` produces `jsProductionLibraryCompileSync` (was
+    // `jsProductionExecutableCompileSync` under `binaries.executable()`).
+    dependsOn("jsProductionLibraryCompileSync")
 
     val packageDir = rootProject.layout.buildDirectory
-        .dir("js/packages/StockholmTransport-stockholm-transport")
+        .dir("js/packages/stockholm-transport")
         .map { it.asFile }
     val outputDir = rootProject.layout.buildDirectory.dir("distributions/npm")
 
@@ -348,7 +370,7 @@ tasks.register("printJsPackageDirs") {
 
         val browserDistDir =
             layout.buildDirectory
-                .dir("dist/js/productionExecutable")
+                .dir("dist/js/productionLibrary")
                 .get()
                 .asFile
         println("\nBrowser distribution directory: $browserDistDir")

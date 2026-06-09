@@ -27,7 +27,9 @@ class KtorLogger : Logger {
 fun createHttpClient() = HttpClient {
     install(ContentNegotiation) {
         json(Json {
-            prettyPrint = true
+            // prettyPrint emits indentation literals into the bundle and is
+            // never needed for over-the-wire payloads; keep responses compact.
+            prettyPrint = false
             isLenient = true
             ignoreUnknownKeys = true
             // A present-but-null value on a non-null property (with a default)
@@ -39,7 +41,11 @@ fun createHttpClient() = HttpClient {
 
     install(Logging) {
         logger = KtorLogger()
-        level = LogLevel.ALL
+        // LogLevel.ALL keeps the full request/response logging code reachable
+        // past DCE — kills bundle size for no benefit in a published artefact.
+        // BuildConfig.DEBUG is baked at build time; consumers compile against
+        // the false branch in production.
+        level = if (BuildConfig.DEBUG) LogLevel.INFO else LogLevel.NONE
     }
 
     install(HttpTimeout) {

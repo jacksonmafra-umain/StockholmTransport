@@ -33,14 +33,22 @@ open class BaseViewModel<T> {
      * A JS-friendly way to subscribe to state updates.
      * JavaScript clients will call this method with a callback function.
      *
+     * Returns a [Subscription] handle so the caller can cancel this single
+     * subscription without tearing down the whole ViewModel. Calling
+     * [onCleared] still cancels every running subscription via the scope.
+     *
      * @param onStateUpdate The callback function to be invoked with the new state.
+     * @return A cancellation handle. Calling `cancel()` cancels only this
+     *         subscription; existing JS callers that ignored the return value
+     *         continue to work unchanged — `onCleared()` cleans up everything.
      */
-    fun subscribe(onStateUpdate: (T) -> Unit) {
-        viewModelScope.launch {
+    fun subscribe(onStateUpdate: (T) -> Unit): Subscription {
+        val job = viewModelScope.launch {
             uiState?.collect {
                 onStateUpdate(it)
             }
         }
+        return Subscription { job.cancel() }
     }
 
     /**
@@ -50,4 +58,14 @@ open class BaseViewModel<T> {
     open fun onCleared() {
         viewModelScope.cancel()
     }
+}
+
+/**
+ * A cancellation handle returned by [BaseViewModel.subscribe]. Exposed as a
+ * `fun interface` so it's emitted as a TypeScript-friendly interface
+ * (`{ cancel(): void }`) instead of a Kotlin class.
+ */
+@JsExport
+fun interface Subscription {
+    fun cancel()
 }
